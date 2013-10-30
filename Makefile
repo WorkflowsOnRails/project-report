@@ -717,7 +717,7 @@ GUNZIP		?= gunzip	# GZipped EPS
 PSNUP		?= psnup
 # == Viewing Stuff ==
 VIEW_POSTSCRIPT	?= gv
-VIEW_PDF	?= xpdf
+VIEW_PDF	?= evince
 VIEW_GRAPHICS	?= display
 
 # Xindy glossaries
