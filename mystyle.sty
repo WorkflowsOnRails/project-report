@@ -1,9 +1,19 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
-\usepackage{sysc4907}
 \usepackage{graphicx}
+\usepackage{listings}
+\usepackage{sysc4907}
 
+\lstset{
+ language=ruby,
+ basicstyle=\footnotesize,
+ frame=single
+}
+
+\lstnewenvironment{snippet}[1][]
+{\lstset{float=htpb,#1}}
+{}
 
 \makeatletter
 \def\sectionnote#1{\def\@sectionnote{#1}}% User interface macro for defining section link
@@ -20,4 +30,4 @@
 
 \newcommand{\todo}[1] {\textit{TODO: #1}}
 
-\newcommand{\question}[1] {\vspace{3mm} \noindent \textbf{#1}}
+\newcommand{\question}[1] {\noindent \paragraph{#1}}
