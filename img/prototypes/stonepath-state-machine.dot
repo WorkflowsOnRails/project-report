@@ -1,0 +1,22 @@
+digraph hierarchy {
+rankdir=TB
+node[shape=Mrecord, fontname=Arial, fontsize=10, penwidth=0.7]
+edge[dir=forward, arrowhead=vee, fontname=Arial, fontsize=9, penwidth=0.7]
+
+start[label="",
+      shape=circle, style=filled, color=black, fillcolor=black,
+      fixedsize=true, width=0.25, height=0.25]
+end[label="",
+    shape=doublecircle, style=filled, color=black, fillcolor=black,
+    fixedsize=true, width=0.2, height=0.2]
+
+pending [label = "{pending|enter/create_claim_task(),create_deploy_task()\lexit/destroy_claim_task()}"]
+in_progress [label = "{in progress|enter/create_develop_task()\lexit/destroy_develop_task()}"]
+closed [label = "{closed|enter/destroy_develop_task()}"]
+
+start -> pending
+pending -> in_progress [label = " claim   "]
+in_progress -> closed [label = " close [completed?]   "]
+in_progress -> pending [label = " after: 1 week   "]
+closed -> end
+}

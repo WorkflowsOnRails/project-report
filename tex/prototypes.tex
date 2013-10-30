@@ -1,0 +1,86 @@
+\chapter {Prototypes}
+
+In order to select a workflow framework for use in the project, a simple prototype application was constructed in both Ruote and Stonepath. The prototype application is designed around features that seemed like a good fit for the capabilities of workflow frameworks, rather than any real-world use case.
+
+\todo {Give an overview of the layout of this section}
+
+
+\sectionnote {BM}
+\section {Overview of the Prototype Application}
+\label {sec:overview-of-the-prototype-application}
+
+The prototype application was designed to encompass as many of the criteria in section \ref{sec:evaluation-questions} as possible in a small demonstration application. A somewhat contrived issue tracking system was designed to match these criteria.
+
+The issue tracking system has three classes of users: reporters, developers, and project managers. Reporters are users who are responsible for reporting bugs, and providing information more information on request. Developers claim bugs from the pool of open issues, implement a fix, and then sign off on the issue. Project managers consult with developers and reporters, and assign a deployment date for the fix. All classes of users can view and comment on bugs, though they are restricted to perform only the following actions:
+\begin{itemize}
+\item repotters may only create issues;
+\item developers may only claim issues that have not yet been claimed, and can only sign off on issues that they have claimed; and
+\item project managers may only set the deployment date on issues.
+\end{itemize}
+
+Once a developer has signed off on an issue, and a project manager has set a deployment date, the issue is closed. Developers and project managers may sign off and set deployment dates in any order - though this is a somewhat unrealistic requirement, it is a good example of a pair of parallel activities. Finally, if a developer holds an issue for a week with, then the issue reverts to an unclaimed state.
+
+
+\sectionnote {BM}
+\section {Stonepath Prototyping Results}
+\label {sec:stonepath-prototyping-results}
+
+The requirements for the issue tracking system were translated into the state machine in Figure \ref{fig:stonepath-prototype-state-machine}. The state machine corresponds to the state of an issue - each action taken by a developer or product manager on an issue has an equivalent event. A developer claiming an issue generates a \verb!claim! event, while a developer signing off on an issue or a project manager setting the deployment date generates a \verb!close! event. As both a sign off and a deployment date are necessary for an issue to be closed, the closed state is guarded by the \verb!completed?! method.
+
+\begin{figure}[!ht]
+\centering \includegraphics[height=5in]{./img/prototypes/stonepath-state-machine}
+\caption{State chart for issues in the prototype issue tracking system described in section \ref{sec:overview-of-the-prototype-application}}
+\label{fig:stonepath-prototype-state-machine}
+\end{figure}
+
+The state machine model also includes a \verb!timeout! event which is triggered seven days after the in progress state is entered. The timeout was omitted from the prototype to save time, as it was not considered a risk - a scheduled task can easily be added using the delayed\_job (\todo{citation}) gem.
+
+Additionally, the model also includes actions to create and destroy tasks when appropriate. Though this appeared to the be correct way to model participation in a workflow when the state machine was designed, it was discarded in the implementation, as described below.
+
+The state machine was translated to a Ruby on Rails application, which is available at \url{https://github.com/WorkflowsOnRails/stonepath-timeboxed-example}. The application was implemented from the bottom up. First a workitem was implemented for issues, as demonstrated in the code snippet in Figure \ref{fig:stonepath-prototype-workitem}. Next, workbenches were created to for roles and users. Finally, a generic task type was defined to associate workitems and workbenches. After the model was completed, Devise was integrated to handle authentication, and the model was wrapped with appropriate views and controllers to drive the application.
+
+\begin{figure}[!ht]
+  \caption{Implementation of the state machine from Figure \ref{fig:stonepath-prototype-state-machine} as a Stonepath work item}
+  \label{fig:stonepath-prototype-workitem}
+  \begin{lstlisting}
+class Issue < ActiveRecord::Base
+  include StonePath::WorkItem
+  owned_by :user  # owned by the initial reporter
+  tasked_through :task
+  state_machine do
+    state :pending, initial: true,
+      after_enter: [:create_claim_task, :create_deploy_task],
+      after_exit: :destroy_claim_task
+    state :in_progress, after_enter: :create_develop_task,
+      after_exit: :destroy_develop_task
+    state :closed, after_enter: :destroy_deploy_task
+
+    event :claim do
+      transitions from: :pending, to: :in_progress
+    end
+
+    event :timeout do
+      transitions from: :in_progress, to: :pending
+    end
+
+    event :close do
+      transitions from: :in_progress, to: :closed, guard: :completed?
+    end
+  end
+
+  def completed?
+    signed_off and deployment_date.present?
+  end
+
+  # ... other scopes, associations, validations and methods ...
+end
+  \end{lstlisting}
+\end{figure}
+
+The prototype identified several possible areas of improvement for both Rails and Stonepath projects, such as:
+
+\paragraph{Pre-populated roles:} each role in the application was modelled with an instance of the \verb!Role! model. This allowed work items to be assigned to logical groups of users, but required extra work to put roles into the database. A seed migration had to be run whenever a production or test database was set up to create the roles, or else the application could not work. If the case studies use this approach to model roles, we will need a reusable way to specify the roles in the model and have them automatically populated in the database.
+
+\paragraph{Authorization:} though Stonewall is advertised as a flexible authorization layer that integrates well with Stonepath, its permissions are much too finely grained to be useful. Stonewall sets permissions at the method level, while access controls are usually described in terms of actions that users can perform, instead of individual attributes they can access and set. In the end, a custom solution was created, which evolved to check users against an approved list of roles in each controller action in Rails. This technique matched almost one-to-one to the actions described in the requirements. Fortunately, Cancan already implements a similar action-based approach, and is also able to centralize access controls to a single source file instead of hard-coding them in each action.
+
+\paragraph{Task modelling:} though the task model in Figure 1 was straightforward to design, it was unwieldy in practice. Stonepath represents each task as a Rails model with a polymorphic association to a workbench and a workitem. Unfortunately, polymorphic associations are implemented in Rails, and not at the database level, so it is difficult to request the developer assigned to an issue by querying the tasks. On the other hand, a developer column on an issue is easy to understand and query. Additionally, tasks are heavyweight - each task includes its own state machine, which went totally unused in the prototype application. Tasks seem to be best used to model sub-activities of an activity, while associations that need to be queried should be added to the work item itself.

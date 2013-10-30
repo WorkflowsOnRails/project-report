@@ -85,7 +85,7 @@ In order to use a workflow framework with Ruby on Rails, it may be necessary to 
 
 
 \sectionnote{BM}
-\section {Stonepath}
+\subsection {Stonepath}
 
 Stonepath is a state-based workflow library for Ruby on Rails. Stonepath models workflows using the concepts of work items, workbenches, and tasks. A work item is a persistent object that represents the central object of a workflow. A work item has a well-defined state and state transitions, which represent the primary activities in the workflow. Work items also have a set of user-defined attributes. Work items can be related to other persistent objects called work benches, which represent participants in a workflow such as users or software agents. Work benches may own work items that they are primarily responsible for, or may be related to work benches through tasks assigned to them. Like work items, work benches and tasks may have arbitrary user-defined attributes.
 
@@ -127,13 +127,12 @@ In Stonepath, activities are modelled both by work items and by tasks. If a task
 \question{Are we able to set preconditions for an activity to start?}
 
 Yes, we can set preconditions for an activity by adding validations to the work item model that are contingent on the state. As a transition updates the state column and attempts to save the model, the model’s attributes must validate against the new state in order for the state change to occur. Any failed validations will be reported to the user. For example, if we have a project management system that tracks features, we may need to provide acceptance criteria and time estimates before the feature can be assigned to a developer.
-We can encode this in the model as in listing \ref{lst:stonepath-precondition}.
+We can encode this in the model as in Figure \ref{fig:stonepath-precondition}.
 
-\begin{lstlisting}[
- float=htpb,
- caption=Example of an activity precondition encoded with Stonepath,
- label=lst:stonepath-precondition
-]
+\begin{figure}[!ht]
+  \caption{Example of an activity precondition encoded with Stonepath}
+  \label{fig:stonepath-precondition}
+  \begin{lstlisting}
 class Feature < ActiveRecord::Base
   # ... state definitions omitted...
   # States: new, todo, in_progress, in_testing, done, accepted, rejected
@@ -149,7 +148,8 @@ class Feature < ActiveRecord::Base
     todo? or in_progress? or in_testing? or done? or accepted?
   end
 end
-\end{lstlisting}
+  \end{lstlisting}
+\end{figure}
 
 We can also prevent transitions by adding guards to the transitions in the state machine definition. Unlike validations, guards do not report validation errors, and require the developer to apply them to every transition out of a state. Guards are most appropriate for modelling parallel activities, where many things need to occur before a transition may be taken.
 
