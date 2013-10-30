@@ -1,0 +1,279 @@
+% Carleton University SCE 4th Year Project thesis style
+% University of Ottawa MSc thesis style -- modifications to the report style
+% modification of suthesis style of Stanford University
+% Example of use:
+\documentclass[12pt]{report}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{SCE4YPTemplate}
+\usepackage{graphicx}
+
+
+\makeatletter
+\def\sectionnote#1{\def\@sectionnote{#1}}% User interface macro for defining section link
+\let\@sectionnote\@empty% Default value for \@sectionnote
+\def\@seccntformat#1{% Update sectional unit formatting macro
+  \ifx\@sectionnote\@empty\else% If a section link exists...
+    % ...print it in left margin.
+    \llap{\normalfont\small\@sectionnote\hspace*{\marginparsep}}\fi
+  \csname the#1\endcsname\quad}
+\let\old@xsect\@xsect
+\def\@xsect{\let\@sectionnote\@empty\old@xsect}% Erase old section link
+\makeatother
+
+
+\newcommand{\todo}[1] {\textit{TODO: #1}}
+
+\newcommand{\question}[1] {\vspace{3mm} \noindent \textbf{#1}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+\title{How to Write Report\\
+       With Two Line Titles}
+\author{Brendan MacDonell, Alexander Clelland}
+\copyrightfalse % do not produce a separate copyright page
+
+% Here you insert the stuff that comes before the preface
+% Each preface section is contained in a \prefacesection and starts on a
+% new page.  These are numbered using Roman numerals.
+% If there are no such pages, do not remove the \beforepreface command
+% since it creates the title page.
+\beforepreface
+
+
+\prefacesection{Abstract}
+This report tells you all you need to know about something.
+
+
+\prefacesection{Acknowledgements}
+I would like to thank my supervisor, anyone who paid me money, gave me
+equipment, etc.
+
+
+\prefaceTOC   % Table of Contents
+\prefaceLOF   % List of Figures
+\prefaceLOT   % List of Tables
+
+
+\prefacesection{List of Abbreviations}
+
+\begin{tabular}[t]{l@{\hspace*{2cm}}l}
+      VoIP & Voice over Internet protocol \\
+      MRI & Magnetic resonance imaging \\
+\end{tabular}
+
+
+\endpreface
+
+
+
+\chapter{Introduction}
+
+Give an introduction to your project.  This might include:
+\begin{itemize}
+  \item Motivation for your project
+  \item Problem you are trying to solve
+  \item Scope of your project
+  \item Organization of your report
+\end{itemize}
+You should tune this appropriately for what best suits your project.
+
+
+
+\chapter{The Engineering Project}
+
+
+\section{Health and Safety}
+
+Using the Health and Safety Guide posted on the course webpage, students will use this section to explain how they addressed the issues of safety and health in the system that they built for their project.
+
+
+\section{Engineering Professionalism}
+
+Using their course experience of ECOR 4995 Professional Practice, students should demonstrate how their professional responsibilities were met by the goals of their project and/or during the performance of their project. 
+
+
+\section{Project Management}
+
+One of the goals of the engineering project is real experience in working on a long-term team project.  Students should explain what project management techniques or processes were used to coordinate, manage and perform their project.
+
+
+\section{Individual Contributions}
+
+This section should carefully itemize the individual contributions of each team member. Project contributions should identify which components of work were done by each individual.  Report contributions should list the author of each major section of this report.
+
+
+\subsection{Project Contributions}
+
+Give the individual contributions of the each team member towards the project.
+
+
+\subsection{Report Contributions}
+
+Give the individual contributions of the each team member towards writing the
+final report.
+
+
+\chapter{Background Literature Review}
+
+A workflow can be seen as a series of operations that are run in a specific order. The main focus of a workflow is to guide the flow of control through each step in the correct order. Many problems that can be considered workflows are simplified when approached as a workflow by changing general requirements into smaller steps which can be easily understood. This makes approaching problems as workflows a good idea as it will generally lower complexity which in turn lowers the cost of the project.
+
+
+\sectionnote{AC}
+\section{Overview of Workflows}
+
+A workflow can be seen as a series of operations that are run in a specific order. The main focus of a workflow is to guide the flow of control through each step in order. In order to advance to the next step in a workflow a number of predefined conditions must be met. Once the conditions are met the control is redirected to the new step. This continues until a ‘completed’ step is reached.
+
+A workflow can have many branching paths where the control flow branches depending on what conditions are met. It can be argued that every problem can be approached as if it were a workflow, as long as there is a well defined start and end. For this reason workflow frameworks are widely used to aid in the creation of solutions.
+
+An example of a basic workflow would be an industrial assembly line. Each step builds upon the previous step. The product is not passed onto the next step until it meets the conditions imposed by the next step. The assembly line only ever has one path that it follows (linear) and is therefore the simplest workflow apart from a single step workflow. More complicated workflows have many branches of control and can have many separate finishing steps. These more complicated workflows are implemented as state machines (state based) or flow charts (process based).
+
+Workflow frameworks normally maintain the current step of the program and how the program will transition between steps. This allows what each step implements to be abstracted from how the program transitions between the many steps lowering the overall complexity of the system. This allows transitions to be modified and edited with little impact to the implementation of each individual step.
+
+The state based model implements the workflow as a state machine. Each step is represented as a state and the following steps are represented by the state transitions. The state model acts like a state machine and is only ever in one state at any time. The state model is good at modeling workflows with well defined single states but falls apart when parallel states are required.
+
+The process based model implements the workflow as a flow chart. This model differs from the state model in that it can easily model parallel processes. Where a state machine typically is only ever in a single state the process model can branch its flow of control to work in parallel. This is done by allowing all the transitions out of a node to be taken as long as the correct conditions are met. The process model also allows control flow to merge from two branches of control back into a single process.
+
+Business Process Model and Notation (BPMN) is graphical way of modeling a business process and is very similar to UML. BPMN is structured as a set of activities linked together by messages and events. Activities are the processes and can be considered the things that need to be done. Events are things that happen in response to something else, such as delays, and connections which describe the control flow.
+
+
+\sectionnote{BM}
+\section {Evaluating Workflow Frameworks for Rails}
+
+\todo{Introduce these questions}
+
+\question{Does the framework work with Ruby on Rails 3.2 / 4.0?}
+
+Ruby on Rails has changed over time. The documentation and community are focused on Rails 4; if a workflow framework only works with Rails 2, the benefit of using the framework might be outweighed by the difficulty of finding tools and best practices for an older version of Rails.
+
+\question{How do we define roles using the framework?}
+
+Workflows involve associating activities to be carried out to people or agents to carry them out. It’s important to understand how the workflow framework expects roles to be defined in order to understand how to use the framework at all.
+
+\question{How can we assign activities to individual users?}
+
+Some workflows call for individuals to be responsible for carrying out activities. A useful workflow framework should accommodate this requirement.
+
+\question{How can we assign activities to groups of users?}
+
+Other times, the specific individual that carries out a workflow is less important than the fact that the user has the appropriate skills and position in the company. In this case, it is easier to assign an activity to a class of users and let an appropriate user or group of users carry it out.
+
+\question{How is access control handled for access to artifacts and activities?} 
+While the notion of access control is common in applications, permissions are often a property of an object that a user attempts to access. In the case of workflow-based systems, permissions are not only a function of the user and object, but also the state of the workflow. As an example, in an expense reporting system claims should only be editable by the submitter before they are approved by their manager.
+
+\question{How do we handle time-limited activities?}
+
+Activities are often time-limited by business requirements. A workflow framework should have some way of modelling activity deadlines, and responding to overdue activities.
+
+\question{Are we able to set preconditions for an activity to start?}
+
+Many activities require some data or artifacts as input; for instance, carrying out object design requires that the requirements were captured in the requirements analysis phase. A workflow framework should have a way to make sure that the prerequisites for an activity are present before the activity begins. Otherwise, applications created with the framework may start activities prematurely due to user error.
+
+\question{Can we set postconditions on activities, and reflect them in the user interface (ex. forms)?}
+
+Similar to preconditions, activities often have post-conditions that must be met before the activity is completed. Even if an analyst indicates that the requirements analysis phase of a software project is completed, the activity may not be complete until the results have been verified.
+
+\question{How do we model parallel activities in a workflow?}
+
+In many real-world workflows, activities occur in parallel to reduce the time taken to complete the workflow. For example, verification testing and implementation are often overlapped in software development; it is possible to perform them in sequence, but would slow the process down. Workflow frameworks must be able to accommodate real business processes to be useful in practice.
+
+\question{Can we change the state of a workflow through an alternate process if there are exceptional circumstances?}
+
+Mistakes are made in any process involving humans. Though it’s not an essential functionality, it is useful to be able to rewind a workflow to an arbitrary activity if the activity needs to be corrected. Otherwise, users may need to recreate the work item and repeat the activity from the beginning.
+
+\question{What work, if any, is needed to integrate the framework with Rails?}
+
+In order to use a workflow framework with Ruby on Rails, it may be necessary to somehow integrate or install the framework into a Rails application. It’s important to understand the amount of effort required - a less-capable but easily integrated framework might be more cost-effective than a full-featured suite that has never been used with Rails before.
+
+
+%=================================================================================
+
+\section{Example Figure}
+
+An example figure grabbed from the Carleton University webpage is shown in Fig.~\ref{fig-culogo}.
+  \begin{figure}[hbt]
+   \begin{center}
+     \includegraphics{cu_logo.png}
+   \end{center}
+  \caption{Carleton University logo.}
+  \label{fig-culogo}
+  \end{figure}
+  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\chapter{Your Implementation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\chapter{Experimental Results}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Conclusions}
+
+I conclude that my project is awesome.  Hey look at this table.
+\begin{table}[htb]
+\begin{center}
+\begin{tabular}{|c|ccc|r|}
+	\hline
+$k$ &  $x_1^k$    &   $x_2^k$  & $x_3^k$   & remarks  \\
+	\hline
+0   & -0.3 & 0.6 & 0.7  &  \\
+1   & 0.47102965 & 0.04883157 & -0.53345964  & *\\
+2   & 0.49988691 & 0.00228830 & -0.52246185 & $s_3$ \\
+3   & 0.49999976 & 0.00005380 & -0.52365600  & \\
+4   & 0.5 & 0.00000307 & -0.52359743  & $\epsilon < 10^{-5}$ \\
+7   & 0.5 & 0 & -0.52359878  & $\epsilon < \xi $ \\
+	\hline
+\end{tabular}
+\caption{This is a great table.}
+\label{greatTable}
+\end{center}
+\end{table}
+
+Isn't Table~\ref{greatTable} really nice?  This next one is nice too.
+
+\begin{table}[htb]
+\begin{center}
+\begin{tabular}{|l||l|l||l|l|}
+\hline
+ &\multicolumn{2}{l|}{Singular}&\multicolumn{2}{l|}{Plural}\\
+\cline{2-5}
+ &English&\textbf{Gaeilge}&English&\textbf{Gaeilge}\\
+\hline\hline
+1st Person&at me&\textbf{agam}&at us&\textbf{againn}\\
+2nd Person&at you&\textbf{agat}&at you&\textbf{agaibh}\\
+3rd Person&at him&\textbf{aige}&at them&\textbf{acu}\\
+ &at her&\textbf{aici}& & \\
+\hline
+\end{tabular}
+\caption{Another nice table.}
+\end{center}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\bibname}{References}
+\begin{thebibliography}{AAA}
+\bibitem{ABC} T. Me and R. You, "A great result," {\em Wonderful Journal}, vol. 5, no. 9,
+	      pp. 1--11, 1998.
+\bibitem{XYZ} J. Him and K. Her, "An even better result that you won't believe," {\em Best Journal Ever}, vol. 4, no. 8, pp. 55--66, 2002.
+\end{thebibliography}
+% If you have your general bibliography in a separate file mybib
+% and you wish to use the plain style (see BIBTeX)
+%    \bibliographystyle{cacm}
+%    \bibliography{mybib}
+    \addcontentsline{toc}{chapter}{\bibname}
+    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Add appendices now.
+\appendix
+
+\chapter{Extra Simulation Results}
+
+\chapter{Review of Linear Algebra}
+
+\end{document}
