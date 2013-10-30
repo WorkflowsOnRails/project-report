@@ -1,0 +1,23 @@
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{sysc4907}
+\usepackage{graphicx}
+
+
+\makeatletter
+\def\sectionnote#1{\def\@sectionnote{#1}}% User interface macro for defining section link
+\let\@sectionnote\@empty% Default value for \@sectionnote
+\def\@seccntformat#1{% Update sectional unit formatting macro
+  \ifx\@sectionnote\@empty\else% If a section link exists...
+    % ...print it in left margin.
+    \llap{\normalfont\small\@sectionnote\hspace*{\marginparsep}}\fi
+  \csname the#1\endcsname\quad}
+\let\old@xsect\@xsect
+\def\@xsect{\let\@sectionnote\@empty\old@xsect}% Erase old section link
+\makeatother
+
+
+\newcommand{\todo}[1] {\textit{TODO: #1}}
+
+\newcommand{\question}[1] {\vspace{3mm} \noindent \textbf{#1}}
