@@ -6,6 +6,19 @@ report. Run `make` to build the report into a file named _document.pdf_,
 or run `make show` to build the document and display it.
 
 
+Prerequisites
+-------------
+
+You need the following software packages to build the report:
+
+* [GNU make](http://www.gnu.org/software/make/)
+* [TeX Live](http://www.tug.org/texlive/)
+* [graphviz](http://www.graphviz.org/)
+
+
+Repository Structure
+--------------------
+
 The files are laid out as follows:
 
 * _sysc4907.sty_: the SYSC4907 document style. Don't change this.
