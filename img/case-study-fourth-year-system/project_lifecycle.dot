@@ -1,0 +1,27 @@
+digraph hierarchy {
+rankdir=TB
+node[shape=Mrecord, fontname=Arial, fontsize=10, penwidth=0.7]
+edge[dir=forward, arrowhead=vee, fontname=Arial, fontsize=9, penwidth=0.7]
+
+start[label="",
+      shape=circle, style=filled, color=black, fillcolor=black,
+      fixedsize=true, width=0.25, height=0.25]
+end[label="",
+    shape=doublecircle, style=filled, color=black, fillcolor=black,
+    fixedsize=true, width=0.2, height=0.2]
+
+suggested[label = "{suggested|}"]
+writing_proposal [label = "{writing proposal|enter/create_proposal_task()}"]
+writing_progress_report [label = "{writing progress report|enter/create_progress_report_task(),create_schedule_form_task()}"]
+preparing_oral_presentation [label = "{preparing oral presentation|enter/create_view_schedule_task()}"]
+pending_completion [label = "{pending completion|enter/create_poster_form_task(),create_final_report_task()}"]
+completed [label = "{completed|}"]
+
+start -> suggested
+suggested -> writing_proposal [label=" select_project   "]
+writing_proposal -> writing_progress_report [label=" accept_proposal   "]
+writing_progress_report -> preparing_oral_presentation [label=" accept_progress_report   "]
+preparing_oral_presentation -> pending_completion [label=" finish_presentation   "]
+pending_completion -> completed [label=" accept_final_report"]
+completed -> end
+}
