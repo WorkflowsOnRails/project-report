@@ -84,3 +84,88 @@ The prototype identified several possible areas of improvement for both Rails an
 \paragraph{Authorization:} though Stonewall is advertised as a flexible authorization layer that integrates well with Stonepath, its permissions are much too finely grained to be useful. Stonewall sets permissions at the method level, while access controls are usually described in terms of actions that users can perform, instead of individual attributes they can access and set. In the end, a custom solution was created, which evolved to check users against an approved list of roles in each controller action in Rails. This technique matched almost one-to-one to the actions described in the requirements. Fortunately, Cancan already implements a similar action-based approach, and is also able to centralize access controls to a single source file instead of hard-coding them in each action.
 
 \paragraph{Task modelling:} though the task model in Figure 1 was straightforward to design, it was unwieldy in practice. Stonepath represents each task as a Rails model with a polymorphic association to a workbench and a workitem. Unfortunately, polymorphic associations are implemented in Rails, and not at the database level, so it is difficult to request the developer assigned to an issue by querying the tasks. On the other hand, a developer column on an issue is easy to understand and query. Additionally, tasks are heavyweight - each task includes its own state machine, which went totally unused in the prototype application. Tasks seem to be best used to model sub-activities of an activity, while associations that need to be queried should be added to the work item itself.
+
+
+\sectionnote {AC}
+\section {Ruote Prototyping Results}
+\label {sec:ruote-prototyping-results}
+
+The BPMN model shown in Figure \ref{ruote-bpmn-diagram} describes how the issue tracking system work using process based methodologies. The workflow of a report begins when it is created and it joins the unclaimed report pool. Developers are then able to claim the report and Managers are then able to set the deployment date. Once both of those have been accomplished the developer is able to sign off the report and it will then close. If the report has not been signed off after 7 days the report returns to the unclaimed report pool.
+
+Reporters are only able to create new reports. Developers are only able to claim unclaimed reports and sign off on the reports that they have claimed. Managers are only able to assign deployment dates to each report.
+
+\begin{figure}[!ht]
+\centering \includegraphics[height=5in]{./img/prototypes/ruote-bpmn-diagram}
+\caption{BPMN for the Ruote prototype issue tracking system.}
+\label{fig:ruote-bpmn-diagram}
+\end{figure}
+
+\paragraph{Ruote-Kit:} provides an easy way of accessing the Ruote dashboard and handles all of the Ruote rails routes. The dashboard is the core of Ruote providing access to the many processes, participants, and workers. A process can be considered the entire workflow, and the participants can be considered the events within the workflow. Ruote-Kit automatically creates a default dashboard object and populates it with a default worker. Workers in Ruote are threads which are used by the participants to do operations on the workitem. The workitem is passed between participants and in the case of this application is the report.
+
+\paragraph{Participants:} Participants contain the logic that is executed whenever a process definition reaches it. Each participant is created using its own class located in app/participants. When a participant is called by a process definition it executes its on\_workitem method. The participant must call ‘reply’ to notify the process that it has finished working on an item. The basic outline of a participant is shown in Figure \ref{fig:ruote-prototype-participant-code}.
+
+\begin{figure}[!ht]
+  \caption{The framework of a participant class and its methods.}
+  \label{fig:ruote-prototype-participant-code}
+  \begin{lstlisting}
+class UnclaimedPoolParticipant
+  include Ruote::LocalParticipant
+
+  def on_workitem
+    #the report_id is passed between participants and stored in the workitem
+    report = Report.find(workitem.lookup(id))
+    --- do work on the report here ---
+    reply #call to the process to notify work has finished
+  end
+
+  def on_cancel
+    #called when workitem is canceled
+  end
+
+  def on_error
+    #called when an error occurs
+  end
+end
+  \end{lstlisting}
+\end{figure}
+
+In order to use a participant in a process definition Ruote must be able to find your participant class. This is done in an initializer file so that the participants are registered and ready for use when the server is started. The method of registering participants with Ruote is shown below in Figure \ref{fig:ruote-prototype-participant-register}.
+
+\begin{figure}[!ht]
+  \caption{Registering the participants with the Dashboard.}
+  \label{fig:ruote-prototype-participant-register}
+  \begin{lstlisting}
+#Register each participant for use in a process definition
+RuoteKit.engine.register do
+  participant ‘unclaimed_pool’, UnclaimedPoolParticipant
+  participant ‘claim_issue’, ClaimIssueParticipant
+  participant ‘sign_issue’, SignIssueParticipant
+  participant ‘close_issue’, CloseIssueParticipant
+end
+  \end{lstlisting}
+\end{figure}
+
+\paragraph{Process:} A process is created along side every new Report and the workitem is set to the newly created report. Figure \ref{fig:ruote-prototype-process-definition} displays the process definition and the participants used to model the BPMN diagram in Figure \ref{fig:ruote-bpmn-diagram}.
+
+\begin{figure}[!ht]
+  \caption{Process Definition of the Ruote prototype bug tracker.}
+  \label{fig:ruote-prototype-process-definition}
+  \begin{lstlisting}
+
+-- REPORT_OBJECT is created up here and the model is saved
+
+pdef = Ruote.process_definition do
+  unclaimed_pool
+  concurrent do
+    claim_issue
+    sign_issue
+  end
+  close_issue
+end
+
+RuoteKit.engine.launch(pdef, REPORT_OBJECT) #launches the process
+
+  \end{lstlisting}
+\end{figure}
+
+This process definition initially calls the on\_workitem method in the unclaimed\_pool participant and waits for a reply call to notify that the on\_workitem method has finished executing. Once it has finished execution claim\_issue and sign\_isse both begin execution concurrently. Only once both claim\_issue and sign\_issue are finished is close\_issue executed. Once close\_issue is finished the process ends. The report\_object that is passed as a parameter to launch() is passed between the participants as a hashmap of the models data. Because of this the value passed to be the workitem must be hashable.
