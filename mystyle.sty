@@ -1,5 +1,6 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
+\usepackage{booktabs}
 \usepackage{etoolbox}
 \usepackage{graphicx}
 \usepackage{hyperref}
@@ -41,6 +42,8 @@
 \newcommand{\question}[1] {\noindent \paragraph{#1}}
 
 \newcommand{\keyword}[1] {\textbf{#1}}
+
+\newcommand{\tablespacer}[0] { \vspace{5.5mm} }
 
 
 % Double-space all tables. This ruins our formatting ...
@@ -84,7 +87,7 @@
 % \end{table}
 
 \newenvironment{usecase}[1][]
-{ \vspace{5.5mm}
+{ \tablespacer
   \begin{tabular}{ p{1.2in} p{4.3in} }
   \textit{Use Case} & #1 }
 { \end{tabular} }

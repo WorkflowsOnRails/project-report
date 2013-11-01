@@ -305,6 +305,7 @@ Use case descriptions for the project execution phase are provided in Tables \re
 
 \sectionnote{AC}
 \subsection{Account Management}
+\label{sec:account-management}
 
 The account management use cases shown in Figure \ref{fig:case-4ys-use-case-account-management} are described in the following tables \ref{tbl:use-case-create-account} through \ref{tbl:use-case-authenticate}. These descriptions cover the creation, modification, and deletion of the different accounts in the system.
 
@@ -451,7 +452,7 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
 
 With the addition of a ``select  project'' step to account for the project being created and selected in the selection phase, the six-step project execution phase described in section \ref{sec:4ys-project-execution} is the core workflow of a project in the fourth-year project management system. As this high-level workflow is completely linear, it can be trivially transformed into the state chart in Figure \ref{fig:state-machine-project-lifecycle}. In this model, the project is a Stonepath work item, while each step is associated with a set of tasks (ex. producing a proposal or submitting a poster fair demo form), which can be extracted from the use case descriptions in section \ref{sec:4ys-project-execution}.
 
-\begin{figure}[!ht]
+\begin{figure}[!htbp]
 \centering \includegraphics[width=3.8in]{./img/case-study-fourth-year-system/project_lifecycle}
 \caption{State chart representation of the workflow for an overall project lifecycle from creation to completion.}
 \label{fig:state-machine-project-lifecycle}
@@ -459,7 +460,7 @@ With the addition of a ``select  project'' step to account for the project being
 
 In fact, the majority of the tasks described by the use cases involve the Project Group Members submitting an artifact, the Project Supervisor reviewing it, and then either returning it or accepting it. These tasks can be modelled as Stonepath tasks, which may be assigned to Project Group Members and Project Supervisors. This process is captured in Figure \ref{fig:state-machine-document-submission}. This model leverages Stonepath’s state-based model of tasks to handle multiple activities in parallel (ex. filling out the oral report scheduling form, and producing a progress report.)
 
-\begin{figure}[!ht]
+\begin{figure}[!htbp]
 \centering \includegraphics[width=3.0in]{./img/case-study-fourth-year-system/document_submission}
 \caption{State chart representation of a general document submission task, such as proposal submission.}
 \label{fig:state-machine-document-submission}
@@ -467,14 +468,87 @@ In fact, the majority of the tasks described by the use cases involve the Projec
 
 Other tasks to produce deliverables require only some small modifications to the state chart in Figure \ref{fig:state-machine-document-submission}. For instance, the special handling of deadlines for final reports can easily be handled with two extra state transitions, as Figure \ref{fig:state-machine-final-report-submission} demonstrates. Similarly, the consensus requirement to submit the oral presentation scheduling form only requires a guard clause, while editing a submitted form only requires a new transition back from accepted as demonstrated in Figure \ref{fig:state-machine-oral-presentation-scheduling}.
 
-\begin{figure}[!ht]
+\begin{figure}[!htbp]
 \centering \includegraphics[width=5.5in]{./img/case-study-fourth-year-system/final_report_submission}
 \caption{State chart representation of a the final report submission task. This workflow is an extension of the general document submission workflow in Figure \ref{fig:state-machine-document-submission}, with additional transitions for strict handling of missed deadlines.}
 \label{fig:state-machine-final-report-submission}
 \end{figure}
 
-\begin{figure}[!ht]
+\begin{figure}[!htbp]
 \centering \includegraphics[width=3.5in]{./img/case-study-fourth-year-system/oral_presentation_scheduling}
 \caption{State chart representation of a the oral presentation scheduling task. This workflow is an extension of the general document submission workflow in Figure \ref{fig:state-machine-document-submission}, with additional transitions to handle achieving consensus on available times, and to handle editing a submitted form.}
 \label{fig:state-machine-oral-presentation-scheduling}
 \end{figure}
+
+
+\FloatBarrier
+
+\sectionnote{BM}
+\section{Design}
+
+The design of the system was performed in a top-down fashion, starting from the core project workflow depicted in Figure \ref{fig:state-machine-project-lifecycle}. The system must accommodate multiple concurrent tasks for a user: not only can some states involve multiple tasks, but Project Supervisors may be involved with several project simultaneously. The clearest way to present all of the concurrent tasks for a user is in a tabular view, as depicted in the wireframe in Figure \ref{fig:wireframe-tasks-view}. The user can then select a task from their pending tasks, and carry out the actions associated with its present state.
+
+\begin{figure}[!htbp]
+\centering \includegraphics[width=6in]{./img/case-study-fourth-year-system/supervisor-tasks-view_wireframe}
+\caption{Wireframe of the tasks view for a Project Supervisor. The tasks view presents the tasks generated by the project state machine in Figure \ref{fig:state-machine-project-lifecycle}. ``Lorem ipsum'' placeholder text has been used in place of introductory and explanatory text.}
+\label{fig:wireframe-tasks-view}
+\end{figure}
+
+In order to achieve this requirement, the system needs to treat different types of tasks in a project generically - a naive implementation that places each type of task (such as a proposal or progress report) in a discrete ActiveRecord model makes it complex to find all of the outstanding tasks for a user. Stonepath has a SPTask mixin that allows a task to be associated with a workbench (ex. a Project Supervisor) and a workitem (a project). A model extending SPTask might be associated with each task for each workbench / workitem pair, using a polymorphic association. Unfortunately this model is very complex to implement and query, as demonstrated by Figure \ref{fig:sptask-complexity}. Though the relationship between users and tasks is now generic, a polymorphic many-to-many relationship like \verb!Task! is difficult to traverse, as discussed in section \ref{sec:stonepath-prototyping-results}. Additionally, this data model is unnecessarily complex to update in exceptional cases: if a Project Supervisor or Project Group Member needs to be added or removed from the project, then new \verb!Task!s must be added or removed from the database through some means other than the project’s state machine.
+
+\begin{figure}[!htbp]
+\centering \includegraphics{./img/case-study-fourth-year-system/task-with-sptask-static-structure}
+\caption{Logical class diagram of the relationship between concrete tasks of the project workflow (such as proposals and progress reports), projects, supervisors, and group members using Stonepath concepts.}
+\label{fig:sptask-complexity}
+\end{figure}
+
+Instead of making use of the Stonepath task model, a simpler custom data model was designed instead. As pictured in Figure \ref{fig:custom-task-simplicity}, instances of a new generic \verb!Task! type are associated directly with a project. This is conceptually much simpler, and also allows Project Supervisors and project Group Members to be added and removed from projects without altering the tasks associated with the project.
+
+\begin{figure}[!htbp]
+\centering \includegraphics{./img/case-study-fourth-year-system/task-through-project-static-structure}
+\caption{Logical class diagram of the relationship between concrete tasks of the project workflow (such as proposals and progress reports), projects, supervisors, and group members using a custom task model.}
+\label{fig:custom-task-simplicity}
+\end{figure}
+
+With the framework in place to access individual tasks, it was decided that each task in a project would have its own page. In general, task pages are laid out with a detailed task description, followed a short summary of the state of the task, actions that can be performed on the task, and then any other data that is necessary to complete the activity corresponding to the current state of the task. This centralizes information related to a task, and guides the user through the process of completing it. The wireframes in Figures \ref{fig:wireframe-group-member-proposal-view} and \ref{fig:wireframe-supervisor-proposal-view} demonstrate this layout with a proposal task: first, there is a description of the proposal requirements (the task description), followed by a summary of the task state (the file associated with the current submission), actions (``submit'', and ``return'' or ``accept''), and auxiliary data (the submission history.) Note that the actions displayed for the proposal are selected based on the current user's role and the state of the task.
+
+\begin{figure}[!htbp]
+\centering \includegraphics[width=6in]{./img/case-study-fourth-year-system/group-member-proposal-view_wireframe}
+\caption{Wireframe of the proposal view of for a Project Group Member when the proposal is in the ``writing submission'' or ``reviewing'' states. The member may upload a new submission with a comment.}
+\label{fig:wireframe-group-member-proposal-view}
+\end{figure}
+
+\begin{figure}[!htbp]
+\centering \includegraphics[width=6in]{./img/case-study-fourth-year-system/supervisor-proposal-view_wireframe}
+\caption{Wireframe of the proposal view of for a Project Supervisor when the proposal is in the ``reviewing'' state. The supervisor may either return the proposal with a comment, or accept it with a comment.}
+\label{fig:wireframe-supervisor-proposal-view}
+\end{figure}
+
+Another important feature of the system is user authentication and managing user profile data. From examining the requirements in section \ref{sec:account-management}, it is clear that Project Group Members, Project Supervisors, and Project Coordinators have many profile attributes in common. These attributes are captured in Table \ref{tbl:user-profile-attributes}.
+
+\begin{table}
+  \centering
+  \caption{User profile attributes used by each role in the system. Note that the attributes for a Group Member are a strict superset of those used by every other role.}
+  \label{tbl:user-profile-attributes}
+  \tablespacer
+  \begin{tabular}{ l l }
+    \toprule
+    Attribute & Roles \\
+    \midrule
+    Full name & All \\
+    Email & All \\
+    Encrypted Password & All \\
+    Programme & Project Group Member \\
+    Student Number & Project Group Member \\
+    Project & Project Group Member \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+There are a few ways to model the users, roles, and attributes in the system. One possibility is to represent each role as its own class; however, as Project Coordinators also act as Project Supervisors, this would lead to a confusing ER model, as both classes would need to be related to Tasks and Projects. Additionally, Project Coordinators and Project Supervisors have identical attributes, so this approach would lead to needlessly duplicated code.
+
+A more refined approach would be to model Project Coordinators and Project Supervisors as the same class, with an attribute to discriminate them. This would enable code reuse for the two roles, and would let Project Supervisors become Project Coordinators (and vice versa) without having to delete and recreate their accounts. It would also produce an expressive ER model - Project Coordinators and Project Supervisors could be referenced through the same foreign key, while Project Group Members could not be accidentally associated. Unfortunately, most Account Management use cases in section \ref{sec:account-management} apply to all roles in the system, so separating the role types into distinct classes remains an impediment to code reuse.
+
+The final approach is to combine all of the roles into a single class, and discriminate them based on a role attribute. While this has the disadvantage of producing a less expressive ER model which can’t distinguish references to Supervisors from references to Group Members, it was selected for implementation as it permits significant code reuse for authentication and profile management. Rails has ORM facilities available to ensure that invalid relationships are not saved to the database, which are discussed further in section \ref{sec:4ys-implementation}.
+
+Given a single class to represent a user’s profile, there are two options to represent the user’s role. It could be represented as either a single-valued attribute for simplicity, or a multi-valued attribute to capture the fact that user’s can have multiple effective roles (eg. a Project Coordinator may also fill the role of a Project Supervisor.) However, as only Project Coordinators fill multiple roles, and it is unlikely that the system will develop a need to more granular roles, the decision was made to represent roles as single values and let the implementation handle determining which effective roles a user may fulfill.
