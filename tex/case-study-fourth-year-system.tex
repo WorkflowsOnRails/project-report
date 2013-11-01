@@ -83,7 +83,7 @@ Use case descriptions for the project execution phase are provided in Tables \re
     \ucpart{Preconditions}
     The Project Supervisor has accepted the Project Group Members, but a project proposal has not been completed.
     %
-    \ucpart{Description}
+    \ucpart{Flow}
     \ucnormal
     \begin{ucenum}
       \item A Project Group Member uploads and submits a PDF document of the proposal (which for now is a draft.)
@@ -125,7 +125,7 @@ Use case descriptions for the project execution phase are provided in Tables \re
     \ucpart{Preconditions}
     The Project Supervisor has accepted a proposal from this group, but has yet to accept a progress report.
     %
-    \ucpart{Description}
+    \ucpart{Flow}
     \ucnormal
     \begin{ucenum}
       \item A Project Group Member uploads and submits a PDF document of the progress report.
@@ -166,7 +166,7 @@ Use case descriptions for the project execution phase are provided in Tables \re
     \ucpart{Preconditions}
     The Project Supervisor has accepted a proposal from this group, and the oral presentation scheduling deadline has not passed.
     %
-    \ucpart{Description}
+    \ucpart{Flow}
     \ucnormal
     \begin{ucenum}
       \item A Project Group Member fills out the Oral Presentation form.
@@ -210,7 +210,7 @@ Use case descriptions for the project execution phase are provided in Tables \re
     \ucpart{Preconditions}
     The oral presentation scheduling deadline has passed.
     %
-    \ucpart{Description}
+    \ucpart{Flow}
     \ucnormal
     \begin{ucenum}
       \item The Project Coordinator views each groups scheduling form.
@@ -244,7 +244,7 @@ Use case descriptions for the project execution phase are provided in Tables \re
     \ucpart{Preconditions}
     The group’s oral presentation deadline has passed, but the date of the poster fair has not.
     %
-    \ucpart{Description}
+    \ucpart{Flow}
     \ucnormal
     \begin{ucenum}
       \item A Project Group Member fills out and submits the poster fair demo request form.
@@ -272,7 +272,7 @@ Use case descriptions for the project execution phase are provided in Tables \re
     \ucpart{Preconditions}
     The project group has completed their oral presentation, but the final report has not yet been completed. Additionally, the submission deadline for the final report has not passed.
     %
-    \ucpart{Description}
+    \ucpart{Flow}
     \ucnormal
     \begin{ucenum}
       \item A Project Group Member uploads and submits a PDF document of the final report (which for now is a draft.)
@@ -300,44 +300,144 @@ Use case descriptions for the project execution phase are provided in Tables \re
 \end{table}
 
 
-\begin{table}
-  \centering
-  \caption{TODO}
-  \label{tbl:use-case-TODO}
-
-  \begin{usecase}[TODO]
-    \ucpart{Description}
-    %
-    \ucpart{Actors}
-    %
-    \ucpart{Preconditions}
-    %
-    \ucpart{Description}
-    \ucnormal
-    \begin{ucenum}
-      \item TODO
-    \end{ucenum}
-    %
-    \ucpart{Variations}
-    \ucbranch{A}
-    \begin{ucenum}
-      \item [A.4] The Project Supervisor returns the progress report.
-      \item [A.5] Return to step 1.
-    \end{ucenum}
-    %
-    \ucpart{Exceptions}
-    \ucexception{TODO}
-    TODO
-    %
-    \ucpart{Postconditions}
-    TODO
-  \end{usecase}
-\end{table}
-
-
 \FloatBarrier
 
 \sectionnote{AC}
 \subsection{Account Management}
 
-The account management use cases shown in Figure 4 are described in the following tables 7 through 10. These descriptions cover the creation, modification, and deletion of the different accounts in the system.
+The account management use cases shown in Figure \ref{fig:case-4ys-use-case-account-management} are described in the following tables \ref{tbl:use-case-create-account} through \ref{tbl:use-case-authenticate}. These descriptions cover the creation, modification, and deletion of the different accounts in the system.
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``Create Account'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-create-account}
+
+  \begin{usecase}[Create User Account]
+    \ucpart{Description}
+    Creates a User Account and assign permissions for the newly created User Account
+    %
+    \ucpart{Actors}
+    Project Group Member, Project Coordinator
+    %
+    \ucpart{Flow}
+    \ucnormal
+    \begin{ucenum}
+      \item The user provides an email address, password, confirmation password, full name, student number, and programme
+      \item The system validates and saves the account
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{Email not unique}
+    An account with that email address already exists and the user is redirected to step 1 and notified of the error
+    \ucexception{Password and confirmation password do not match}
+    User is redirected to step 1 and notified of the error
+    \ucexception{Email address, password, confirmation password, or full name  is not provided}
+    User is redirected to step 1 and notified of the error
+    %
+    \ucpart{Postconditions}
+    The User Account is created and saved by the system
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``Register Group Member Account'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-register-member-account}
+
+  \begin{usecase}[Register Group Member Account]
+    \ucpart{Description}
+    A student is able to register their own account and their Student Number must be provided and be unique
+    %
+    \ucpart{Actors}
+    Project Group Member
+    %
+    \ucpart{Description}
+    \ucnormal
+    \begin{ucenum}
+      \item The user provides an email address, password, confirmation password, full name, student number, and programme
+      \item The system validates and saves the account, include (Create User Account)
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{Student number not unique}
+    An account with that student number already exists and the user is redirected to step 1 and notified of the error
+    \ucexception{Student number or programme is not provided}
+    User is redirected to step 1 and notified of the error
+    %
+    \ucpart{Postconditions}
+    If the Group Member Account was created successfully they will be logged in. If the Group Member Account was not created successfully they will be prompted to attempt to create their account again.
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``Manage Account'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-manage-account}
+
+  \begin{usecase}[Manage Account]
+    \ucpart{Description}
+    Any user may edit their own account. Only Project Coordinators are able to edit accounts other than their own.
+    %
+    \ucpart{Actors}
+    Project Group Member, Project Supervisor, Project Coordinator
+    %
+    \ucpart{Preconditions}
+    Account being edited exists
+    %
+    \ucpart{Flow}
+    \ucnormal
+    \begin{ucenum}
+      \item User provides new account information
+      \item The system validates and saves the edited account
+    \end{ucenum}
+    %
+    \ucpart{Variations}
+    \ucbranch{A}
+    \begin{ucenum}
+      \item [A.1] User selects to delete the account
+      \item [A.2] The system deletes the account and all references to it
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{No privilege to edit\slash delete selected account}
+    The account cannot be edited\slash deleted by the current user
+    %
+    \ucpart{Postconditions}
+    If the Account was edited the changes are saved by the system. If the Account was deleted all references to that account and the account itself are removed.
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``Authenticate'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-authenticate}
+
+  \begin{usecase}[Authenticate]
+    \ucpart{Description}
+    Authenticate the current User Account
+    %
+    \ucpart{Actors}
+    Project Group Member, Project Supervisor, Project Coordinator
+    %
+    \ucpart{Preconditions}
+    Account being Authenticated exists
+    %
+    \ucpart{Flow}
+    \ucnormal
+    \begin{ucenum}
+      \item User provides an email address and a password
+      \item The system authenticates the user
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{Invalid email or password}
+    The user is not authenticated and is redirected to step 1 and notified of the error
+    %
+    \ucpart{Postconditions}
+    The User Account was authenticated and is allowed to do any operations that it is allowed.
+  \end{usecase}
+\end{table}
