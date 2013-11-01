@@ -54,6 +54,7 @@ Individual use cases for these concerns are illustrated in Figures \ref{fig:case
 
 \sectionnote{BM}
 \subsection{Project Execution}
+\label{sec:4ys-project-execution}
 
 Though all three concerns are important to the system, the most interesting from the point of view of a workflow framework is the project execution phase. This phase accounts for the majority of the lifetime of a fourth-year project, and is also the area in the existing fourth year project management system that could use the most improvement. While account creation and project selection mostly involve basic CRUD (create, read, update, and delete) actions, the execution phase has a well-defined flow:
 \begin{enumerate}
@@ -441,3 +442,39 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
     The User Account was authenticated and is allowed to do any operations that it is allowed.
   \end{usecase}
 \end{table}
+
+
+\FloatBarrier
+
+\sectionnote{BM}
+\section{Workflow Design}
+
+With the addition of a ``select  project'' step to account for the project being created and selected in the selection phase, the six-step project execution phase described in section \ref{sec:4ys-project-execution} is the core workflow of a project in the fourth-year project management system. As this high-level workflow is completely linear, it can be trivially transformed into the state chart in Figure \ref{fig:state-machine-project-lifecycle}. In this model, the project is a Stonepath work item, while each step is associated with a set of tasks (ex. producing a proposal or submitting a poster fair demo form), which can be extracted from the use case descriptions in section \ref{sec:4ys-project-execution}.
+
+\begin{figure}[!ht]
+\centering \includegraphics[width=3.8in]{./img/case-study-fourth-year-system/project_lifecycle}
+\caption{State chart representation of the workflow for an overall project lifecycle from creation to completion.}
+\label{fig:state-machine-project-lifecycle}
+\end{figure}
+
+In fact, the majority of the tasks described by the use cases involve the Project Group Members submitting an artifact, the Project Supervisor reviewing it, and then either returning it or accepting it. These tasks can be modelled as Stonepath tasks, which may be assigned to Project Group Members and Project Supervisors. This process is captured in Figure \ref{fig:state-machine-document-submission}. This model leverages Stonepath’s state-based model of tasks to handle multiple activities in parallel (ex. filling out the oral report scheduling form, and producing a progress report.)
+
+\begin{figure}[!ht]
+\centering \includegraphics[width=3.0in]{./img/case-study-fourth-year-system/document_submission}
+\caption{State chart representation of a general document submission task, such as proposal submission.}
+\label{fig:state-machine-document-submission}
+\end{figure}
+
+Other tasks to produce deliverables require only some small modifications to the state chart in Figure \ref{fig:state-machine-document-submission}. For instance, the special handling of deadlines for final reports can easily be handled with two extra state transitions, as Figure \ref{fig:state-machine-final-report-submission} demonstrates. Similarly, the consensus requirement to submit the oral presentation scheduling form only requires a guard clause, while editing a submitted form only requires a new transition back from accepted as demonstrated in Figure \ref{fig:state-machine-oral-presentation-scheduling}.
+
+\begin{figure}[!ht]
+\centering \includegraphics[width=5.5in]{./img/case-study-fourth-year-system/final_report_submission}
+\caption{State chart representation of a the final report submission task. This workflow is an extension of the general document submission workflow in Figure \ref{fig:state-machine-document-submission}, with additional transitions for strict handling of missed deadlines.}
+\label{fig:state-machine-final-report-submission}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering \includegraphics[width=3.5in]{./img/case-study-fourth-year-system/oral_presentation_scheduling}
+\caption{State chart representation of a the oral presentation scheduling task. This workflow is an extension of the general document submission workflow in Figure \ref{fig:state-machine-document-submission}, with additional transitions to handle achieving consensus on available times, and to handle editing a submitted form.}
+\label{fig:state-machine-oral-presentation-scheduling}
+\end{figure}
