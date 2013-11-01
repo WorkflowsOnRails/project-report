@@ -112,7 +112,8 @@ class UnclaimedPoolParticipant
   include Ruote::LocalParticipant
 
   def on_workitem
-    #the report_id is passed between participants and stored in the workitem
+    # the report_id is passed between participants and stored
+    # in the workitem
     report = Report.find(workitem.lookup(id))
     --- do work on the report here ---
     reply #call to the process to notify work has finished
