@@ -14,7 +14,7 @@ The fourth-year project management system is used by the department of Systems a
 
 The system fulfills its functional requirements, but requires significant effort on the part of students to navigate, as all actions, information and deadlines are available at all times. It offers a good example of a system where the user experience could be improved by structuring the system into workflows. Additionally, the system involves deadlines and collaborative activities between multiple actors, which makes it a good test of the capabilities of the Stonepath workflow framework.
 
-\sectionnote {???}
+\sectionnote {BM}
 \section {Requirements}
 The required functionality of the fourth-year project management system can be split into three main concerns:
 \begin{itemize}
@@ -49,6 +49,12 @@ Individual use cases for these concerns are illustrated in Figures \ref{fig:case
 \label{fig:case-4ys-use-case-oral-reports}
 \end{figure}
 
+
+\FloatBarrier
+
+\sectionnote{BM}
+\subsection{Project Execution}
+
 Though all three concerns are important to the system, the most interesting from the point of view of a workflow framework is the project execution phase. This phase accounts for the majority of the lifetime of a fourth-year project, and is also the area in the existing fourth year project management system that could use the most improvement. While account creation and project selection mostly involve basic CRUD (create, read, update, and delete) actions, the execution phase has a well-defined flow:
 \begin{enumerate}
 \item First, a project proposal must be drafted, submitted, revised, and accepted.
@@ -59,3 +65,279 @@ Though all three concerns are important to the system, the most interesting from
 \item While the group is preparing for the poster fair, a final report must also be drafted, submitted, revised, and accepted.
 \end{enumerate}
 Additionally, each step of the fourth-year project process has associated deadlines.
+
+Use case descriptions for the project execution phase are provided in Tables \ref{tbl:use-case-produce-proposal} through \ref{tbl:use-case-final-report}.
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``produce proposal'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-produce-proposal}
+
+  \begin{usecase}[Produce Proposal]
+    \ucpart{Description}
+    Project Group Members produce a project proposal with feedback from their Project Supervisor
+    %
+    \ucpart{Actors}
+    Project Group Member, Project Supervisor
+    %
+    \ucpart{Preconditions}
+    The Project Supervisor has accepted the Project Group Members, but a project proposal has not been completed.
+    %
+    \ucpart{Description}
+    \ucnormal
+    \begin{ucenum}
+      \item A Project Group Member uploads and submits a PDF document of the proposal (which for now is a draft.)
+      \item The system notifies the Project Supervisor and the other Project Group Members.
+      \item The Project Supervisor reviews the proposal draft.
+      \item The Project Supervisor provides feedback to the Project Group Members on the proposal draft.
+      \item Return to step 1.
+    \end{ucenum}
+    %
+    \ucpart{Variations}
+    \ucbranch{A}
+    \begin{ucenum}
+      \item [A.4] The Project Supervisor accepts the proposal draft.
+      \item [A.5] The system marks the draft as the final proposal and notifies the Project Group Members.
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{Deadline expires}
+    If the proposal is not submitted and finalized before the deadline, it is marked as overdue. The interpretation of this status is left to the Project Supervisor.
+    %
+    \ucpart{Postconditions}
+    A PDF of the proposal is stored and marked as accepted, and project has entered the next phase.
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``submit progress report'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-submit-progress-report}
+
+  \begin{usecase}[Submit Progress Report]
+    \ucpart{Description}
+    Project Group Members submit a status update document to their Project Supervisor summarizing their progress on their project.
+    %
+    \ucpart{Actors}
+    Project Group Member, Project Supervisor
+    %
+    \ucpart{Preconditions}
+    The Project Supervisor has accepted a proposal from this group, but has yet to accept a progress report.
+    %
+    \ucpart{Description}
+    \ucnormal
+    \begin{ucenum}
+      \item A Project Group Member uploads and submits a PDF document of the progress report.
+      \item The system notifies the Project Supervisor and the other Project Group Members.
+      \item The Project Supervisor reviews the progress report.
+      \item The Project Supervisor accepts the progress report.
+    \end{ucenum}
+    %
+    \ucpart{Variations}
+    \ucbranch{A}
+    \begin{ucenum}
+      \item [A.4] The Project Supervisor returns the progress report.
+      \item [A.5] Return to step 1.
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{Deadline expires}
+    If the progress report is not submitted and finalized before the deadline, it is marked as overdue. The interpretation of this status is left to the Project Supervisor.
+    %
+    \ucpart{Postconditions}
+    A PDF of the progress report is stored, and the project enters the next phase.
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``schedule group oral presentation'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-schedule-group-oral}
+
+  \begin{usecase}[Schedule Group Oral Presentation]
+    \ucpart{Description}
+    Project Group Members and their Project Supervisor indicate times that they will be available for the oral presentation.
+    %
+    \ucpart{Actors}
+    Project Group Member, Project Supervisor
+    %
+    \ucpart{Preconditions}
+    The Project Supervisor has accepted a proposal from this group, and the oral presentation scheduling deadline has not passed.
+    %
+    \ucpart{Description}
+    \ucnormal
+    \begin{ucenum}
+      \item A Project Group Member fills out the Oral Presentation form.
+      \item The system notifies the Project Supervisor and the other Project Group Members.
+      \item The Project Supervisor and other Project Group Members review the scheduling form.
+      \item The Project Supervisor and all of Project Group Members accept the submitted scheduling form.
+      \item The group’s scheduling form is marked is approved.
+      \item The oral presentation scheduling deadline expires.
+    \end{ucenum}
+    %
+    \ucpart{Variations}
+    \ucbranch{A}
+    \begin{ucenum*}
+      \item [A.4] Instead of accepting the schedule, a Project Group Member or the Project Supervisor changes the scheduling form.
+      \item [A.5] Return to step 2.
+    \end{ucenum*}
+    \ucbranch{B}
+    \begin{ucenum}
+      \item [B.6] A Project Group Member or the Project Supervisor changes the scheduling form.
+      \item [B.7] Return to step 2.
+    \end{ucenum}
+    %
+    \ucpart{Postconditions}
+    The last approved version of the scheduling form is recorded as the scheduling form submitted by the group. If no scheduling form was approved, then a form is submitted with all timeslots marked as available.
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``schedule oral presentations'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-schedule-orals}
+
+  \begin{usecase}[Schedule Oral Presentations]
+    \ucpart{Description}
+    The Project Coordinator determines when and where each group will have their oral presentation.
+    %
+    \ucpart{Actors}
+    Project Coordinator
+    %
+    \ucpart{Preconditions}
+    The oral presentation scheduling deadline has passed.
+    %
+    \ucpart{Description}
+    \ucnormal
+    \begin{ucenum}
+      \item The Project Coordinator views each groups scheduling form.
+      \item The Project Coordinator produces a schedule that best meets the constraints of all of the project groups, assigning each group a time and place for their oral presentation.
+      \item The system notifies all Project Group Members and Project Supervisors.
+      \item Project Group Members and Project Supervisors view the times and locations of their assigned oral presentations.
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{Rescheduling required}
+    If a Project Group Member or Project Supervisor is no longer available for the timeslot they were assigned, they must contact the Project Coordinator. The Project Coordinator may choose to repeat the process from step 1 with the new scheduling constraints.
+    %
+    \ucpart{Postconditions}
+    Each group has been assigned an appropriate time and location for their oral presentation.
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``submit poster fair demo form'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-poster-fair-form}
+
+  \begin{usecase}[Submit Poster Fair Demo Form]
+    \ucpart{Description}
+    The Project Group Members and Project Supervisor may opt to request space for a demonstration at the poster fair.
+    %
+    \ucpart{Actors}
+    Project Group Members, Project Supervisor
+    %
+    \ucpart{Preconditions}
+    The group’s oral presentation deadline has passed, but the date of the poster fair has not.
+    %
+    \ucpart{Description}
+    \ucnormal
+    \begin{ucenum}
+      \item A Project Group Member fills out and submits the poster fair demo request form.
+      \item The system notifies the Project Group Members, Project Supervisor, and Project Coordinator.
+    \end{ucenum}
+    %
+    \ucpart{Postconditions}
+    The poster fair demo request form has been sent to the Project Coordinator.
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``produce final report'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-final-report}
+
+  \begin{usecase}[Produce Final Report]
+    \ucpart{Description}
+    Project Group Members produce a final project report with feedback from their Project Supervisor
+    %
+    \ucpart{Actors}
+    Project Group Member, Project Supervisor, Project Coordinator
+    %
+    \ucpart{Preconditions}
+    The project group has completed their oral presentation, but the final report has not yet been completed. Additionally, the submission deadline for the final report has not passed.
+    %
+    \ucpart{Description}
+    \ucnormal
+    \begin{ucenum}
+      \item A Project Group Member uploads and submits a PDF document of the final report (which for now is a draft.)
+      \item The system notifies the Project Supervisor and the other Project Group Members.
+      \item The Project Supervisor reviews the draft report.
+      \item The Project Supervisor provides feedback to the Project Group Members on the draft report.
+      \item Return to step 1.
+    \end{ucenum}
+    %
+    \ucpart{Variations}
+    \ucbranch{A}
+    \begin{ucenum}
+      \item [A.4] The Project Supervisor accepts the draft report.
+      \item [A.5] The system marks the draft as the final report and notifies the Project Group Members.
+      \item [A.6] The system forwards a copy of the final report to the Project Coordinator for distribution to the second reader.
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{Deadline expires}
+    Submission is closed, and no final report can be submitted after the deadline. If a submission was pending acceptance, it is marked as accepted and proceeds to step A.5.
+    %
+    \ucpart{Postconditions}
+    The project is completed. If the final report was submitted, then the PDF of the final report is stored and marked as accepted, and the Project Coordinator has received a copy.
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{TODO}
+  \label{tbl:use-case-TODO}
+
+  \begin{usecase}[TODO]
+    \ucpart{Description}
+    %
+    \ucpart{Actors}
+    %
+    \ucpart{Preconditions}
+    %
+    \ucpart{Description}
+    \ucnormal
+    \begin{ucenum}
+      \item TODO
+    \end{ucenum}
+    %
+    \ucpart{Variations}
+    \ucbranch{A}
+    \begin{ucenum}
+      \item [A.4] The Project Supervisor returns the progress report.
+      \item [A.5] Return to step 1.
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{TODO}
+    TODO
+    %
+    \ucpart{Postconditions}
+    TODO
+  \end{usecase}
+\end{table}
+
+
+\FloatBarrier
+
+\sectionnote{AC}
+\subsection{Account Management}
+
+The account management use cases shown in Figure 4 are described in the following tables 7 through 10. These descriptions cover the creation, modification, and deletion of the different accounts in the system.

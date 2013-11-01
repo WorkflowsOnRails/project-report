@@ -1,10 +1,17 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
+\usepackage{etoolbox}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{listings}
+\usepackage{paralist}
 \usepackage{placeins}
+\usepackage{setspace}
 \usepackage{sysc4907}
+
+
+% Ragged right can help remove ridiculous hyphenation if we need to.
+%\AtBeginDocument{\raggedright}
 
 \lstset{
  language=ruby,
@@ -34,3 +41,66 @@
 \newcommand{\question}[1] {\noindent \paragraph{#1}}
 
 \newcommand{\keyword}[1] {\textbf{#1}}
+
+
+% Double-space all tables. This ruins our formatting ...
+%\AtBeginEnvironment{tabular}{\doublespacing}
+
+% Use Case Environment
+%
+% Example Use:
+% \begin{table}
+%   \centering
+%   \caption{TODO}
+%   \label{tbl:use-case-TODO}
+%
+%   \begin{usecase}[TODO]
+%     \ucpart{Description}
+%     %
+%     \ucpart{Actors}
+%     %
+%     \ucpart{Preconditions}
+%     %
+%     \ucpart{Description}
+%     \ucnormal
+%     \begin{ucenum}
+%       \item TODO
+%     \end{ucenum}
+%     %
+%     \ucpart{Variations}
+%     \ucbranch{A}
+%     \begin{ucenum}
+%       \item [A.4] The Project Supervisor returns the progress report.
+%       \item [A.5] Return to step 1.
+%     \end{ucenum}
+%     %
+%     \ucpart{Exceptions}
+%     \ucexception{TODO}
+%     TODO
+%     %
+%     \ucpart{Postconditions}
+%     TODO
+%   \end{usecase}
+% \end{table}
+
+\newenvironment{usecase}[1][]
+{ \vspace{5.5mm}
+  \begin{tabular}{ p{1.2in} p{4.3in} }
+  \textit{Use Case} & #1 }
+{ \end{tabular} }
+
+\newenvironment{ucenum}
+{ \begin{compactenum} }
+{ \end{compactenum} \vspace{-5.5mm} }
+
+\newenvironment{ucenum*}
+{ \begin{compactenum} }
+{ \end{compactenum} }
+
+\newcommand{\ucpart}[1] {\\ \textit{#1} & }
+
+\newcommand{\ucnormal}[0] { \textbf{Normal Flow} }
+
+\newcommand{\ucbranch}[1] { \textbf{Branching Flow #1} }
+
+\newcommand{\ucexception}[1] { \textbf{#1}~ }
