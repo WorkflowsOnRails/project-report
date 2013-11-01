@@ -38,5 +38,5 @@ The files are laid out as follows:
           Omit the file extension from your call to `\includegraphics`, or else
           your files may not be automatically converted to pdfs.
 * _resources/_: miscellaneous files used to produce the report, but not
-                directly usable by the Makefile. Includes resources, Visio
+                directly usable by the Makefile. Includes wireframes, Visio
                 diagrams, etc.
