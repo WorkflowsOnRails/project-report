@@ -15,6 +15,9 @@ You need the following software packages to build the report:
 * [TeX Live](http://www.tug.org/texlive/)
 * [graphviz](http://www.graphviz.org/)
 
+Additionally, you will need [pencil](http://pencil.evolus.vn/) to edit
+the wireframes in the resources directory.
+
 
 Repository Structure
 --------------------
@@ -34,3 +37,6 @@ The files are laid out as follows:
           `\includegraphics[width=5in]{./img/<chapter>/<image>}`.
           Omit the file extension from your call to `\includegraphics`, or else
           your files may not be automatically converted to pdfs.
+* _resources/_: miscellaneous files used to produce the report, but not
+                directly usable by the Makefile. Includes resources, Visio
+                diagrams, etc.
