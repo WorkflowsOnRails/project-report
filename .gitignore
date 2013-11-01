@@ -5,6 +5,7 @@
 *.bbl
 *.blg
 *.d
+*.dot.png
 *.dvi
 *.fdb_latexmk
 *.fls
