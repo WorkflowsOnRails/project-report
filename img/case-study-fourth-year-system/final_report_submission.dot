@@ -9,16 +9,18 @@ start[label="",
 writing_submission[label = "{writing submission|}"]
 reviewing[label = "{reviewing|enter/notify_submitted()}"]
 accepted[label = "{accepted|enter/notify_accepted(),record_submission()}"]
+failed[label = "{failed|}"]
 end[label="",
     shape=doublecircle, style=filled, color=black, fillcolor=black,
     fixedsize=true, width=0.2, height=0.2]
 
 start->writing_submission
 writing_submission->reviewing [label = " submit   "]
-writing_submission->end [label = " deadline_expired/notify_expired()   "]
+writing_submission->failed [label = " deadline_expired/notify_expired()   "]
 reviewing->reviewing [label = " submit   "]
 reviewing->writing_submission [label = " return/notify_returned()   "]
 reviewing->accepted [label = " accept   "]
 reviewing->accepted [label = " deadline_expired/notify_expired()   "]
 accepted->end
+failed->end
 }
