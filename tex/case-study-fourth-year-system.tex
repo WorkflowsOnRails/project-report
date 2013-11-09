@@ -449,6 +449,7 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
 
 \sectionnote{BM}
 \section{Workflow Design}
+\label{sec:4ys-workflow-design}
 
 With the addition of a ``select  project'' step to account for the project being created and selected in the selection phase, the six-step project execution phase described in section \ref{sec:4ys-project-execution} is the core workflow of a project in the fourth-year project management system. As this high-level workflow is completely linear, it can be trivially transformed into the state chart in Figure \ref{fig:state-machine-project-lifecycle}. In this model, the project is a Stonepath work item, while each step is associated with a set of tasks (ex. producing a proposal or submitting a poster fair demo form), which can be extracted from the use case descriptions in section \ref{sec:4ys-project-execution}.
 
@@ -485,6 +486,7 @@ Other tasks to produce deliverables require only some small modifications to the
 
 \sectionnote{BM}
 \section{Design}
+\label{sec:4ys-design}
 
 The design of the system was performed in a top-down fashion, starting from the core project workflow depicted in Figure \ref{fig:state-machine-project-lifecycle}. The system must accommodate multiple concurrent tasks for a user: not only can some states involve multiple tasks, but Project Supervisors may be involved with several project simultaneously. The clearest way to present all of the concurrent tasks for a user is in a tabular view, as depicted in the wireframe in Figure \ref{fig:wireframe-tasks-view}. The user can then select a task from their pending tasks, and carry out the actions associated with its present state.
 
@@ -552,3 +554,211 @@ A more refined approach would be to model Project Coordinators and Project Super
 The final approach is to combine all of the roles into a single class, and discriminate them based on a role attribute. While this has the disadvantage of producing a less expressive ER model which can’t distinguish references to Supervisors from references to Group Members, it was selected for implementation as it permits significant code reuse for authentication and profile management. Rails has ORM facilities available to ensure that invalid relationships are not saved to the database, which are discussed further in section \ref{sec:4ys-implementation}.
 
 Given a single class to represent a user’s profile, there are two options to represent the user’s role. It could be represented as either a single-valued attribute for simplicity, or a multi-valued attribute to capture the fact that user’s can have multiple effective roles (eg. a Project Coordinator may also fill the role of a Project Supervisor.) However, as only Project Coordinators fill multiple roles, and it is unlikely that the system will develop a need to more granular roles, the decision was made to represent roles as single values and let the implementation handle determining which effective roles a user may fulfill.
+
+
+\FloatBarrier
+
+\sectionnote{BM}
+\section{Implementation}
+\label{sec:4ys-implementation}
+
+\todo{Add an introduction to this section and present it in a logical order.}
+
+\sectionnote{BM}
+\subsection{Task Assignment}
+The data model in Figure \ref{fig:custom-task-simplicity} was realized as the ER model represented in Figure \ref{fig:custom-task-er-model} using multiple-table inheritance (MTI.) Though there are Rails libraries available that implement MTI, such as acts\_as\_relation and heritage (\todo{cite}), neither are documented to work with Rails 4 and both mask the fact that MTI subclasses are not substitutable. Instead of using a library, MTI was implemented manually using Rails’ polymorphic associations. The base Task table contains all of the data required to present it in a task list (such as a summary of the task and when it is due), as well as the attributes for a polymorphic ActiveRecord association with the various task types. This permits a single query over the task table to select the summaries of all tasks assigned to a user, while each task page (such as the proposal task page in Figure \ref{fig:wireframe-group-member-proposal-view}) can retrieve the specialized task instance it requires and display it.
+
+\begin{figure}[!htbp]
+\centering \includegraphics{./img/case-study-fourth-year-system/task-through-project-er-model}
+\caption{ER diagram depicting how the logical class model in Figure \ref{fig:custom-task-simplicity} translates to a relational model for the Rails Object Relational Mapper (ORM).}
+\label{fig:custom-task-er-model}
+\end{figure}
+
+Though the mapping from the ER model in Figure \ref{fig:custom-task-er-model} to Rails migrations is trivial, cleanly implementing the multiple table inheritance structure in Rails is less straightforward. Models representing specific tasks need to do three things:
+\begin{enumerate}
+  \item indicate their relationship with the generic task type using a \verb!has_one! association;
+  \item delegate accessors for the generic task’s attributes through the association;
+  \item and provide a way to create a generic task and a specific task at the same time.
+\end{enumerate}
+
+These responsibilities were extracted into a mixin named \verb!Taskable!, presented in Figure \ref{fig:taskable-mixin-definition}. As demonstrated in Figure \ref{fig:taskable-mixin-example}, models representing specific tasks only need to include Taskable in order to act as specific tasks. These tasks can be created using the conventional ActiveRecord API, eg. \\ \verb!Proposal.create(project: p, deadline: DateTime.now + 10.days)!.
+
+\begin{figure}[!ht]
+  \begin{lstlisting}
+module Taskable
+  extend ActiveSupport::Concern
+  included do
+    has_one :task, as: :taskable
+    extend Forwardable
+    def_delegators :task, :project, :deadline, :completed_at
+  end
+
+  module ClassMethods
+    def create(**options)
+      # ... helper method to handle creating generic tasks and
+      # specific taskables with one method call ...
+    end
+  end
+end
+  \end{lstlisting}
+  \cprotect\caption{Code snippet illustrating the implementation of the \verb!Taskable! mixin to associate models with generic tasks using multiple table inheritance.}
+  \label{fig:taskable-mixin-definition}
+\end{figure}
+
+\begin{figure}[!ht]
+  \begin{lstlisting}
+class Proposal < ActiveRecord::Base
+  include Taskable
+  include AASM
+  # ... state machine specification omitted ...
+end
+  \end{lstlisting}
+  \cprotect\caption{Code snippet illustrating the use of the \verb!Taskable! mixin to turn the \verb!Proposal! model into a specific task implementation associated with a generic task.}
+  \label{fig:taskable-mixin-example}
+\end{figure}
+
+
+\sectionnote{BM}
+\subsection{Workflow Generalization}
+
+The task completion workflows presented in \ref{sec:4ys-workflow-design} can be thought of as specializations of a basic submission workflow; if the core process of submitting a document changes, it is likely to impact all tasks. It would be nice to reuse the definition of the core submission workflow among all of the tasks that extend it. This way, changes to the core submission process only need to be made in one place, and it is clear how two tasks that specialize the core workflow differ.
+
+While this is somewhat awkward to express in class-based state machines, it is easy to implement in Rails with AASM. AASM permits multiple \verb!aasm do ... end!
+blocks in the body of a model definition. Each block can add new states or events, or refine behaviours associated with previously-defined states and events. Thus, the common states and transitions shared by all tasks implementing extensions of a common workflow may be captured in one such
+\verb!aasm! block, while extensions are implemented in successive blocks.
+
+Using this feature, the most general submission workflow was implemented as the \verb!DocumentSubmissionWorkflow! concern given in Figure
+\ref{fig:document-submission-concern}. Task implementations that do not require any modification of the base workflow (such as proposal submission) can simply \verb!include DocumentSubmissionWorkflow!. Other tasks requiring a refined submission workflow may include the concern, and follow it with additional \verb!aasm! blocks. The implementation of the \verb!FinalReport! task given in Figure \ref{fig:final-report-workflow-specialization} exemplifies this approach.
+
+\begin{figure}[!ht]
+  \begin{lstlisting}
+module DocumentSubmissionWorkflow
+  extend ActiveSupport::Concern
+
+  included do
+    include AASM
+
+    aasm do
+      state :writing_submission, initial: true
+      state :reviewing, enter: :notify_submitted
+      state :accepted,
+            after_enter: [:notify_accepted, :record_submission]
+
+      event :submit do
+        transitions from: [:writing_submission, :reviewing],
+                    to: :reviewing
+      end
+
+      event :return do
+        transitions from: :reviewing, to: :writing_submission,
+                    on_transition: :notify_returned
+      end
+
+      event :accept do
+        transitions from: :reviewing, to: :accepted
+      end
+    end
+  end
+end
+  \end{lstlisting}
+  \caption{Code snippet illustrating the most general submission workflow captured by the DocumentSubmissionWorkflow concern.}
+  \label{fig:document-submission-concern}
+\end{figure}
+
+\begin{figure}[!ht]
+  \begin{lstlisting}
+class FinalReport < ActiveRecord::Base
+  # ...
+
+  include DocumentSubmissionWorkflow
+
+  aasm do
+    state :failed
+
+    event :deadline_expired do
+      after { notify_expired }
+
+      transitions from: :writing_submission, to: :failed
+      transitions from: :reviewing, to: :accepted
+    end
+  end
+
+  # ...
+end
+  \end{lstlisting}
+  \cprotect\caption{Code snippet demonstrating refinement of the document submission workflow for the \verb!FinalReport! model.}
+  \label{fig:final-report-workflow-specialization}
+\end{figure}
+
+
+\sectionnote{BM}
+\subsection{User Profiles and Authentication}
+
+As well, the subsystem for authentication and user profiles described in section \ref{sec:4ys-design} was implemented. Devise was used to implement authentication for a \verb!User! model, with the attributes detailed in Table \ref{tbl:user-profile-attributes}. The validations prescribed in Tables \ref{tbl:use-case-create-account} through \ref{tbl:use-case-authenticate} were implemented, along with additional validations to ensure that the attributes which apply only to Project Group Members could not be accidentally added to users in other roles. These in-application validations provide the equivalent data integrity guarantees as splitting the User model into distinct models by role type. A code snippet with an example of these validations appears in Figure \ref{fig:4ys-user-validations}. Note the use of the \verb!is_group_member?! predicate: as alluded to in section \ref{sec:4ys-design}, the implementation of the User model provides appropriate predicates (named \verb!is_group_member?!, \verb!is_supervisor?!, and \verb!is_coodinator?!) to describe which effective roles are indicated by the value of a \verb!User!’s role attribute.
+
+\begin{figure}[!ht]
+  \begin{lstlisting}
+class User < ActiveRecord::Base
+  # ...
+  with_options unless: :is_group_member? do |m|
+    m.validates :programme, absence: true
+    m.validates :student_number, absence: true
+    m.validates :project_id, absence: true
+  end
+  # ...
+end
+  \end{lstlisting}
+  \caption{Code snippet illustrating the use of the conditional validations to ensure that extra attributes are only set for users with the Project Group Member role.}
+  \label{fig:4ys-user-validations}
+\end{figure}
+
+
+\FloatBarrier
+
+\sectionnote{BM}
+\subsection{Authorization}
+
+\todo {Cite documentation in the following paragraphs}
+
+With authentication and user profiles in place, authorization was the next requirement. Many actions, such as creating projects, can only be performed by users in specific roles. While access checks could be implemented manually using if-else statements and query filters in the controllers and views, this would lead to code duplication: permission checks could end up duplicated in multiple controllers, and the views linking to those controllers would also have to include the checks to prevent inaccessible links from being displayed. Fortunately, Rails has several authorization libraries available which provide conventions to centralize, enforce, and query permission checks. We considered Stonewall, Cancan, Authority, and Pundit for the access control system. These libraries are described briefly below.
+
+\paragraph{Stonewall.} The developers of Stonepath also produced Stonewall, which is intended to be an access-control library that integrates well with Stonepath. Stonewall defines permissions at the model level using a complex DSL, and applies them to methods on the models themselves. It captures the current user when a controller begins executing, and implicitly checks every method call to a protected method on a model. If a method is executed that the user does not have permission to call, than an exception will be thrown. Unfortunately, Stonewall is largely undocumented, and is totally untested and unmaintained.
+
+\paragraph{Cancan.} Cancan allows developers to define rule-based permissions for CRUD operations in a single central Ability class. Cancan includes an declarative Ruby DSL to define permissions: rules can range from statements that grant a user permission to perform all actions on all models, to declaring that the current user can only view a specific model that they are associated with through a deeply-nested relationship. Cancan defines a \verb!can?! predicate that tests whether the current user can perform an action on a specified target, and an \verb|authorize!| method that raises an exception if an action can’t be performed on a specified target.
+
+In addition to basic permission-checking methods, Cancan includes tools to remove boilerplate permission checks, and to protect against holes due to forgotten permission checks. Any controller class may be configured to automatically load, create, or list objects before passing control to the standard RESTful actions. Controllers may also be flagged with \verb!check_authorization! to raise an exception if no permission check is performed while handling a controller action. Unfortunately, resource autoloading and auto-authorization conflicts with the new protections against mass assignment attacks introduced in Rails 4. The latest Rails version that is compatible with Cancan is version 3.2.15.
+
+\paragraph{Authority.} Authority is an authorization library for Rails 4 that takes a somewhat different approach than Cancan. Developers define one class, called an authorizer, for each model to authorize. Each authorizer consists of a series of methods, such as \verb!creatable_by?!, which return a boolean indicating whether the current user can perform the action corresponding to the method. Like Cancan, Authority provides a method to enforce permissions and raise an exception if they are not fulfilled, another to query if a user is permitted to perform an action, and a way to ensure that authorization is performed in each action of a controller. Authority requires more setup and wiring than Cancan; for example, to define an authorizer method for a custom action, one must first add the action to a configuration file so that Authority knows which authorizer method to call to check permissions on the action. Additionally, Authority lacks Cancan’s ability to automatically load and authorize models.
+
+\paragraph{Pundit.} Like Authority, Pundit is an authorization library for Rails 4 that represents access rules with one authorization class per model. Each corresponding class (called a policy) has one boolean method for each action that may be taken on the model. Similarly to Cancan and Authority, Pundit defines one controller method to enforce permissions, another to query permissions on objects, and a third to ensure that authorization is performed in each action. As is the case with Authority, Pundit can’t automatically load and authorize models. However, unlike Authority, Pundit eschews configuration files for method naming conventions, and requires no setup beyond installing the gem.
+
+\par \noindent \\ After reviewing the documentation and open issues for each library, Pundit was selected as the authorization system for the case study. Stonewall was eliminated for being too unwieldy, as per-method and per-attribute access control are much more granular than necessary, and much harder to validate than per-action access control. Cancan was eliminated due to its incompatibility with Rails 4, and because it doesn’t appear to be actively maintained. Pundit was chosen over Authority as it provides the same feature set as Authority with less configuration and boilerplate. Pundit is actively maintained, and is seeing an increase in use as developers migrate away from Cancan. Though Pundit lacks support for automatically loading and authorizing objects, we can achieve the same thing ourselves by using a library like \verb!inherited_resources! and overloading the relevant controller methods perform do authorization automatically.
+
+An example pundit policy is given in Figure \ref{fig:4ys-pundit-policy}. This policy allows all users to view projects, but only allows coordinators and the supervisors assigned to a project to update or delete them. This policy is automatically associated with \verb!Project! models, so we only need to call
+\verb!authority @project! in each action in the the \verb!ProjectsController! to check it. Additionally, we can check permissions to conditionally show links and sections in the view by getting an instance of the policy and calling appropriate methods on it, such as \verb!policy(@project).destroy?!.
+
+\begin{figure}[!ht]
+  \begin{lstlisting}
+class ProjectPolicy < ApplicationPolicy
+  def show?
+    true
+  end
+
+  def create?
+    @user.is_supervisor?
+  end
+
+  def update?
+    @user.is_coordinator? || user_supervises_project?
+  end
+
+  alias_method :destroy?, :update?
+
+  def user_supervises_project?
+    @user.is_supervisor? && @record.supervisors.include?(@user)
+  end
+end
+  \end{lstlisting}
+  \cprotect \caption{An example Pundit policy governing actions on \verb!Project!s.}
+  \label{fig:4ys-pundit-policy}
+\end{figure}
