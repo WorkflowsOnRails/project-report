@@ -762,3 +762,23 @@ end
   \cprotect \caption{An example Pundit policy governing actions on \verb!Project!s.}
   \label{fig:4ys-pundit-policy}
 \end{figure}
+
+
+\FloatBarrier
+
+\sectionnote {BM}
+\subsection {Presenting Available Actions}
+
+Using AASM, we can extract information about all of the permitted event transitions from the current state of an object. Additionally, Pundit allows us to query which controller actions may be taken for the current user. As the system follows the convention that every event corresponds to a controller action, this information can be used to automatically present users with the actions they can perform for a task's current state, without resorting to hard-coding \verb!if! statements for role or state checks.
+
+This functionality was implemented as a simple controller concern. In order to use it, controllers may include \verb!StateActionRenderable! and call 
+\verb!render_state_actions! in the associated view, passing it a taskable. When it is called, the helper performs the following steps:
+\begin{enumerate}
+\item First, it queries AASM for the events that cause transitions from the current state of the taskable.
+\item Next, it checks the Pundit policy for the taskable to determine which of the events may be triggered by the current user. By convention, the method named \verb!<event>?!, ex. \verb!submit?! is used to check permissions for the event.
+\item Finally, it renders the partial view with the same name as each permitted event.
+\end{enumerate}
+
+Of course, it may be the case that multiple controllers should share the same views. Controllers may override the method \verb!action_view_prefix!, which takes the event name as an argument and returns the view directory to look in to find the event partial. This is convenient, as it allows view delegation to be performed without having to create one partial per controller for each event, which would in turn only render another partial.
+
+Though this functionality is useful for structuring actions, it comes with an associated cost in user interface flexibility. As the partials for each action are separate, there is no way to have them share user interface elements, which leads to some redundancy. It is possible to alter the state machine so that elements which be rendered together use the same event, and check a guard to determine which transition to take; however, it is undesirable to compromise the model in order to improve the user interface. \todo {Create an illustration to support this assertion, and demonstrate the difference between the original mockups and the user interfaces produced with this technique.}
