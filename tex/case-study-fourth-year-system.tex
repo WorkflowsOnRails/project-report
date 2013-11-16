@@ -447,6 +447,227 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
 
 \FloatBarrier
 
+\sectionnote{AC}
+\subsection{Project Management}
+\label{sec:project-management}
+
+The following tables \ref{tbl:use-case-create-project} through \ref{tbl:use-case-leave-project} describe the management of a project. These descriptions cover how projects are created, deleted, viewed, and how memberes are able to join and leave.
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``Create Project'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-create-project}
+
+  \begin{usecase}[Create Project]
+    \ucpart{Description}
+    A Project Coordinator is able to create a project with specified options and assign one or more supervisors. A Project Supervisor is allowed to create a project to which they are automatically signed.
+    %
+    \ucpart{Actors}
+    Project Supervisor, Project Coordinator
+    %
+    \ucpart{Flow}
+    \ucnormal
+    \begin{ucenum}
+      \item A Project Coordinator or a Project Supervisors selects to create a new project
+      \item If the creator is a Project Coordinator a name, description, programmes, and supervisor are provided
+      \item The system validates and saves the project and the provided supervisor is assigned to the project
+    \end{ucenum}
+    %
+    \ucpart{Variations}
+    \ucbranch{A}
+    \begin{ucenum}
+      \item [A.2] If the creator is a Project Supervisor a name, description, and programmes are provided.
+      \item [A.3] The system validates and saves the project and the creator is assigned to the project
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{Name not unique}
+    A Project with that name already exists and the user is redirected to step 1 and notified of the errors
+    \ucexception{Name, desciription, programmes, or supervisor is not provided}
+    The user is redirected to step 1 and notified of the errors
+    %
+    \ucpart{Postconditions}
+    The Project is created and saved by the system
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``Delete Project'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-delete-project}
+
+  \begin{usecase}[Delete Project]
+    \ucpart{Description}
+    A Project Coordinator is allowed to delete any project. A Project Supervisor is allowed to delete any project that they are assigned to.
+    %
+    \ucpart{Actors}
+    Project Supervisor, Project Coordinator
+    %
+    \ucpart{Preconditions}
+    The project that the Project Coordinator wishes to delete exists
+    %
+    \ucpart{Flow}
+    \ucnormal
+    \begin{ucenum}
+      \item A Project Coordinator or Project Supervisor selects to delete a selected project
+      \item A confirmation message is displayed notifying the user of what this operation means
+      \item The user agrees and the Project is deleted and the user is redirected to viewing a list of all available projects
+    \end{ucenum}
+    %
+    \ucpart{Variations}
+    \ucbranch{A}
+    \begin{ucenum}
+      \item [A.3] The user disagrees and the user is redirected back to viewing the selected project
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{Permission Denied}
+    The user is a Project Supervisor and is not assigned to the selected project and is returned to viewing the project
+    %
+    \ucpart{Postconditions}
+    The Project is deleted
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``Search Projects'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-search-project}
+
+  \begin{usecase}[Search Project]
+    \ucpart{Description}
+    All users are allowed to search for projects
+    %
+    \ucpart{Actors}
+    Project Group Member, Project Supervisor, Project Coordinator
+    %
+    \ucpart{Flow}
+    \ucnormal
+    \begin{ucenum}
+      \item A user selects to search for projects
+      \item A list displaying the names, supervisors, programmes, and group members for every project is shown
+    \end{ucenum}
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``View Project'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-view-project}
+
+  \begin{usecase}[View Project]
+    \ucpart{Description}
+    All users are allowed to view the details of a project such as the Project Supervisors, Project Group Members, name, description, and programmes.
+    %
+    \ucpart{Actors}
+    Project Group Member, Project Supervisor, Project Coordinator
+    %
+    \ucpart{Preconditions}
+    The project that the user wishes to view exists
+    %
+    \ucpart{Flow}
+    \ucnormal
+    \begin{ucenum}
+      \item The user selects a project to view
+      \item The user is presented with the name, description, programmes, Project Supervisors, and Project Group Members associated with the project
+    \end{ucenum}
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``Join Project'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-join-project}
+
+  \begin{usecase}[Join Project]
+    \ucpart{Description}
+    A Project Supervisor can add any Project Group Member, which is not currently a member of a project, to the project that they are assigned to. Project Supervisors are able to add other Project Supervisors to projects they are assigned to.
+    %
+    \ucpart{Actors}
+    Project Group Member, Project Supervisor
+    %
+    \ucpart{Preconditions}
+    The project that is being joined exists
+    %
+    \ucpart{Flow}
+    \ucnormal
+    \begin{ucenum}
+      \item The Project Supervisor selects to add a group member to the project
+      \item A list of all group members not assigned to any project is displayed and one is selected
+      \item The selected user is added to the project
+    \end{ucenum}
+    %
+    \ucpart{Variations}
+    \ucbranch{A}
+    \begin{ucenum}
+      \item [A.1] The Project Supervisor selects to add another supervisor to the project
+      \item [A.2] A list of all Project Supervisors is displayed and one is selected, continue to 3
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{Project Group Member already in project}
+    The selected Project Group Member is already assigned to a project (including this one)
+    \ucexception{Project Supervisor already in project}
+    The selected Project Supervisor is already assigned to the current project
+    %
+    \ucpart{Postconditions}
+    The user is added to the project
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``Leave Project'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-leave-project}
+
+  \begin{usecase}[Leave Project]
+    \ucpart{Description}
+    The Project Supervisor can remove any Project Group Member currently assigned to their project. The Project Supervisor can leave the project themselves if there is currently another Project Supervisor also assigned.
+    %
+    \ucpart{Actors}
+    Project Group Member, Project Supervisor
+    %
+    \ucpart{Preconditions}
+    The user being removed from the project is currently a member of the project
+    %
+    \ucpart{Flow}
+    \ucnormal
+    \begin{ucenum}
+      \item A Project Supervisor selects a Project Group Member to be removed from the group
+      \item A confirmation message is displayed notifying the user of what this operation means
+      \item The Project Supervisor agrees and the selected user is removed from the group
+    \end{ucenum}
+    %
+    \ucpart{Variations}
+    \ucbranch{A}
+    \begin{ucenum}
+      \item [A.1] A Project Supervisor selects to leave the group themselves
+    \end{ucenum}
+    \ucbranch{B}
+    \begin{ucenum}
+      \item [A.3] The Project Supervisor disagrees and is returned to the view project screen
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{User Not In Project}
+    The selected user is not in the project
+    \ucexception{Last Supervisor}
+    The last Project Supervisor in a project is not allowed to leave.
+    %
+    \ucpart{Postconditions}
+    The selected user is no longer a member of the project
+  \end{usecase}
+\end{table}
+
+
+\FloatBarrier
+
 \sectionnote{BM}
 \section{Workflow Design}
 \label{sec:4ys-workflow-design}
