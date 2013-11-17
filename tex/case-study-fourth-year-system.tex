@@ -611,9 +611,9 @@ The following tables \ref{tbl:use-case-create-project} through \ref{tbl:use-case
     %
     \ucpart{Exceptions}
     \ucexception{Project Group Member already in project}
-    The selected Project Group Member is already assigned to a project (including this one)
+    The selected Project Group Member is already assigned to a project (including this one). The user is returned to step 2
     \ucexception{Project Supervisor already in project}
-    The selected Project Supervisor is already assigned to the current project
+    The selected Project Supervisor is already assigned to the current project. The user is returned to step 2A
     %
     \ucpart{Postconditions}
     The user is added to the project
@@ -656,9 +656,9 @@ The following tables \ref{tbl:use-case-create-project} through \ref{tbl:use-case
     %
     \ucpart{Exceptions}
     \ucexception{User Not In Project}
-    The selected user is not in the project
+    The selected user is not in the project. The user is returned to the default view of the project.
     \ucexception{Last Supervisor}
-    The last Project Supervisor in a project is not allowed to leave.
+    The last Project Supervisor in a project is not allowed to leave. The user is returned to the default view of the project.
     %
     \ucpart{Postconditions}
     The selected user is no longer a member of the project
