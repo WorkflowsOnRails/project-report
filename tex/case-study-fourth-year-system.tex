@@ -668,6 +668,161 @@ The following tables \ref{tbl:use-case-create-project} through \ref{tbl:use-case
 
 \FloatBarrier
 
+\sectionnote{AC}
+\subsection{Coordinator Actions}
+\label{sec:coordinator-actions}
+
+The following tables \ref{tbl:use-case-create-supervisor} through \ref{tbl:use-case-reschedule-deadline} describe the unique actions a coordinator can take. These include creating and deleting Supervisor accounts, initiating a new year, and rescheduling deadlines.
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``Create Supervisor'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-create-supervisor}
+
+  \begin{usecase}[Create Supervisor]
+    \ucpart{Description}
+    Coordinators are able to create a Supervisor account by specifying the name, email, and password that the Supervisor will use to log in
+    %
+    \ucpart{Actors}
+    Project Supervisor, Project Coordinator
+    %
+    \ucpart{Flow}
+    \ucnormal
+    \begin{ucenum}
+      \item A Coordinator clicks on the Create Supervisors tab
+      \item The Coordinator provides a name, email, and password
+      \item The system validates and saves the supervisor account
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{Email not unique}
+    An account with that email address already exists and the user is redirected to step 2 and notified of the error
+    \ucexception{Password and confirmation password do not match}
+    User is redirected to step 2 and notified of the error
+    \ucexception{Name, email, password or confirmation password is not provided}
+    User is redirected to step 2 and notified of the error
+    %
+    \ucpart{Postconditions}
+    The Supervisor account is created and can now be used
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``Delete Supervisor'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-delete-supervisor}
+
+  \begin{usecase}[Delete Supervisor]
+    \ucpart{Description}
+    Coordinators are able to delete Supervisor accounts
+    %
+    \ucpart{Actors}
+    Project Supervisor, Project Coordinator
+    %
+    \ucpart{Flow}
+    \ucnormal
+    \begin{ucenum}
+      \item A Coordinator clicks on 'Delete' button next to the Supervisor they wish to delete
+      \item A confirmation message is displayed requesting confirmation before deleting the supervisor
+      \item The Coordinator agrees and the supervisor account is deleted
+    \end{ucenum}
+    %
+    \ucpart{Variations}
+    \ucbranch{A}
+    \begin{ucenum*}
+      \item [A.1] The Coordinator disagrees, the supervisor account is not deleted, and the Coordinator is sent back to the list of Supervisors
+    \end{ucenum*}
+    %
+    \ucpart{Exceptions}
+    \ucexception{Supversior doesn't exist}
+    The Supervisor that is attempting to be deleted does not exist, The coordinator is sent back to the list of Supervisors
+    \ucexception{Supversior is last supervisor of a project}
+    The Supervisor cannot be deleted if they are the last supervisor in a project
+    %
+    \ucpart{Postconditions}
+    The Supervisor account is deleted and is removed from all projects they were supervising.
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``Start New Year'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-start-new-year}
+
+  \begin{usecase}[Start New Year]
+    \ucpart{Description}
+    Coordinators can start a new year. This deletes all projects and Group Member accounts. It guides the Coordinator through a series of steps to set up the new year which include ensuring the correct supervisor accounts are in place, and setting deadlines
+    %
+    \ucpart{Actors}
+    Project Coordinator
+    %
+    \ucpart{Preconditions}
+    The current year has no deadlines that have not been met (The current year is finished)
+    %
+    \ucpart{Flow}
+    \ucnormal
+    \begin{ucenum}
+      \item The Coordinator selects to start a new year and a confirmation message is displayed (It must mention that all projects and group member accounts will be deleted)
+      \item The Coordinator agrees and all projects and group member accounts are deleted
+      \item The Coordinator is presented with a list of all current supervisor accounts and is able to add and delete them before moving onto the next step
+      \item The Coordinator choses to move to the next step and is presented with a list of all deadlines and must schedule them all before moving on to the next step
+      \item The Coordinator schedules all the deadlines and the New Year has started
+    \end{ucenum}
+    %
+    \ucpart{Variations}
+    \ucbranch{A}
+    \begin{ucenum*}
+      \item [A.2] The Coordinator disagrees with starting a new year and is sent back to the default application page
+    \end{ucenum*}
+    %
+    \ucpart{Exceptions}
+    \ucexception{Deadline Not Set}
+    All deadlines must be set, the Coordinator is sent back to step 4
+    %
+    \ucpart{Postconditions}
+    The New Year is ready and all deadlines are scheduled
+  \end{usecase}
+\end{table}
+
+
+\begin{table}
+  \centering
+  \caption{Use case description for the ``Reschedule Deadline'' use case of the fourth-year project management system.}
+  \label{tbl:use-case-reschedule-deadline}
+
+  \begin{usecase}[Reschedule Deadline]
+    \ucpart{Description}
+    Deadlines can be rescheduled as long as they have not already been passed
+    %
+    \ucpart{Actors}
+    Project Coordinator
+    %
+    \ucpart{Preconditions}
+    The deadline that is being changed is in the future and has not already passed
+    %
+    \ucpart{Flow}
+    \ucnormal
+    \begin{ucenum}
+      \item A Coordinator selects a deadline to reschedule and is presented with a way to input a new date
+      \item The Coordinator selects a new date and agrees to the deadline rescheduling
+      \item The deadline has been rescheduled and all users are notified of the modification
+    \end{ucenum}
+    %
+    \ucpart{Exceptions}
+    \ucexception{Date selected has passed}
+    You cannot assign a deadline before the current time, the coordinator is sent back to step 2 and shown the error
+    %
+    \ucpart{Postconditions}
+    The deadline is rescheduled and all supervisors and group members are notified
+  \end{usecase}
+\end{table}
+
+
+\FloatBarrier
+
 \sectionnote{BM}
 \section{Workflow Design}
 \label{sec:4ys-workflow-design}
