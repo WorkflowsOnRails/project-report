@@ -688,7 +688,9 @@ In fact, the majority of the tasks described by the use cases involve the Projec
 \label{fig:state-machine-document-submission}
 \end{figure}
 
-Other tasks to produce deliverables require only some small modifications to the state chart in Figure \ref{fig:state-machine-document-submission}. For instance, the special handling of deadlines for final reports can easily be handled with two extra state transitions, as Figure \ref{fig:state-machine-final-report-submission} demonstrates. Similarly, the consensus requirement to submit the oral presentation scheduling form only requires a guard clause, while editing a submitted form only requires a new transition back from accepted as demonstrated in Figure \ref{fig:state-machine-oral-presentation-scheduling}.
+Other tasks to produce deliverables require only some small modifications to the state chart in Figure \ref{fig:state-machine-document-submission}. For instance, the special handling of deadlines for final reports can easily be handled with two extra state transitions, as Figure \ref{fig:state-machine-final-report-submission} demonstrates.
+
+Similarly, the consensus requirement to submit the oral presentation scheduling form only requires a guard clause. On the other hand, it does not make sense to ``return'' a scheduling form if a participant has a conflict; instead, the participant only needs to edit the form and ask the others to approve it again. This workflow is demonstrated in Figure \ref{fig:state-machine-oral-presentation-scheduling}.
 
 \begin{figure}[!htbp]
 \centering \includegraphics[width=5.5in]{./img/case-study-fourth-year-system/final_report_submission}
@@ -697,7 +699,7 @@ Other tasks to produce deliverables require only some small modifications to the
 \end{figure}
 
 \begin{figure}[!htbp]
-\centering \includegraphics[width=3.5in]{./img/case-study-fourth-year-system/oral_presentation_scheduling}
+\centering \includegraphics[width=3.0in]{./img/case-study-fourth-year-system/oral_presentation_scheduling}
 \caption{State chart representation of a the oral presentation scheduling task. This workflow is an extension of the general document submission workflow in Figure \ref{fig:state-machine-document-submission}, with additional transitions to handle achieving consensus on available times, and to handle editing a submitted form.}
 \label{fig:state-machine-oral-presentation-scheduling}
 \end{figure}

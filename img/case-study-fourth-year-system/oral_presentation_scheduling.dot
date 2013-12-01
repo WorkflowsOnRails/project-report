@@ -17,8 +17,7 @@ accepted[label = "{accepted|enter/notify_accepted(),record_submission()}"]
 start -> writing_submission
 writing_submission -> reviewing [label = " submit   "]
 reviewing -> reviewing [label = " submit   "]
-reviewing -> writing_submission [label = " return/notify_returned()   "]
 reviewing -> accepted [label = " accept [everyone_accepted?]  "]
-accepted -> writing_submission [label=" reopen   "]
+accepted -> reviewing [label=" submit   "]
 accepted -> end
 }
