@@ -16,6 +16,7 @@ The system fulfills its functional requirements, but requires significant effort
 
 \sectionnote {BM}
 \section {Requirements}
+\label {sec:4ys-requirements}
 The required functionality of the fourth-year project management system can be split into three main concerns:
 \begin{itemize}
 \item \keyword{account management}, which involves creating accounts for Project Supervisors and Project Group Members, as well as authentication with the system;
@@ -854,8 +855,8 @@ Similarly, the consensus requirement to submit the oral presentation scheduling 
 \end{figure}
 
 \begin{figure}[!htbp]
-\centering \includegraphics[width=3.0in]{./img/case-study-fourth-year-system/oral_presentation_scheduling}
-\caption{State chart representation of a the oral presentation scheduling task. This workflow is an extension of the general document submission workflow in Figure \ref{fig:state-machine-document-submission}, with additional transitions to handle achieving consensus on available times, and to handle editing a submitted form.}
+\centering \includegraphics[width=6.0in]{./img/case-study-fourth-year-system/oral_presentation_scheduling}
+\caption{State chart representation of a the oral presentation scheduling task. This workflow is an extension of the general document submission workflow in Figure \ref{fig:state-machine-document-submission}, with additional transitions to handle achieving consensus on available times, editing a submitted form, and closing the form when the deadline expires.}
 \label{fig:state-machine-oral-presentation-scheduling}
 \end{figure}
 
@@ -1169,8 +1170,102 @@ Though this functionality is useful for structuring actions, it comes with an as
 
 The 'Start New Year' functionality is a very simple implementation of the wizard UI pattern. A coordinator is presented with a series of pages to guide them through the set up of a new year. The coordinator navigates through these pages with forward and backward buttons. The steps involved in creating a new year are described in table \ref{tbl:use-case-start-new-year}. 
 
-The wizard pattern is used to give the user an easy way to go through a sequence of steps to achieve a goal. This is typlically done with forward and backward buttons which are located on every page. In order to reuse previous functionality of Supervisor Management and Deadline Scheduling those features were moved into rails partials. This allows the previous implementation to be used in multiple pages allowing the addition of the forward and back buttons to only the wizard pages. 
+The wizard pattern is used to give the user an easy way to go through a sequence of steps to achieve a goal. This is typlically done with forward and backward buttons which are located on every page. In order to reuse previous functionality of Supervisor Management and Deadline Scheduling those features were moved into rails partials. This allows the previous implementation to be used in multiple pages allowing the addition of the forward and back buttons to only the wizard pages.
 
 During this refactoring of the Supervisor management and Deadline Scheduling we discovered an issue with how the partial would redirect the user after modifications. Previously the user would be redirected to the default Supervisor Management page or the default Deadline Scheduling page. With this new change the page the user would be directed to would be dependant on if the user was accessing that page through the wizard or by itself. To solve this we simply send a reference to which page the partial is being viewed from to the partial so it knows how to redirect itself.
 
 
+\sectionnote {BM}
+\section {Testing}
+
+Although the case studies are not intended to be deployed and used, there is still value in producing a test suite for the fourth year project system.
+As the project plan involves extracting reuseable components from the two case studies, it is important to ensure that the case studies continue to function as they are refactored as decomposed.
+
+
+\sectionnote {BM}
+\subsection {Approach}
+
+As the project involves two case studies, plus development and refactoring,
+it is important to maximize test coverage per hour of test development. Furthermore, the system does not implement any complex business logic, so the functionality of the system is evenly distributed among models, views, and controllers. For this reason, integration testing was selected as the preferred testing method: it would require significantly more time to write lower-level Rails tests (such as unit tests of the routes, models, and controllers) that achieve the same level of coverage. As well, this approach does not compromise observability or controllability: as there is no complex business logic in the fourth year project system, all relevant state and parameters in all components of the application can be accessed through the user interface.
+
+In order to minimize time spent developing tests for the case study, it was decided that tests would only be designed to achieve complete coverage of the use cases detailed in section \ref{sec:4ys-requirements}. Full black-box coverage should be sufficient to find regressions caused by refactoring the system, as the implementation of the business logic itself will not evolve. If regressions do occur while extracting components to external libraries, it is expected that they will be detectable without full white-box coverage.
+
+\todo {Explain why we're using the all-transitions criterion to select test paths for functionality modeled as state machines.}
+
+
+\sectionnote {BM}
+\subsection {Technology}
+
+The Ruby community has coalesced around two popular tools for web application integration testing: Capybara and Watir. While Watir provides a framework-agnostic Ruby API to launch and control web browsers, Capybara provides a domain-specific language to test Rails applications. Capybara was selected as the case study's integration testing framework due to its ease of use with Rails. While Watir requires users to write their own code to handle running a web server outside of their Watir tests, Capybara uses the Rack::Test library to send requests and receive responses from a Rails application without requiring the user to launch and shut down a separate server process.
+
+Additionally, Capybara's DSL makes it trivial to control with the system under test, as each logical action taken by a user (for example, ``click on a button'' or ``fill in an input box'') requires a single Capybara statement. Figure \ref{fig:4ys-test-signup} provides an example of a simple Capybara test, which drives the system through the process of a Project Group Member creating an account.
+
+\todo{Explain use of MiniTest instead of Cucumber / RSpec, and why we're using factory girl for fixtures.}
+
+\begin{figure}[!ht]
+  \begin{lstlisting}
+class SignupTest < ActiveSupport::TestCase
+  include TestHelper
+
+  test "create a student account" do
+    user_attrs = attributes_for(:student)
+
+    # Can't use the ID, as we need to select the name from a dropdown
+    programme_name = 'Electrical'
+
+    visit '/'
+    click_on 'Sign up'
+
+    within '#new_user' do
+      fill_in 'Full name', with: user_attrs[:full_name]
+      fill_in 'Student number', with: user_attrs[:student_number]
+      select programme_name, from: 'Programme'
+      fill_in 'Email', with: user_attrs[:email]
+      fill_in 'Password', with: user_attrs[:password],
+                          match: :prefer_exact
+      fill_in 'Password confirmation', with: user_attrs[:password]
+      click_on 'Sign up'
+    end
+
+    assert page.has_content? 'You have signed up successfully'
+  end
+end
+  \end{lstlisting}
+  \cprotect \caption{An example integration test using Capybara to simulate a Project Group Member creating an account in the system.}
+  \label{fig:4ys-test-signup}
+\end{figure}
+
+
+Many of the use cases in the system also involve time-based actions, such as deadlines expiring. While it would be possible to directly manipulate the test database to insert timestamps occurring at some point in the past, this would require bypassing ActiveRecord entirely to avoid the system's custom validation rule that prevents deadlines from being set for past dates. It also produces test cases that are difficult to follow: instead of modeling deadlines expiring due to the passage of time, the test cases would instead written to modify the deadlines.
+
+The timecop library provides a simpler approach to testing time-sensitive behavior. It replaces the Ruby Time class with a mock object that returns the desired time, allowing tests to simulate the passage of time. Figure \ref{fig:4ys-test-timecop} contains an example that uses timecop and Capybara to test deadlines for oral presentation forms, corresponding to the behavior modeled in Figure \ref{fig:state-machine-oral-presentation-scheduling}. Note the call to \verb!Expirable.send_expired_events!: as timecop can only modify the current time in the running process, the test must invoke methods that would normally be run periodically by an external process.
+
+\begin{figure}[!ht]
+  \begin{lstlisting}
+class OralPresentationFormTest < ActiveSupport::TestCase
+  # ...
+
+  test 'oral presentation form deadline expires' do
+    Timecop.freeze(ORAL_PRESENTATION_FORM_DEADLINE - 1.days) do
+      login_student
+
+      visit '/'
+      click_on ORAL_PRESENTATION_FORM_NAME
+      assert state_is? 'Writing submission'
+    end
+
+    Timecop.freeze(ORAL_PRESENTATION_FORM_DEADLINE + 1.days) do
+      Expirable.send_expired_events
+
+      visit '/'
+      click_on ORAL_PRESENTATION_FORM_NAME
+      assert state_is? 'Completed'
+    end
+  end
+
+  # ...
+end
+  \end{lstlisting}
+  \cprotect \caption{An example integration test illustrating the use of timecop to test time-sensitive behavior.}
+  \label{fig:4ys-test-timecop}
+\end{figure}

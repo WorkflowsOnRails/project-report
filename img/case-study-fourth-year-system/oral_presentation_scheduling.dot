@@ -1,23 +1,74 @@
-digraph hierarchy {
-rankdir=TB
-node[shape=Mrecord, fontname=Arial, fontsize=10, penwidth=0.7]
-edge[dir=forward, arrowhead=vee, fontname=Arial, fontsize=9, penwidth=0.7]
-
-start[label="",
-      shape=circle, style=filled, color=black, fillcolor=black,
-      fixedsize=true, width=0.25, height=0.25]
-end[label="",
-    shape=doublecircle, style=filled, color=black, fillcolor=black,
-    fixedsize=true, width=0.2, height=0.2]
-
-writing_submission[label = "{writing submission|}"]
-reviewing[label = "{reviewing|enter/notify_submitted()}"]
-accepted[label = "{accepted|enter/notify_accepted(),record_submission()}"]
-
-start -> writing_submission
-writing_submission -> reviewing [label = " submit   "]
-reviewing -> reviewing [label = " submit   "]
-reviewing -> accepted [label = " accept [everyone_accepted?]  "]
-accepted -> reviewing [label=" submit   "]
-accepted -> end
+digraph statechart {
+	graph [bb="0,0,422,414",
+		rankdir=TB
+	];
+	node [fontname=Arial,
+		fontsize=10,
+		label="\N",
+		penwidth=0.7,
+		shape=Mrecord
+	];
+	edge [dir=forward,
+		fontname=Arial,
+		fontsize=9,
+		penwidth=0.7
+	];
+	writing_submission	 [height=0.54167,
+		label="{Writing submission|}",
+		pos="312,338",
+		width=1.3889];
+	reviewing	 [height=0.54167,
+		label="{Reviewing|entry / notify_submitted(); clear_users_who_accepted();}",
+		pos="154,252",
+		width=3.5625];
+	writing_submission -> reviewing	 [label=" submit  ",
+		lp="256,295",
+		pos="e,188.11,271.14 278.11,318.98 254.44,306.4 222.66,289.5 197.19,275.96"];
+	completed	 [height=0.54167,
+		label="{Completed|entry / record_submission();}",
+		pos="245,80",
+		width=1.9167];
+	writing_submission -> completed	 [label=" deadline_expired  ",
+		lp="382.5,209",
+		pos="e,270.71,99.237 324.15,318.85 331.8,306.29 340.96,288.86 345,272 349.14,254.71 347.88,249.54 345,232 338.47,192.2 338.02,179.8 316,\
+146 306.1,130.81 291.85,116.82 278.7,105.74"];
+	"1222499a-ba83-48c5-b10e-a44eb32c168d"	 [color=black,
+		fillcolor=black,
+		fixedsize=true,
+		height=0.25,
+		label="",
+		pos="312,405",
+		shape=circle,
+		style=filled,
+		width=0.25];
+	"1222499a-ba83-48c5-b10e-a44eb32c168d" -> writing_submission	 [pos="e,312,357.24 312,395.77 312,388.54 312,377.6 312,367.24"];
+	reviewing -> reviewing	 [label=" submit  ",
+		lp="318,252",
+		pos="e,282.62,245.91 282.62,258.09 293.33,256.78 300,254.75 300,252 300,250.24 297.26,248.77 292.48,247.6"];
+	accepted	 [height=0.54167,
+		label="{Accepted|entry / notify_accepted(); mark_completed();}",
+		pos="104,166",
+		width=2.8958];
+	reviewing -> accepted	 [label=" accept [all_users_accepted?]  ",
+		lp="78,209",
+		pos="e,26.85,185.04 51.984,232.97 34.342,227.82 19.79,221.52 14,214 6.5969,204.39 9.6822,196.54 18.151,190.22"];
+	reviewing -> completed	 [label=" deadline_expired  ",
+		lp="272.5,166",
+		pos="e,242.89,99.082 176.97,232.81 190.54,220.87 206.97,204.16 217,186 230.32,161.87 237.56,131.09 241.32,109.1"];
+	accepted -> reviewing	 [label=" submit  ",
+		lp="169,209",
+		pos="e,153.72,232.64 130.02,185.01 136.14,190.44 142.03,196.87 146,204 149.1,209.56 151.06,216.02 152.28,222.33"];
+	accepted -> completed	 [label=" deadline_expired  ",
+		lp="191.5,123",
+		pos="e,189.12,99.069 119.46,146.69 128.24,137.16 139.88,125.89 152,118 160.61,112.4 170.2,107.41 179.86,103.05"];
+	"33eefbce-7c56-40dc-9ce4-c7f4d07f7741"	 [color=black,
+		fillcolor=black,
+		fixedsize=true,
+		height=0.30556,
+		label="",
+		pos="245,11",
+		shape=doublecircle,
+		style=filled,
+		width=0.29167];
+	completed -> "33eefbce-7c56-40dc-9ce4-c7f4d07f7741"	 [pos="e,245,22.176 245,60.692 245,51.877 245,41.283 245,32.23"];
 }
