@@ -1,0 +1,29 @@
+digraph hierarchy {
+  rankdir=TB
+  node[shape=Mrecord, fontname=Arial, fontsize=10, penwidth=0.7]
+  edge[dir=forward, fontname=Arial, fontsize=9, penwidth=0.7]
+
+  start[label="",
+        shape=circle, style=filled, color=black, fillcolor=black,
+        fixedsize=true, width=0.25, height=0.25]
+  end[label="",
+      shape=doublecircle, style=filled, color=black, fillcolor=black,
+      fixedsize=true, width=0.2, height=0.2]
+
+  hypothesis[label = "{Writing hypothesis|entry / create_hypothesis_task();}"]
+  literature_review[label = "{Performing literature review|entry / create_review_task();}"]
+  method[label = "{Describing method|entry / create_method_task();}"]
+  results[label = "{Gathering data|entry / create_results_task();}"]
+  analysis[label = "{Analyzing data|entry / create_analysis_task();}"]
+  conclusions[label = "{Drawing conclusions|entry / create_conclusions_task();}"]
+  completed[label = "{Completed|}"]
+
+  start -> hypothesis
+  hypothesis -> literature_review
+  literature_review -> method
+  method -> results
+  results -> analysis
+  analysis -> conclusions
+  conclusions -> completed
+  completed -> end
+}

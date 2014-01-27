@@ -1,7 +1,35 @@
 \chapter{Case~Study: An~IDE~for~Research}
 
+While the first case study focused on a system with several complex, deadline-driven workflows, it had only a simple notion of roles. The second case study balances this by focusing on an application that has a simple and well-known workflow, but a more complex notion of user roles.
+
 \sectionnote {BM}
 \section {Overview}
+\label{sec:case-study-research-overview}
+
+Scientific misconduct and issues with reproducibility are a growing concern.
+While deliberate misconduct and fraud are difficult to prevent using technological means, it should be possible to encourage adequate record-keeping and proper process by using a software tool to guide inexperience researchers through the scientific process.
+
+In general, the process of performing a research project can be described in six steps:
+\begin{compactenum}
+\item \textbf{Write a hypothesis}
+\item \textbf{Perform a literature review} to discover prior work in the field, summarize the context of the work, and perhaps gain ideas for design of the experiment.
+\item \textbf{Design an experimental method} to test the hypothesis.
+\item \textbf{Record the results} obtained from the experiment.
+\item \textbf{Analyze the results}, often using a set of domain-specific tools.
+\item \textbf{Draw conclusions} from the analysis.
+\end{compactenum}
+
+Though the process is often taught as a sequence of steps, some iteration may occur occasionally; for example, while designing the method a researcher might realize that their hypothesis as written is unclear or difficult, and alter it to correct the issue. On the other hand, there are several patterns of changes that should not be made, in order to avoid introducing biases or outright fraud:
+\begin{compactitem}
+\item the hypothesis and method should not be edited after the experiment begins;
+\item the results should not be changed after beginning analysis;
+\item the analysis, conclusions, and literature review should always be editable.
+\end{compactitem}
+
+The research process itself may be carried out by a number of individuals with different responsibilities, depending on the discipline. For example, a technician may be responsible for validating the methodology and carrying out the experiment itself, while a statistician may be consulted for the analysis. It is important that a tool for managing the research process can accommodate any arbitrary assignment of responsibilities to individuals that a project demands.
+
+As a well-defined sequence of steps with restricted iteration, this process seems like an excellent candidate for automation using a workflow framework. Furthermore, as user roles are not predefined, but instead specified on a project-by-project basis, this case study provides an opportunity to investigate best practices and existing libraries for role-based access.
+
 
 
 \sectionnote {AC}
@@ -429,4 +457,45 @@ Tables \ref{tbl:use-case-view-research-project} to \ref{tbl:use-case-draw-conclu
 \FloatBarrier
 
 \sectionnote {BM}
-\section {Design}
+\section {Workflow Design}
+
+While the six-step process described in section \ref{sec:case-study-research-overview} maps trivially to a simple workflow, possible iterations described between steps is somewhat more subtle. Though it may appear that the ability to revisit the literature review while performing the analysis implies a transition from the ``Analyzing data'' phase to the ``Performing literature review'' phase, it is important to distinguish the state of the user interface for current user from the state of the project itself. Such a transition would imply that the project must return to ``Performing literature review'', impacting all other participants in the project. Worse, such a transition would require the project to transition back through all of the intermediate states to reach the analysis phase again, possibly altering previously-completed states along the way.
+
+Instead, it seems more natural to express this conceptual iteration as a policy, governing which tasks can be edited in which project state. The thus-limited workflow for a research project is expressed in Figure \ref{fig:case-research-design-project-workflow}. There is an entry action for each state that is responsible for creating the associated task. Creating the appropriate tasks when the associated state is entered provides a way of tracking when the tasks are created, and thus when the associated state transitions occurred.
+
+The tasks themselves are not stateful, unlike the heavy-weight tasks in the previous case study. For generality, it was assumed that the only actions applicable to each task are editing and viewing. Any mandatory review procedure attached to each step would be burdensome for projects consisting of a single researcher, while larger research groups can just as easily perform any review before the project owner advances to the next step of the project.
+
+\begin{figure}[!ht]
+\centering \includegraphics[height=8in]{./img/case-study-research-railgun/research-project-lifecycle}
+\caption{State machine describing the research project workflow.}
+\label{fig:case-research-design-project-workflow}
+\end{figure}
+
+\FloatBarrier
+
+\sectionnote {BM}
+\section {User Interface Design}
+
+\begin{figure}[!ht]
+\centering \includegraphics[width=5.5in]{./img/case-study-research-railgun/mockup-home-page}
+\caption{Wireframe depicting the home page for a researcher. Projects that are in a phase that grant the current user edit permissions are listed as active, while those that the user cannot take action on are considered dormant.}
+\label{fig:case-research-design-view-analysis}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering \includegraphics[width=5.5in]{./img/case-study-research-railgun/mockup-view-analysis}
+\caption{Wireframe depicting an analysis task in the research management system.}
+\label{fig:case-research-design-view-analysis}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering \includegraphics[width=5.5in]{./img/case-study-research-railgun/mockup-edit-analysis}
+\caption{Wireframe depicting a user editing the text body associated with an analysis task in the research management system.}
+\label{fig:case-research-design-edit-analysis}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering \includegraphics[width=5.5in]{./img/case-study-research-railgun/mockup-manage-project}
+\caption{Wireframe demonstrating the interface to manage members of a research project.}
+\label{fig:case-research-design-manage-project}
+\end{figure}
