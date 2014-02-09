@@ -19,11 +19,11 @@ digraph hierarchy {
   completed[label = "{Completed|}"]
 
   start -> hypothesis
-  hypothesis -> literature_review
-  literature_review -> method
-  method -> results
-  results -> analysis
-  analysis -> conclusions
-  conclusions -> completed
+  hypothesis -> literature_review [label = "  begin_literature_review "]
+  literature_review -> method [label = "  begin_method_definition "]
+  method -> results [label = "  begin_experiment "]
+  results -> analysis [label = "  begin_analysis "]
+  analysis -> conclusions [label = "  begin_concluding "]
+  conclusions -> completed [label = "  finish_project "]
   completed -> end
 }

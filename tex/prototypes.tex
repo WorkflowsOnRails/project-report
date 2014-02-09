@@ -1,3 +1,6 @@
+\documentclass[document.tex]{subfiles}
+\begin{document}
+
 \chapter {Prototypes}
 
 In order to select a workflow framework for use in the project, a simple prototype application was constructed in both Ruote and Stonepath. The prototype application is designed around features that seemed like a good fit for the capabilities of workflow frameworks, rather than any real-world use case.
@@ -172,3 +175,5 @@ RuoteKit.engine.launch(pdef, REPORT_OBJECT) #launches the process
 \end{figure}
 
 This process definition first calls the \verb!on_workitem! method in the \verb!unclaimed_pool! participant and waits for a reply call to notify that the \verb!on_workitem! method has finished executing. Once it has finished execution \verb!claim_issue! and \verb!sign_issue! both begin execution concurrently. Only once both \verb!claim_issue! and \verb!sign_issue! are finished is \verb!close_issue! executed. Once \verb!close_issue! is finished the process ends. The \verb!report_object! that is passed as a parameter to \verb!launch()! is passed between the participants as a hashmap of the models data. Because of this the value passed to be the workitem must be hashable.
+
+\end{document}

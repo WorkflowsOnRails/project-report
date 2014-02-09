@@ -1,3 +1,6 @@
+% -*- compile-command: "cd .. && make -k tex/case-study-research-ide.pdf" -*-
+\documentclass[document.tex]{subfiles}
+\begin{document}
 \chapter{Case~Study: An~IDE~for~Research}
 
 While the first case study focused on a system with several complex, deadline-driven workflows, it had only a simple notion of roles. The second case study balances this by focusing on an application that has a simple and well-known workflow, but a more complex notion of user roles.
@@ -44,6 +47,7 @@ As a well-defined sequence of steps with restricted iteration, this process seem
 
 \sectionnote {AC}
 \section {Requirements}
+\label{sec:case-research-requirements}
 
   Figures \ref{fig:case-research-use-case-project-management} through \ref{fig:case-research-use-case-project-workflow} display the individual use cases for the research IDE application. They have been separated into two diagrams based on project management and the main project workflow. The project management shown in Figure \ref{fig:case-research-use-case-project-management} goes over which actors have permission to view, create and delete research projects. In addition, it also displays modifying the permissions of users for a given project and how the project advances to the next stage of the workflow. The project workflow shown in Figure \ref{fig:case-research-use-case-project-workflow} focuses on the workflow system described in section \ref{sec:case-study-research-overview}.
 
@@ -458,12 +462,13 @@ As a well-defined sequence of steps with restricted iteration, this process seem
 
 \sectionnote {BM}
 \section {Workflow Design}
+\label{sec:case-research-workflow-design}
 
 While the six-step process described in section \ref{sec:case-study-research-overview} maps trivially to a simple workflow, possible iterations described between steps is somewhat more subtle. Though it may appear that the ability to revisit the literature review while performing the analysis implies a transition from the ``Analyzing data'' phase to the ``Performing literature review'' phase, it is important to distinguish the state of the user interface for current user from the state of the project itself. Such a transition would imply that the project must return to ``Performing literature review'', impacting all other participants in the project. Worse, such a transition would require the project to transition back through all of the intermediate states to reach the analysis phase again, possibly altering previously-completed states along the way.
 
-Instead, it seems more natural to express this conceptual iteration as a policy, governing which tasks can be edited in which project state. The thus-limited workflow for a research project is expressed in Figure \ref{fig:case-research-design-project-workflow}. There is an entry action for each state that is responsible for creating the associated task. Creating the appropriate tasks when the associated state is entered provides a way of tracking when the tasks are created, and thus when the associated state transitions occurred.
+Instead, it seems more natural to express this conceptual iteration as a policy, governing which tasks can be edited in which project state. The thus-limited workflow for a research project is expressed in Figure \ref{fig:case-research-design-project-workflow}. It also contains an additional ``completed'' state. Rather than representing a step in the research process, this state represents completion of the process, and is included to accommodate archiving projects for record-keeping purposes.
 
-The tasks themselves are not stateful, unlike the heavy-weight tasks in the previous case study. For generality, it was assumed that the only actions applicable to each task are editing and viewing. Any mandatory review procedure attached to each step would be burdensome for projects consisting of a single researcher, while larger research groups can just as easily perform any review before the project owner advances to the next step of the project.
+Each state of the workflow has an entry action that is responsible for creating the associated task. Creating the appropriate tasks when the associated state is entered provides a way of tracking when the tasks are created, and thus when the associated state transitions occurred. The tasks themselves are not stateful, unlike the heavy-weight tasks in the previous case study. For generality, it was assumed that the only actions applicable to each task are editing and viewing. Any mandatory review procedure attached to each step would be burdensome for projects consisting of a single researcher, while larger research groups can just as easily perform any review before the project owner advances to the next step of the project.
 
 \begin{figure}[!ht]
 \centering \includegraphics[height=8in]{./img/case-study-research-railgun/research-project-lifecycle}
@@ -475,12 +480,25 @@ The tasks themselves are not stateful, unlike the heavy-weight tasks in the prev
 
 \sectionnote {BM}
 \section {User Interface Design}
+\label {sec:case-research-ui-design}
+
+\todo {Add an appropriate introduction to this section here}
+
+As the research IDE allows a user to be a member of several projects at the same time, the user needs some way of navigating available projects and quickly distinguishing projects of interest from historical or inactive projects. The home page of the application, presented in Figure \ref{fig:case-research-design-home-page} presents a user's projects grouped into two categories. The ``active'' category contains projects that are in states that grant the user edit permission; for example, if a project is in the ``collecting data'' state, and a technician assigned to the project has permission to edit the results task, then it will appear in the active category. Otherwise, projects will be listed under the ``dormant'' category in case they contain data that a user wishes to access.
 
 \begin{figure}[!ht]
 \centering \includegraphics[width=5.5in]{./img/case-study-research-railgun/mockup-home-page}
 \caption{Wireframe depicting the home page for a researcher. Projects that are in a phase that grant the current user edit permissions are listed as active, while those that the user cannot take action on are considered dormant.}
-\label{fig:case-research-design-view-analysis}
+\label{fig:case-research-design-home-page}
 \end{figure}
+
+Each step in the research process is represented by a task. Each task associated with a project has its own page. Users can navigate between pages for a project using a navigation bar, as shown in Figure \ref{fig:case-research-design-view-analysis}. The navigation bar indicates the current page, as well as which pages can be accessed in the current project state. It also allows an Owner to advance the project to the next state when they deem the current state to be complete, as described in the ``Advance State'' use case given in Table \ref{tbl:use-case-advance-state}.
+
+As the application is designed to be applicable to any scientific domain, it does not specify what each task entails.
+Each page has two sections: an attachments section and an HTML body, as seen in Figure \ref{fig:case-research-design-view-analysis}.
+The sections can be used to capture whatever information and data a project requires.
+Users with permission to edit a task can add attachments and edit the body content using a built-in Markdown editor, shown in Figure \ref{fig:case-research-design-edit-analysis}.
+The markdown content is automatically converted to HTML for display in a task's HTML body, and may also be exported as a LaTeX fragment.
 
 \begin{figure}[!ht]
 \centering \includegraphics[width=5.5in]{./img/case-study-research-railgun/mockup-view-analysis}
@@ -494,8 +512,32 @@ The tasks themselves are not stateful, unlike the heavy-weight tasks in the prev
 \label{fig:case-research-design-edit-analysis}
 \end{figure}
 
+Finally, each project has a management page which is accessible only by the project's owner.
+The project management page includes the ability to delete the project, as described in Table \ref{tbl:use-case-delete-research-project}, as well as the ability to manage user permissions per the use case in Table \ref{tbl:use-case-modify-permissions}.
+This functionality is illustrated in the wireframe in Figure \ref{fig:case-research-design-manage-project}.
+
 \begin{figure}[!ht]
 \centering \includegraphics[width=5.5in]{./img/case-study-research-railgun/mockup-manage-project}
-\caption{Wireframe demonstrating the interface to manage members of a research project.}
+\caption{Wireframe demonstrating the interface for an Owner to manage a research project.}
 \label{fig:case-research-design-manage-project}
 \end{figure}
+
+
+\FloatBarrier
+
+\section {Implementation}
+
+\todo {Add an introduction and overview of this section here}
+
+\sectionnote {BM}
+\subsection {Data Model}
+
+\todo {Fill this section in with some justification}
+
+\begin{figure}[!ht]
+\centering \includegraphics[width=4.0in]{./img/case-study-research-railgun/data-model}
+\caption{Partial data model depicting the relationship between the application-specific models involved in the research IDE case study. The logical file attribute of the Attachment model is provided by the Paperclip attachment library, which was also used in the first case study.}
+\label{fig:case-research-data-model}
+\end{figure}
+
+\end{document}
