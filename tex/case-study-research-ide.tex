@@ -9,7 +9,7 @@ While the first case study focused on a system with several complex, deadline-dr
 \section {Background}
 \label{sec:case-study-research-background}
 
-Workflow-based systems have found a welcoming niche in the fields of computational science and bioinformatics. Software suites called scientific workflow systems allow researchers to describe their experiments in terms of workflows and manage the results that they produce. These tools improve reproducibility by allowing scientists to share the steps required to reproduce an experiment, and review how the experiment's results were produced.
+Workflow-based systems have found a niche in computational science and bioinformatics. Software suites called scientific workflow systems allow researchers to describe their experiments in terms of workflows and manage the results that they produce. These tools improve reproducibility by allowing scientists to share the steps required to reproduce an experiment, and review how the experiment's results were produced.
 
 Taverna is one such scientific workflow system. It is an open source tool build to aid in the execution of scientific experiments, with a focus on in silico experiments. In silico experiments are scientific experiments which are done entirely on a computer such as complex models of cells. The main benefit to in silico experiments is the increased precesion and the size of the data that can be generated and analyzed. Unfortunately, many researchers are not programmers and are unable to easily create in silico experimentats. Taverna allows a researcher to describe an experiment with a workflow so that the steps of an experiment are abstracted from the programming of it. This modular workflow approach allows a researcher to design an experiment without having to worry about the technical details of programming.
 
@@ -531,15 +531,62 @@ This functionality is illustrated in the wireframe in Figure \ref{fig:case-resea
 
 \todo {Add an introduction and overview of this section here}
 
+
 \sectionnote {BM}
 \subsection {Data Model}
 
-\todo {Fill this section in with some justification}
+While the use cases in section \ref{sec:case-research-requirements} suggest a system that understands specifically how to manage hypotheses, literature reviews, and other tasks, the user interface described above is much more minimal. The solution domain has been reduced to a collection of projects, each with a small number of component tasks.
+
+Figure \ref{fig:case-research-data-model} presents a data model representing the core functional concerns of the system. Each project has only a name, owner, and current state, as well as a collection of attributes to track who last modified the project and when. Similarly, tasks only need to store which state they are associated with (here called the task type), along with the markdown content for the HTML body of the task and relevant modification metadata. Tasks also have associated attachments, and all models track the last user to modify them. Even users can be represented simply; aside from the authentication data stored by Devise, the model only needs to track the user's name, email address, and optionally an indication of their institutional affiliation.
+
+Though this data model is limited, it is almost sufficient to implement the solution described in section \ref{sec:case-research-ui-design}. It omits only the authorization requirement, which is explored in detail below.
 
 \begin{figure}[!ht]
-\centering \includegraphics[width=4.0in]{./img/case-study-research-railgun/data-model}
+\centering \includegraphics[width=5.0in]{./img/case-study-research-railgun/data-model}
 \caption{Partial data model depicting the relationship between the application-specific models involved in the research IDE case study. The logical file attribute of the Attachment model is provided by the Paperclip attachment library, which was also used in the first case study.}
 \label{fig:case-research-data-model}
 \end{figure}
+
+
+\FloatBarrier
+
+\sectionnote {BM}
+\subsection {Permission-based Authorization}
+
+Although Pundit provides a way to express authorization rules, it leaves it up to the developer to create the data model to capture which users can perform what actions. While this was an advantage in the first case study as the authorization scheme was simple, the research IDE involves user-configurable fine-grained permissions.
+
+There are many existing authorization libraries for Rails that implement some form of permission management, such as Acl9, Roleable, and Rolify.
+In general, all such libraries provide developers with the ability to attach and query for permissions on user / data object pairs. Others support more sophisticated use cases, such as granting users permissions that are associated with all instances of a specific class, or querying to see if any one of a number of permissions are satisfied on a pairing. However, they are all implemented as some form of association between a role object that describes some class of roles, a user, and a resource that the user is granted some permission on. As a general rule, the data object (also known as the ``resource'') is represented using a polymorphic association in order to accommodate multiple resource types in the same application.
+
+Unfortunately, none of the existing permission management libraries provide a way to easily query for all permissions assigned to a user / data object pair.
+At best, they provide an programming interface that can fetch all permissions granted to a user, or all role types associated with an object.
+While these interfaces are adequate to implement simple web applications like discussion forums or news websites, they are too clumsy to use to implement a permission management user interface like the one pictured in Figure \ref{fig:case-research-design-manage-project};
+while one could individually query all of the possible permissions that could be assigned to each user / task pair, this would scale poorly for projects with more than a handful of users. Ultimately, the cleanest way to retrieve set of permissions is to bypass the libraries' APIs entirely, and query the permission data from the database.
+
+Once the set of permissions is retrieved, Owners must to be able to view and update it.
+Owners should be able to select an appropriate set of permissions for a participant, and then press a button to update them.
+This use case is not supported by existing permission libraries for Rails.
+The libraries lack an ``update'' operation for permissions; developers must either add logic to determine which permissions to add or remove based on the set submitted, or attempt to manipulate the database directly.
+
+Even updating existing permissions via direct database manipulation is difficult: all of the libraries listed above separate permission grants from the definition of the permission type itself.
+Figure \ref{fig:case-research-rolify-data-model} presents the Rolify data model as an example.
+In Rolify flyweight \verb!Role! instances represent permission type / resource pairings, and are associated with users through a many-to-many relationship.
+This data model makes it difficult to update the type of permission granted to a user / task pairing, as a \verb!Role! instance of the correct type must already exist for the given \verb!Task!, or must be created as part of the update.
+The problem could be easily rectified by using a simpler data model, such as the one given in Figure \ref{fig:case-research-sane-permission-data-model}: if the permission is specified on an association class instead, it can be modified with a single \verb!UPDATE! statement.
+
+\begin{figure}[!ht]
+\centering \includegraphics[height=3.5in]{./img/case-study-research-railgun/rolify-data-model}
+\caption{Data model used by the Rolify permission model. Note the separation of the permission type from the many-to-many association.}
+\label{fig:case-research-rolify-data-model}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=3.5in]{./img/case-study-research-railgun/permission-data-model}
+\cprotect\caption{Custom permission model linking \verb!User!s and \verb!Task!s using an association class to specify.}
+\label{fig:case-research-sane-permission-data-model}
+\end{figure}
+
+\todo{Discuss orthogonality of tag-like boolean permissions, ex. they don't support the requirement that a user be assigned either a view or view+edit permission, not both.}
 
 \end{document}
