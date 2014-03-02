@@ -15,14 +15,13 @@ Taverna is one such scientific workflow system \cite{taverna-website}. It is an 
 
 Due to the large computational requirement of in silico experiments Taverna allows multiple systems to work on the computations of a single experiment. This allows a researcher to utilize an entire network of computers and benefit from the extra computational power. Because of the nature many scientific experiments many tasks are able to be done in parallel. With parallel activities and enough computational power the speed at which an experiment can be completed drastically increases.
 
-Another workflow tool we found in the scientific domain is Pegasus, which is similar to Taverna and provides all the same features. However, Taverna and Pegasus do not offer any tools to write proper scientific documentation following the scientific method. Our second case study differs from these tools in that we handle the act of documenting scientific experiments and not the act of executing the experiment itself.
 
 \sectionnote {BM}
 \section {Overview}
 \label{sec:case-study-research-overview}
 
 Scientific misconduct and issues with reproducibility are a growing concern.
-While deliberate misconduct and fraud are difficult to prevent using technological means, it should be possible to encourage adequate record-keeping and proper process by using a software tool to guide inexperience researchers through the scientific process.
+While scientific workflow tools similar to Taverna have data management features that help researchers to track data provenance and reproducibility, they do not make any attempt to manage the scientific process itself. Though deliberate misconduct and fraud are difficult to prevent using technological means, it should be possible to encourage best practices by using a software tool to guide inexperienced researchers through the scientific process, which can itself be modeled as a workflow.
 
 In general, the process of performing a research project can be described in six steps:
 \begin{compactenum}
@@ -44,7 +43,7 @@ Though the process is often taught as a sequence of steps, some iteration may oc
 The research process itself may be carried out by a number of individuals with different responsibilities, depending on the discipline. For example, a technician may be responsible for validating the methodology and carrying out the experiment itself, while a statistician may be consulted for the analysis. It is important that a tool for managing the research process can accommodate any arbitrary assignment of responsibilities to individuals that a project demands.
 
 As a well-defined sequence of steps with restricted iteration, this process seems like an excellent candidate for automation using a workflow framework. Furthermore, as user roles are not predefined, but instead specified on a project-by-project basis, this case study provides an opportunity to investigate best practices and existing libraries for role-based access.
-
+It also fills a different need that isn't met by existing existing scientific workflow software. \todo{Something about synergy.}
 
 
 \sectionnote {AC}
@@ -468,9 +467,29 @@ As a well-defined sequence of steps with restricted iteration, this process seem
 
 While the six-step process described in section \ref{sec:case-study-research-overview} maps trivially to a simple workflow, possible iterations described between steps is somewhat more subtle. Though it may appear that the ability to revisit the literature review while performing the analysis implies a transition from the ``Analyzing data'' phase to the ``Performing literature review'' phase, it is important to distinguish the state of the user interface for current user from the state of the project itself. Such a transition would imply that the project must return to ``Performing literature review'', impacting all other participants in the project. Worse, such a transition would require the project to transition back through all of the intermediate states to reach the analysis phase again, possibly altering previously-completed states along the way.
 
-Instead, it seems more natural to express this conceptual iteration as a policy, governing which tasks can be edited in which project state. The thus-limited workflow for a research project is expressed in Figure \ref{fig:case-research-design-project-workflow}. It also contains an additional ``completed'' state. Rather than representing a step in the research process, this state represents completion of the process, and is included to accommodate archiving projects for record-keeping purposes.
+Instead, it seems more natural to express this conceptual iteration as a policy, governing which tasks can be edited in which project state. The thus-limited workflow for a research project is expressed in Figure \ref{fig:case-research-design-project-workflow}, while a summary of the policies governing each task are given in Table \ref{tbl:case-research-edit-policies}. It also contains an additional ``completed'' state. Rather than representing a step in the research process, this state represents completion of the process, and is included to accommodate archiving projects for record-keeping purposes.
 
 Each state of the workflow has an entry action that is responsible for creating the associated task. Creating the appropriate tasks when the associated state is entered provides a way of tracking when the tasks are created, and thus when the associated state transitions occurred. The tasks themselves are not stateful, unlike the heavy-weight tasks in the previous case study. For generality, it was assumed that the only actions applicable to each task are editing and viewing. Any mandatory review procedure attached to each step would be burdensome for projects consisting of a single researcher, while larger research groups can just as easily perform any review before the project owner advances to the next step of the project.
+
+\begin{table}
+  \centering
+  \caption{Summary of when the task corresponding to each state in the research workflow may be edited.}
+  \label{tbl:case-research-edit-policies}
+  \tablespacer
+  \begin{tabular}{ l l }
+    \toprule
+    Task & When is the task editable? \\
+    \midrule
+    Writing hypothesis & Until the 'gathering results' state is entered \\
+    Performing literature review & Until the project is completed \\
+    Describing method & Until the 'gathering results' state is entered \\
+    Gathering results & Until the 'analyzing data' state is entered \\
+    Analyzing data & Until the project is completed \\
+    Drawing conclusions & Until the project is completed \\
+    Completed & Always, in order to accommodate notes and errata \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \begin{figure}[!ht]
 \centering \includegraphics[height=8in]{./img/case-study-research-railgun/research-project-lifecycle}
@@ -552,27 +571,43 @@ Though this data model is limited, it is almost sufficient to implement the solu
 
 \sectionnote {BM}
 \subsection {Permission-based Authorization}
+\label{sec:case-research-permission-based-auth}
 
-Although Pundit provides a way to express authorization rules, it leaves it up to the developer to create the data model to capture which users can perform what actions. While this was an advantage in the first case study as the authorization scheme was simple, the research IDE involves user-configurable fine-grained permissions.
+Although Pundit provides a way to express authorization rules, it leaves it up to the developer to create the data model to capture which users can perform what actions. While this was an advantage in the first case study as the authorization scheme was simple, the research IDE involves user-configurable fine-grained permissions. The case study also has the following additional requirements, derived from sections \ref{sec:case-study-research-requirements} and \ref{sec:case-research-ui-design}:
+\begin{enumerate}
+\item Owners can assign each participant a permission (ex. no access, view, or view and edit) for each task in a single project;
+\item Owners can view and update the set of permissions assigned to a participant through an interface that groups the permissions by participant;
+\item There must be at most one permission set for a given participant / project / task type combination;
+\end{enumerate}
 
-There are many existing authorization libraries for Rails that implement some form of permission management, such as Acl9, Roleable, and Rolify.
-In general, all such libraries provide developers with the ability to attach and query for permissions on user / data object pairs. Others support more sophisticated use cases, such as granting users permissions that are associated with all instances of a specific class, or querying to see if any one of a number of permissions are satisfied on a pairing. However, they are all implemented as some form of association between a role object that describes some class of roles, a user, and a resource that the user is granted some permission on. As a general rule, the data object (also known as the ``resource'') is represented using a polymorphic association in order to accommodate multiple resource types in the same application.
+Ideally, these requirements would be met by an existing permission management library.
+In fact, there are many existing authorization libraries for Rails that implement some form of permission management, such as Acl9, Roleable, and Rolify.
+In general, all such libraries provide developers with the ability to attach and query for permissions on user / data object pairs.
+Others support more sophisticated use cases, such as granting users permissions that are associated with all instances of a specific class, or querying to see if any one of a number of permissions are satisfied on a pairing.
+However, they are all implemented as some form of association between a role object that describes some class of roles, a user, and a resource that the user is granted some permission on. Unfortunately, 
 
-Unfortunately, none of the existing permission management libraries provide a way to easily query for all permissions assigned to a user / data object pair.
-At best, they provide an programming interface that can fetch all permissions granted to a user, or all role types associated with an object.
-While these interfaces are adequate to implement simple web applications like discussion forums or news websites, they are too clumsy to use to implement a permission management user interface like the one pictured in Figure \ref{fig:case-research-design-manage-project};
-while one could individually query all of the possible permissions that could be assigned to each user / task pair, this would scale poorly for projects with more than a handful of users. Ultimately, the cleanest way to retrieve set of permissions is to bypass the libraries' APIs entirely, and query the permission data from the database.
+While the first requirement is trivial to achieve by associating a ``view'' or ``edit'' permission with a specific participant / task pair, the latter two are not supported out of the box.
+None of the existing permission management libraries for Rails have a concept of
+mutually exclusive permissions, so the controller setting up a permission would need to ensure that a conflicting permission does not already exist.
+Even then, this solution still leaves the project open to race conditions, as the exclusivity constraint would not be enforced at the database level.
 
-Once the set of permissions is retrieved, Owners must to be able to view and update it.
-Owners should be able to select an appropriate set of permissions for a participant, and then press a button to update them.
-This use case is not supported by existing permission libraries for Rails.
-The libraries lack an ``update'' operation for permissions; developers must either add logic to determine which permissions to add or remove based on the set submitted, or attempt to manipulate the database directly.
+Additionally, the existing libraries do not provide APIs to query for all permissions assigned to a user / resource pair; at best, they provide an programming interface that can fetch all permissions associated with an individual user or resource.
+While these APIs are sufficient to implement simple permission management schemes, such as designating a set of users as administrators or moderators of a specific section of an online forum, they are too clumsy to implement the user interface like the one depicted in Figure \ref{fig:case-research-design-manage-project}.
+The only way around this API limitation is to examine the implementation of permissions in the library, and write appropriate database queries to retrieve all permissions for a user / resource pair.
 
-Even updating existing permissions via direct database manipulation is difficult: all of the libraries listed above separate permission grants from the definition of the permission type itself.
-Figure \ref{fig:case-research-rolify-data-model} presents the Rolify data model as an example.
-In Rolify flyweight \verb!Role! instances represent permission type / resource pairings, and are associated with users through a many-to-many relationship.
-This data model makes it difficult to update the type of permission granted to a user / task pairing, as a \verb!Role! instance of the correct type must already exist for the given \verb!Task!, or must be created as part of the update.
-The problem could be easily rectified by using a simpler data model, such as the one given in Figure \ref{fig:case-research-sane-permission-data-model}: if the permission is specified on an association class instead, it can be modified with a single \verb!UPDATE! statement.
+Finally, the current crop of libraries only provide APIs to create or delete permissions; updating a permission is not an option.
+If an owner submits a form from the management interface that specifies the set of permissions assigned to a participant, the implementation must first determine the current set of permissions and then delete or create permissions as needed to match the requested set.
+Even bypassing the API and manipulating the database directly is insufficient to work around this limitation.
+The permission libraries all store permissions in a form that makes it impossible to change the permission level of an existing user / resource association with a single update; for example, the Rolify data model (presented in Figure \ref{fig:case-research-rolify-data-model}) separates the permission level from the many-to-many association connecting users to permissions.
+This clever data model would require more programmer effort to update than most Rails forms, which simply transform the submitted data into a set of model instances and save them to the database without creating intermediate objects.
+
+A richer permission model is therefore necessary to meet the requirements of the second case study.
+Figure \ref{fig:case-research-sane-permission-data-model} depicts the data model of the new system.
+The database enforces a unique constraint on user / role name / resource combinations, so that a named set of mutually exclusive permissions can be guaranteed to have only a single value per user / resource pair.
+For the second case study, the users are associated with projects through a permission named for the task type they are associated with.
+This not only ensures that only a single value is set, but also permits permissions to be set for tasks before the associated task model has been created.
+As well, the use of a single join table for the permissions makes it trivial to perform an insert or update simply by creating and saving a model instance, as no associated model instances need to be created.
+It is equally trivial to query the database to determine if a user has a specified permission for a task: as demonstrated by Figure \ref{fig:case-research-permission-code-example}, it can be implemented with a single existence query on the Role model.
 
 \begin{figure}[!ht]
 \centering \includegraphics[height=3.5in]{./img/case-study-research-railgun/rolify-data-model}
@@ -582,11 +617,77 @@ The problem could be easily rectified by using a simpler data model, such as the
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=3.5in]{./img/case-study-research-railgun/permission-data-model}
-\cprotect\caption{Custom permission model linking \verb!User!s and \verb!Task!s using an association class to specify.}
+\includegraphics[height=2.5in]{./img/case-study-research-railgun/permission-data-model}
+\cprotect\caption{Custom permission model linking \verb!User!s and \verb!Resource!s using a single intermediate class.}
 \label{fig:case-research-sane-permission-data-model}
 \end{figure}
 
-\todo{Discuss orthogonality of tag-like boolean permissions, ex. they don't support the requirement that a user be assigned either a view or view+edit permission, not both.}
+\begin{figure}[!ht]
+  \begin{lstlisting}
+class Task < ActiveRecord::Base
+  # ...
+
+  def has_editor?(user)
+    project.owned_by?(user) ||
+      has_role?(user, ROLE.EDITOR)
+  end
+
+  def has_viewer?(user)
+    project.owned_by?(user) ||
+      has_role?(user, [ROLE.EDITOR, ROLE.VIEWER])
+  end
+
+  def has_role?(user, role)
+    Role.where(resource: project, name: task_type,
+               user: user, value: role)
+        .exists?
+  end
+end
+  \end{lstlisting}
+  \cprotect\caption{Code snippet illustrating the implementation of permission queries for \verb!Task!s.}
+  \label{fig:case-research-permission-code-example}
+\end{figure}
+
+\FloatBarrier
+
+\sectionnote {BM}
+\subsection {State-based Task Policies}
+
+While the permission model in section \ref{sec:case-research-permission-based-auth} captures which users have permission to perform specific actions, the ability to edit a task also depends on the state its associated project is in, as specified in Table \ref{tbl:case-research-edit-policies}.
+
+Although the simplest way to implement this policy would be to hard-code a list of all states that each task type is editable in, the \verb!Project! model already specifies the order of states, in order to render the navigation bar.
+A \verb!have_not_started?! method was added to query whether a specific state (or a successor thereof) had already been entered.
+With this method, it was possible to perform a row-by-row translation of Table \ref{tbl:case-research-edit-policies} to the partial Pundit policy given in Figure \ref{fig:case-research-state-based-policy}.
+Re-using the existing metadata significantly improves the maintainability of the policy -- if a state is added or removed, the policy only needs to be modified if that specific state determines when a task is editable.
+
+\todo{Can we conclude anything general here? Is this a pattern worth capturing in our methodology when we write it?}
+
+\begin{figure}[!ht]
+  \begin{lstlisting}
+class TaskPolicy < ApplicationPolicy
+  alias_method :p, :project
+
+  EDIT_POLICIES = ActiveSupport::HashWithIndifferentAccess.new({
+    writing_hypothesis: proc { p.have_not_started? :gathering_data },
+    writing_literature_review: proc { p.have_not_started? :completed },
+    describing_method: proc { p.have_not_started? :gathering_data },
+    gathering_data: proc { p.have_not_started? :analyzing_results },
+    analyzing_results: proc { p.have_not_started? :completed },
+    drawing_conclusions: proc { p.have_not_started? :completed },
+    completed: proc { true },
+  })
+
+  def edit?
+    is_editor = task.has_editor?(user)
+    currently_editable = instance_eval(&EDIT_POLICIES[task.task_type])
+    is_editor && currently_editable
+  end
+
+  # ...
+end
+  \end{lstlisting}
+  \cprotect\caption{Code snippet demonstrating the declarative DSL that determines when a task is editable. Note that a \verb!proc! is a block of code without a referencing environment (similar to a Smalltalk block), and \verb!instance_eval! evaluates a \verb!proc! (here looked up from the \verb!EDIT_POLICIES! hash) with the receiver bound to \verb!self!.}
+  \label{fig:case-research-state-based-policy}
+\end{figure}
 
 \end{document}
