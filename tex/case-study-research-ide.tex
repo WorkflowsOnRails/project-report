@@ -690,4 +690,15 @@ end
   \label{fig:case-research-state-based-policy}
 \end{figure}
 
+\FloatBarrier
+
+\sectionnote {AC}
+\section {Testing}
+
+As in our previous case study, we focused mainly on use case testing since the case study is not intended to be deployed. We focused on testing the features of the second case study that were not present in the first case study, such as role permissions.We assumed we might be able to extract a role permission feature and decided to build a test suite focusing that functionality.
+
+Even though we were focused on testing role permissions we still found it valuable to test the state machines. By testing the state machines we could be certain that our permission tests which rely heavily on the state of a project would work correctly. All-transitions criteria was used to test the state machines and was not very expensive due to the simplicity of the state machine. The state machine of the second case study is completely linear with each state only having a single transition to the following state. Because of this it was enough to use a single test path through the system to cover all-transitions.
+
+Our use case testing suite is much more in depth and focuses on the project use cases.At each state a member of a project gains access to the actions that the state provides. In addition, some actions belonging to a previous state may remain open to modification, or may be closed and unable to be modified. Because of this each possible action had to be tested in every state. This was done using capybara, advancing to the correct state and going back through all previous possible actions and asserting their availability according to our use cases
+
 \end{document}
