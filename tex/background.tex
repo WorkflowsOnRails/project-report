@@ -11,9 +11,9 @@ A workflow can be seen as a series of operations that are run in a specific orde
 \section {Overview of Workflows}
 \label {sec:overview-of-workflows}
 
-A workflow can be seen as a series of operations that are run in a specific order. The main focus of a workflow is to guide the flow of control through each step in order. In order to advance to the next step in a workflow a number of predefined conditions must be met. Once the conditions are met the control is redirected to the new step. This continues until a ‘completed' step is reached.
+A workflow can be seen as a series of operations that are run in a specific order. The main focus of a workflow is to guide the flow of control through each step in order. In order to advance to the next step in a workflow a number of predefined conditions must be met. Once the conditions are met the control is redirected to the new step. This continues until a some final step is reached.
 
-A workflow can have many branching paths where the control flow branches depending on what conditions are met. It can be argued that every problem can be approached as if it were a workflow, as long as there is a well defined start and end. For this reason workflow frameworks are widely used to aid in the creation of solutions.
+A workflow can have many branching paths where the control flow branches depending on what conditions are met. It can be argued that every problem can be approached as if it were a workflow as long as there is a well defined start and end. For this reason workflow frameworks are widely used to aid in the creation of many applications.
 
 An example of a basic workflow would be an industrial assembly line. Each step builds upon the previous step. The product is not passed onto the next step until it meets the conditions imposed by the next step. The assembly line only ever has one path that it follows (linear) and is therefore the simplest workflow apart from a single step workflow. More complicated workflows have many branches of control and can have many separate finishing steps. These more complicated workflows are implemented as state machines (state based) or flow charts (process based).
 
@@ -23,7 +23,7 @@ The state based model implements the workflow as a state machine. Each step is r
 
 The process based model implements the workflow as a flow chart. This model differs from the state model in that it can easily model parallel processes. Where a state machine typically is only ever in a single state the process model can branch its flow of control to work in parallel. This is done by allowing all the transitions out of a node to be taken as long as the correct conditions are met. The process model also allows control flow to merge from two branches of control back into a single process.
 
-Business Process Model and Notation (BPMN) is graphical way of modeling a business process and is very similar to UML. BPMN is structured as a set of activities linked together by messages and events. Activities are the processes and can be considered the things that need to be done. Events are things that happen in response to something else, such as delays, and connections which describe the control flow.
+BPMN \cite{bpmn} is graphical way of modeling a business process and is very similar to UML. BPMN is structured as a set of activities linked together by messages and events. Activities are the processes and can be considered the actions that need to be done. Events are actions that happen in response to something else, such as delays, and connections which describe the control flow.
 
 
 \sectionnote {BM}
@@ -176,7 +176,7 @@ Stonepath is only a thin wrapper around Rails and AASM to encourage best practic
 
 \sectionnote {AC}
 \subsection {Ruote}
-Ruote is a process-based workflow framework for Ruby. It can be integrated with Ruby on Rails, though it is not specific to Ruby on Rails. It models a workflow as a combination of processes and participants. The processes represent each process or stage of a workflow and the participants represent the ‘individual' people or software agents working in that process of the workflow. Each participant can be assigned to multiple processes, however they are not very reusable as they can only ever implement one method of work.
+Ruote \cite{ruote} is a process-based workflow framework for Ruby. It can be integrated with Ruby on Rails, though it is not specific to Ruby on Rails. It models a workflow as a combination of processes and participants. The processes represent each process or stage of a workflow and the participants represent the ‘individual' people or software agents working in that process of the workflow. Each participant can be assigned to multiple processes, however they are not very reusable as they can only ever implement one method of work.
 
 Each process is defined by a process definition. Process definitions describe the internals of each process and direct the flow of work between the registered participants. Once the process definition finishes the process terminates and it moves on to the next process.
 
