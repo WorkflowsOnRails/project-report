@@ -3,13 +3,25 @@
 
 \chapter{Introduction}
 
-Give an introduction to your project.  This might include:
-\begin{itemize}
-  \item Motivation for your project
-  \item Problem you are trying to solve
-  \item Scope of your project
-  \item Organization of your report
-\end{itemize}
-You should tune this appropriately for what best suits your project.
+Almost all companies and organizations have processes specific to their business that are carried out as a series of steps, often by people or systems occupying specific roles.
+These steps may be linear, or may follow alternate flows depending on the outcome of a step; for example, an employee might file an expense report, which their manager might either approve, or return to the employee for more input.
+As information technology has increasingly become a part of modern business practices, these business processes have come to be managed by software applications that ensure that the steps are executed in the right order by the right individuals.
+
+Any process involving a series of steps carried out in some defined order is known as a \emph{workflow}.
+Workflows can be captured using flowchart-like notations, such as BPMN \cite{bpmn}, in order to make them easier to define and understand.
+Application frameworks such as Activiti \cite{activiti} make it easy to translate workflow descriptions in BPMN to software applications.
+This allows organizations using these frameworks to easily build and maintain applications based on their business processes.
+
+As organizations have turned to web-based systems to manage their business processes, they have also begun to consider lightweight web frameworks such as Ruby on Rails as alternatives to more traditional platforms like the JVM.
+Though the use of a lightweight framework is intended to reduce implementation time and complexity, these frameworks do not offer the same degree of workflow support as more traditional enterprise platforms.
+Many web-based workflow systems are therefore implemented in an ad hoc manner, spreading the definition of the steps and roles that constitute the workflow throughout the application.
+This makes such applications more difficult to design, build, and maintain.
+
+Therefore, it is desirable to reconcile lightweight web frameworks and workflow frameworks so that developers can reap the benefits of both. This project has defined a new platform for workflow-based web development targeting Ruby on Rails. To do so, a series of prototypes were constructed to evaluate existing approaches to workflow-based development on Rails, and two case study applications were created to gain more insight into common problems and patterns related to implementing workflows on Rails. The reusable elements of the two case studies were then extracted to define a common platform for developing such workflow-based applications.
+
+The remainder of this report is divided into chapters as follows: Chapter \ref{ch:engineering} describes the engineering effort involved in the project, while Chapter \ref{ch:background} provides a more in-depth look at existing workflow frameworks, with a specific focus on the state of framework support for Ruby on Rails.
+Chapters \ref{ch:prototypes}, \ref{ch:case-study-1}, and \ref{ch:case-study-2} provide an in-depth look at the design, implementation, and testing of the prototypes and case studies that were used to define the platform.
+Chapter \ref{ch:platform} describes the platform that was extracted from the two case studies.
+Finally, Chapter \ref{ch:conclusion} summarizes the achievements of the project, and discusses ideas for future work.
 
 \end{document}
