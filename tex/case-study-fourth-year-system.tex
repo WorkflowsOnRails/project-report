@@ -4,24 +4,22 @@
 \chapter{Case~Study: Fourth~Year~Project~System}
 \label {ch:case-study-1}
 
-\todo{Fill this in}
-
-\sectionnote {BM}
-\section {Overview}
-
-The fourth-year project management system is used by the department of Systems and Computer Engineering at Carleton University to manage the completion of fourth-year projects by students in software- and systems-related programs. The system provides students with information on candidate projects, expectations, deadlines and deliverables, and also manages the submission of some project deliverables. The system is used by
-\begin{itemize}
-\item the \keyword{Project Coordinator}, who is an instructor responsible for overall administration of the fourth-year projects and events;
-\item \keyword{Project Supervisors}, which are instructors who suggest candidate projects and supervise the completion of individual projects; and
-\item \keyword{Project Group Members}, which are students who must be members of exactly one project group.
-\end{itemize}
+The fourth-year project management system is used by the department of Systems and Computer Engineering at Carleton University to manage the completion of fourth-year projects by students in software- and systems-related programs. The system provides students with information on candidate projects, expectations, deadlines and deliverables, and also manages the submission of some project deliverables.
 
 The system fulfills its functional requirements, but requires significant effort on the part of students to navigate, as all actions, information and deadlines are available at all times. It offers a good example of a system where the user experience could be improved by structuring the system into workflows. Additionally, the system involves deadlines and collaborative activities between multiple actors, which makes it a good test of the capabilities of the Stonepath workflow framework.
 
 \sectionnote {BM}
 \section {Requirements}
 \label {sec:4ys-requirements}
-The required functionality of the fourth-year project management system can be split into three main concerns:
+
+The fourth-year project management system is used by three types of actors:
+\begin{itemize}
+\item the \keyword{Project Coordinator}, who is an instructor responsible for overall administration of the fourth-year projects and events;
+\item \keyword{Project Supervisors}, which are instructors who suggest candidate projects and supervise the completion of individual projects; and
+\item \keyword{Project Group Members}, which are students who must be members of exactly one project group.
+\end{itemize}
+
+These three actors use the system for tasks that can be split into three main concerns, specifically
 \begin{itemize}
 \item \keyword{account management}, which involves creating accounts for Project Supervisors and Project Group Members, as well as authentication with the system;
 \item \keyword{project selection}, which entails Project Supervisors creating candidate projects and managing group membership, as well as Project Group Members browsing available projects, consulting with Project Supervisors to find a project, and joining a project; and
@@ -945,7 +943,9 @@ Given a single class to represent a user’s profile, there are two options to r
 \section{Implementation}
 \label{sec:4ys-implementation}
 
-\todo{Add an introduction to this section and present it in a logical order.}
+After the core data model and workflows for the application were designed, implementation proceeded in an iterative fashion, with a focus on identifying common elements that can be extracted into a workflow platform. This section highlights some of the key implementation decisions, and how they were approached.
+
+\todo {Re-organize this section to present authentication, then authorization, then assignment, workflow generalization, and then presenting available actions. There seems to be too little discussion to bother keeping the start new year section.}
 
 \sectionnote{BM}
 \subsection{Task Assignment}
@@ -1101,19 +1101,17 @@ end
 \sectionnote{BM}
 \subsection{Authorization}
 
-\todo {Cite documentation in the following paragraphs}
-
 With authentication and user profiles in place, authorization was the next requirement. Many actions, such as creating projects, can only be performed by users in specific roles. While access checks could be implemented manually using if-else statements and query filters in the controllers and views, this would lead to code duplication: permission checks could end up duplicated in multiple controllers, and the views linking to those controllers would also have to include the checks to prevent inaccessible links from being displayed. Fortunately, Rails has several authorization libraries available which provide conventions to centralize, enforce, and query permission checks. We considered Stonewall, Cancan, Authority, and Pundit for the access control system. These libraries are described briefly below.
 
-\paragraph{Stonewall.} The developers of Stonepath also produced Stonewall, which is intended to be an access-control library that integrates well with Stonepath. Stonewall defines permissions at the model level using a complex DSL, and applies them to methods on the models themselves. It captures the current user when a controller begins executing, and implicitly checks every method call to a protected method on a model. If a method is executed that the user does not have permission to call, than an exception will be thrown. Unfortunately, Stonewall is largely undocumented, and is totally untested and unmaintained.
+\paragraph{Stonewall.} The developers of Stonepath also produced Stonewall, which is intended to be an access-control library that integrates well with Stonepath \cite{stonewall}. Stonewall defines permissions at the model level using a complex DSL, and applies them to methods on the models themselves. It captures the current user when a controller begins executing, and implicitly checks every method call to a protected method on a model. If a method is executed that the user does not have permission to call, than an exception will be thrown. Unfortunately, Stonewall is largely undocumented, and is totally untested and unmaintained.
 
-\paragraph{Cancan.} Cancan allows developers to define rule-based permissions for CRUD operations in a single central Ability class. Cancan includes an declarative Ruby DSL to define permissions: rules can range from statements that grant a user permission to perform all actions on all models, to declaring that the current user can only view a specific model that they are associated with through a deeply-nested relationship. Cancan defines a \verb!can?! predicate that tests whether the current user can perform an action on a specified target, and an \verb|authorize!| method that raises an exception if an action can’t be performed on a specified target.
+\paragraph{Cancan.} Cancan allows developers to define rule-based permissions for CRUD operations in a single central Ability class \cite{cancan}. Cancan includes an declarative Ruby DSL to define permissions: rules can range from statements that grant a user permission to perform all actions on all models, to declaring that the current user can only view a specific model that they are associated with through a deeply-nested relationship. Cancan defines a \verb!can?! predicate that tests whether the current user can perform an action on a specified target, and an \verb|authorize!| method that raises an exception if an action can’t be performed on a specified target.
 
 In addition to basic permission-checking methods, Cancan includes tools to remove boilerplate permission checks, and to protect against holes due to forgotten permission checks. Any controller class may be configured to automatically load, create, or list objects before passing control to the standard RESTful actions. Controllers may also be flagged with \verb!check_authorization! to raise an exception if no permission check is performed while handling a controller action. Unfortunately, resource autoloading and auto-authorization conflicts with the new protections against mass assignment attacks introduced in Rails 4. The latest Rails version that is compatible with Cancan is version 3.2.15.
 
-\paragraph{Authority.} Authority is an authorization library for Rails 4 that takes a somewhat different approach than Cancan. Developers define one class, called an authorizer, for each model to authorize. Each authorizer consists of a series of methods, such as \verb!creatable_by?!, which return a boolean indicating whether the current user can perform the action corresponding to the method. Like Cancan, Authority provides a method to enforce permissions and raise an exception if they are not fulfilled, another to query if a user is permitted to perform an action, and a way to ensure that authorization is performed in each action of a controller. Authority requires more setup and wiring than Cancan; for example, to define an authorizer method for a custom action, one must first add the action to a configuration file so that Authority knows which authorizer method to call to check permissions on the action. Additionally, Authority lacks Cancan’s ability to automatically load and authorize models.
+\paragraph{Authority.} Authority \cite{authority} is an authorization library for Rails 4 that takes a somewhat different approach than Cancan. Developers define one class, called an authorizer, for each model to authorize. Each authorizer consists of a series of methods, such as \verb!creatable_by?!, which return a boolean indicating whether the current user can perform the action corresponding to the method. Like Cancan, Authority provides a method to enforce permissions and raise an exception if they are not fulfilled, another to query if a user is permitted to perform an action, and a way to ensure that authorization is performed in each action of a controller. Authority requires more setup and wiring than Cancan; for example, to define an authorizer method for a custom action, one must first add the action to a configuration file so that Authority knows which authorizer method to call to check permissions on the action. Additionally, Authority lacks Cancan’s ability to automatically load and authorize models.
 
-\paragraph{Pundit.} Like Authority, Pundit is an authorization library for Rails 4 that represents access rules with one authorization class per model. Each corresponding class (called a policy) has one boolean method for each action that may be taken on the model. Similarly to Cancan and Authority, Pundit defines one controller method to enforce permissions, another to query permissions on objects, and a third to ensure that authorization is performed in each action. As is the case with Authority, Pundit can’t automatically load and authorize models. However, unlike Authority, Pundit eschews configuration files for method naming conventions, and requires no setup beyond installing the gem.
+\paragraph{Pundit.} Like Authority, Pundit is an authorization library for Rails 4 that represents access rules with one authorization class per model \cite{pundit}. Each corresponding class (called a policy) has one boolean method for each action that may be taken on the model. Similarly to Cancan and Authority, Pundit defines one controller method to enforce permissions, another to query permissions on objects, and a third to ensure that authorization is performed in each action. As is the case with Authority, Pundit can’t automatically load and authorize models. However, unlike Authority, Pundit eschews configuration files for method naming conventions, and requires no setup beyond installing the gem.
 
 \par \noindent \\ After reviewing the documentation and open issues for each library, Pundit was selected as the authorization system for the case study. Stonewall was eliminated for being too unwieldy, as per-method and per-attribute access control are much more granular than necessary, and much harder to validate than per-action access control. Cancan was eliminated due to its incompatibility with Rails 4, and because it doesn’t appear to be actively maintained. Pundit was chosen over Authority as it provides the same feature set as Authority with less configuration and boilerplate. Pundit is actively maintained, and is seeing an increase in use as developers migrate away from Cancan. Though Pundit lacks support for automatically loading and authorizing objects, we can achieve the same thing ourselves by using a library like \verb!inherited_resources! and overloading the relevant controller methods perform do authorization automatically.
 
@@ -1164,7 +1162,7 @@ This functionality was implemented as a simple controller concern. In order to u
 
 Of course, it may be the case that multiple controllers should share the same views. Controllers may override the method \verb!action_view_prefix!, which takes the event name as an argument and returns the view directory to look in to find the event partial. This is convenient, as it allows view delegation to be performed without having to create one partial per controller for each event, which would in turn only render another partial.
 
-Though this functionality is useful for structuring actions, it comes with an associated cost in user interface flexibility. As the partials for each action are separate, there is no way to have them share user interface elements, which leads to some redundancy. It is possible to alter the state machine so that elements which be rendered together use the same event, and check a guard to determine which transition to take; however, it is undesirable to compromise the model in order to improve the user interface. \todo {Create an illustration to support this assertion, and demonstrate the difference between the original mockups and the user interfaces produced with this technique.}
+Though this functionality is useful for structuring actions, it comes with an associated cost in user interface flexibility. As the partials for each action are separate, there is no way to have them share user interface elements, which leads to some redundancy. It is possible to alter the state machine so that elements which are rendered together use the same event, and check a guard to determine which transition to take; however, it is undesirable to compromise the model in order to improve the user interface. \todo {Create an illustration to support this assertion, and demonstrate the difference between the original mockups and the user interfaces produced with this technique.}
 
 
 \FloatBarrier
@@ -1200,11 +1198,11 @@ In order to minimize time spent developing tests for the case study, it was deci
 \sectionnote {BM}
 \subsection {Technology}
 
+\todo{Break this into two sections -- end-to-end testing and time-based   testing. Add citations for projects.}
+
 The Ruby community has coalesced around two popular tools for web application integration testing: Capybara and Watir. While Watir provides a framework-agnostic Ruby API to launch and control web browsers, Capybara provides a domain-specific language to test Rails applications. Capybara was selected as the case study's integration testing framework due to its ease of use with Rails. While Watir requires users to write their own code to handle running a web server outside of their Watir tests, Capybara uses the Rack::Test library to send requests and receive responses from a Rails application without requiring the user to launch and shut down a separate server process.
 
 Additionally, Capybara's DSL makes it trivial to control with the system under test, as each logical action taken by a user (for example, ``click on a button'' or ``fill in an input box'') requires a single Capybara statement. Figure \ref{fig:4ys-test-signup} provides an example of a simple Capybara test, which drives the system through the process of a Project Group Member creating an account.
-
-\todo{Explain use of MiniTest instead of Cucumber / RSpec, and why we're using factory girl for fixtures.}
 
 \begin{figure}[!ht]
   \begin{lstlisting}

@@ -1,0 +1,195 @@
+\documentclass[document.tex]{subfiles}
+\begin{document}
+
+\chapter {Initial Research on Existing Workflow Frameworks}
+
+\section {Evaluation Questions}
+\label {sec:evaluation-questions}
+
+\todo{Introduce these questions}
+
+\question{Does the framework work with Ruby on Rails 3.2 / 4.0?}
+
+Ruby on Rails has changed over time. The documentation and community are focused on Rails 4; if a workflow framework only works with Rails 2, the benefit of using the framework might be outweighed by the difficulty of finding tools and best practices for an older version of Rails.
+
+\question{How do we define roles using the framework?}
+
+Workflows involve associating activities to be carried out to people or agents to carry them out. It's important to understand how the workflow framework expects roles to be defined in order to understand how to use the framework at all.
+
+\question{How can we assign activities to individual users?}
+
+Some workflows call for individuals to be responsible for carrying out activities. A useful workflow framework should accommodate this requirement.
+
+\question{How can we assign activities to groups of users?}
+
+Other times, the specific individual that carries out a workflow is less important than the fact that the user has the appropriate skills and position in the company. In this case, it is easier to assign an activity to a class of users and let an appropriate user or group of users carry it out.
+
+\question{How is access control handled for access to artifacts and activities?}
+ 
+While the notion of access control is common in applications, permissions are often a property of an object that a user attempts to access. In the case of workflow-based systems, permissions are not only a function of the user and object, but also the state of the workflow. As an example, in an expense reporting system claims should only be editable by the submitter before they are approved by their manager.
+
+\question{How do we handle time-limited activities?}
+
+Activities are often time-limited by business requirements. A workflow framework should have some way of modelling activity deadlines, and responding to overdue activities.
+
+\question{Are we able to set preconditions for an activity to start?}
+
+Many activities require some data or artifacts as input; for instance, carrying out object design requires that the requirements were captured in the requirements analysis phase. A workflow framework should have a way to make sure that the prerequisites for an activity are present before the activity begins. Otherwise, applications created with the framework may start activities prematurely due to user error.
+
+\question{Can we set postconditions on activities, and reflect them in the user interface (ex. forms)?}
+
+Similar to preconditions, activities often have post-conditions that must be met before the activity is completed. Even if an analyst indicates that the requirements analysis phase of a software project is completed, the activity may not be complete until the results have been verified.
+
+\question{How do we model parallel activities in a workflow?}
+
+In many real-world workflows, activities occur in parallel to reduce the time taken to complete the workflow. For example, verification testing and implementation are often overlapped in software development; it is possible to perform them in sequence, but would slow the process down. Workflow frameworks must be able to accommodate real business processes to be useful in practice.
+
+\question{Can we change the state of a workflow through an alternate process if there are exceptional circumstances?}
+
+Mistakes are made in any process involving humans. Though it's not an essential functionality, it is useful to be able to rewind a workflow to an arbitrary activity if the activity needs to be corrected. Otherwise, users may need to recreate the work item and repeat the activity from the beginning.
+
+\question{What work, if any, is needed to integrate the framework with Rails?}
+
+In order to use a workflow framework with Ruby on Rails, it may be necessary to somehow integrate or install the framework into a Rails application. It's important to understand the amount of effort required - a less-capable but easily integrated framework might be more cost-effective than a full-featured suite that has never been used with Rails before.
+
+
+\sectionnote{BM}
+\section {Stonepath}
+
+Stonepath is a state-based workflow library for Ruby on Rails. Stonepath models workflows using the concepts of work items, workbenches, and tasks. A work item is a persistent object that represents the central object of a workflow. A work item has a well-defined state and state transitions, which represent the primary activities in the workflow. Work items also have a set of user-defined attributes. Work items can be related to other persistent objects called work benches, which represent participants in a workflow such as users or software agents. Work benches may own work items that they are primarily responsible for, or may be related to work benches through tasks assigned to them. Like work items, work benches and tasks may have arbitrary user-defined attributes.
+
+Stonepath itself is only a thin layer on top of Rails and another Rails library called AASM. In a Stonepath application, responsibilities are divided as follows:
+
+\begin{itemize}
+\item Rails implements the basic web application stack, including handling HTTP requests in the controller layer, rendering HTML pages in the view layer, and validating and persisting objects in the model layer.
+\item AASM provides a domain-specific language to define persistent state machines. AASM is used to specify state machines for work items and tasks.
+\item Stonepath provides helpers to relate work items to tasks and work benches, plus generators to automatically create models for work items and tasks. Stonepath also includes an audit log implementation, and a state-sensitive access control layer named Stonewall.
+\end{itemize}
+
+The following section provides an overview of Stonepath in terms of the criteria laid out in section \ref{sec:evaluation-questions}.
+
+
+\question{Does the framework work with Ruby on Rails 3.2 / 4.0?}
+
+Not out of the box, as there was an autoloading change in Rails 4 that broke Stonepath's AASM integration. However, manually adding \verb!'aasm'! to the Gemfile is enough to work around the issue. The migrations and models generated by Stonepath also use deprecated methods, but can be fixed up manually.
+
+\question{How do we define roles using the framework?}
+
+Neither Rails or Stonepath require any specific role definition format. Stonewall, which is an extension of Stonepath that implements access control on models, is also flexible in handling role definitions; it only requires that a User model implement a \verb!role! (or \verb!roles!) method that returns a string (or collection of strings) representing the role name. A user's role can therefore be represented as a string column in the user table, a many-to-one relation between user and role models, or a many-to-many relationship between users and roles.
+
+\question{How can we assign activities to individual users?}
+
+Make the User model a workbench, and assign tasks to the workbench.
+
+\question{How can we assign activities to groups of users?}
+
+Make the group (or role) model a workbench, and assign tasks to the workbench.
+
+\question{How is access control handled for access to artifacts and activities?} 
+
+Activities and actions are handled by controllers, so a \verb!before_filter! should be used to prevent users from accessing actions that they don't have access rights for. Rendering links or other information is handled by the view. The model can manage access using Stonewall, a DSL that describes which roles can access which work items depending on the work item state.
+
+\question{How do we handle time-limited activities?}
+
+In Stonepath, activities are modelled both by work items and by tasks. If a task is used to model part of an activity, a due date can be set on the task. Similarly, if the state itself should be time limited, then we can create tasks for those work items that only exist to manage overdue activities. It is then trivial to implement a periodic process to poll for overdue tasks and invoke an appropriate callback on them.
+
+\question{Are we able to set preconditions for an activity to start?}
+
+Yes, we can set preconditions for an activity by adding validations to the work item model that are contingent on the state. As a transition updates the state column and attempts to save the model, the model's attributes must validate against the new state in order for the state change to occur. Any failed validations will be reported to the user. For example, if we have a project management system that tracks features, we may need to provide acceptance criteria and time estimates before the feature can be assigned to a developer.
+We can encode this in the model as in Figure \ref{fig:stonepath-precondition}.
+
+\begin{figure}[!ht]
+  \caption{Example of an activity precondition encoded with Stonepath}
+  \label{fig:stonepath-precondition}
+  \begin{lstlisting}
+class Feature < ActiveRecord::Base
+  # ... state definitions omitted...
+  # States: new, todo, in_progress, in_testing, done, accepted, rejected
+  # Acceptance criteria and hour estimated are required for features
+  # that are in development, or have been developed already.
+
+  with_options if: :in_development? do |m|
+    m.validates :acceptance_criteria, presence: true
+    m.validates :estimated_hours, numericality: true
+  end
+
+  def in_development?
+    todo? or in_progress? or in_testing? or done? or accepted?
+  end
+end
+  \end{lstlisting}
+\end{figure}
+
+We can also prevent transitions by adding guards to the transitions in the state machine definition. Unlike validations, guards do not report validation errors, and require the developer to apply them to every transition out of a state. Guards are most appropriate for modelling parallel activities, where many things need to occur before a transition may be taken.
+
+\question{Can we set postconditions on activities, and reflect them in the user interface (ex. forms)?}
+
+We can set postconditions on an activity by applying guards to appropriate transitions out of the state corresponding to the activity. As an example, we might not want to transition out of a state that represents two parallel activities until both activities have been completed. In this case, we could add a guard to the transition to ensure that both activities have completed in order for the transition to occur. To display errors caused by failed postconditions, we can populate a model's error list in the guard. Unlike preconditions, there is no officially-supported way to declare postconditions that apply to all transitions out of a state.
+
+\question{How do we model parallel activities in a workflow?}
+
+To model parallel activities, multiple task assignments are generated when a work item enters a state representing a parallel activity. The tasks making up a work item are themselves models, so they can have views and controllers like any other activity. The only extra logic needed to handle parallel activities is a set of appropriate guards on the transitions out of the state representing the parallel activities. These guards ensure that all of the tasks have completed before the transition occurs.
+
+\question{Can we change the state of a workflow through an alternate process if there are exceptional circumstances?}
+
+A work item should only change state in response to events. It is possible to directly modify the \verb!aasm_state! attribute of a work item, though this approach is not officially supported.
+
+\question{What work, if any, is needed to integrate the framework with Rails?}
+
+Stonepath is only a thin wrapper around Rails and AASM to encourage best practices in dealing with workflow-based applications. Stonepath does not automatically derive routes, views or controllers. Similarly, Stonewall implements access control at the model layer, so the developer is responsible for creating views and controllers that respect the model layer access controls.
+
+
+\sectionnote {AC}
+\section {Ruote}
+Ruote is a process-based workflow framework for Ruby. It can be integrated with Ruby on Rails, though it is not specific to Ruby on Rails. It models a workflow as a combination of processes and participants. The processes represent each process or stage of a workflow and the participants represent the ‘individual' people or software agents working in that process of the workflow. Each participant can be assigned to multiple processes, however they are not very reusable as they can only ever implement one method of work.
+
+Each process is defined by a process definition. Process definitions describe the internals of each process and direct the flow of work between the registered participants. Once the process definition finishes the process terminates and it moves on to the next process.
+
+A work item can be seen as a collection of data passed between each process that the participants work on and modify. Ruote has complete control over the work item and can reset it and modify it at any point during the workflow.
+
+The following section provides an overview of Ruote in terms of the criteria laid out in section \ref{sec:evaluation-questions}.
+
+\question{Does the framework work with Ruby on Rails 3.2 / 4.0?}
+
+Yes, it works with a manual setup or by using a much simpler setup involving Ruote-Kit. Starting a new project with Ruote-Kit is the easiest method because you can generate a new rails project using a provided template. However this template has not been updated for 4.0 so it required a very simple fix in the routes.rb file. I never tried to integrate Ruote-Kit with an existing application but there doesn't appear to be much you would have to configure.
+
+\question{How do we define roles using the framework?}
+
+Ruote does not have the concept of a role. However each participant class is just a ruby class so you are able to access any roles that are being used elsewhere in your application.
+
+\question{How can we assign activities to individual users?}
+
+A process definition defines how a single process distributes the work between the participants assigned to it. The process definition is a tree structure that simply tells the participants when they should do work and synchronizes them. The process definition can be defined with basic Ruby, JSON, XML, or a Ruote specific mini-language called radial.
+
+\question{How can we assign activities to groups of users?}
+
+Yes. In this case we can use a participant which represents the group itself.
+
+\question{How is access control handled for access to artifacts and activities?}
+
+Ruote is not responsible for access control, only process management.
+
+\question{How do we handle time-limited activities?}
+
+Each activity has a timeout attribute which can be set on selected participants. When the time specified in the timeout is reached it skips to the next step in the activity regardless if the participants have finished their work or not.
+
+\question{Are we able to set preconditions for an activity to start?}
+
+Yes, transitions between stages are done with method calls and mutexes so you can simply wrap segments with if statements to control the flow of the workflow.
+
+\question{Can we set postconditions on activities, and reflect them in the user interface (ex. forms)?}
+
+Yes, there are methods you can implement such as \verb!on_cancel!, \verb!on_timeout!, and \verb!on_error! which will run when that specific event is triggered.
+
+\question{How do we model parallel activities in a workflow?}
+
+Using ruote-synchronize addon it is possible to launch multiple processes concurrently and synchronize them with the use of mutexes in the form of :await. In terms of a single workflow Ruote supports concurrent running and synchronization of each participant.
+
+\question{Can we change the state of a workflow through an alternate process if there are exceptional circumstances?}
+
+One way of doing this is to catch some type of error and then invoke \verb!engine.cancel_process(id)! which is cancel a process and invoke the \verb!on_cancel! method of that process. The engine can then call \verb!engine.launch(id)! to start another process.
+
+\question{What work, if any, is needed to integrate the framework with Rails?}
+
+Ruote can be run alongside or inside a Rails web application with Ruote-kit. You use the framework with your web application by accessing the Ruote thread and invoking expressions which can initiate the changes in the workflow.
+\end{document}

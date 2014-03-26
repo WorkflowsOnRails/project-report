@@ -611,14 +611,14 @@ As well, the use of a single join table for the permissions makes it trivial to 
 It is equally trivial to query the database to determine if a user has a specified permission for a task: as demonstrated by Figure \ref{fig:case-research-permission-code-example}, it can be implemented with a single existence query on the Role model.
 
 \begin{figure}[!ht]
-\centering \includegraphics[height=3.5in]{./img/case-study-research-railgun/rolify-data-model}
+\centering \includegraphics[width=2.0in]{./img/case-study-research-railgun/rolify-data-model}
 \caption{Data model used by the Rolify permission model. Note the separation of the permission type from the many-to-many association.}
 \label{fig:case-research-rolify-data-model}
 \end{figure}
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[height=2.5in]{./img/case-study-research-railgun/permission-data-model}
+\includegraphics[width=2.0in]{./img/case-study-research-railgun/permission-data-model}
 \cprotect\caption{Custom permission model linking \verb!User!s and \verb!Resource!s using a single intermediate class.}
 \label{fig:case-research-sane-permission-data-model}
 \end{figure}
