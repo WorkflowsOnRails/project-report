@@ -1,26 +1,70 @@
-digraph hierarchy {
-rankdir=TB
-node[shape=Mrecord, fontname=Arial, fontsize=10, penwidth=0.7]
-edge[dir=forward, arrowhead=vee, fontname=Arial, fontsize=9, penwidth=0.7]
-
-start[label="",
-      shape=circle, style=filled, color=black, fillcolor=black,
-      fixedsize=true, width=0.25, height=0.25]
-writing_submission[label = "{writing submission|}"]
-reviewing[label = "{reviewing|enter/notify_submitted()}"]
-accepted[label = "{accepted|enter/notify_accepted(),record_submission()}"]
-failed[label = "{failed|}"]
-end[label="",
-    shape=doublecircle, style=filled, color=black, fillcolor=black,
-    fixedsize=true, width=0.2, height=0.2]
-
-start->writing_submission
-writing_submission->reviewing [label = " submit   "]
-writing_submission->failed [label = " deadline_expired/notify_expired()   "]
-reviewing->reviewing [label = " submit   "]
-reviewing->writing_submission [label = " return/notify_returned()   "]
-reviewing->accepted [label = " accept   "]
-reviewing->accepted [label = " deadline_expired/notify_expired()   "]
-accepted->end
-failed->end
+digraph statechart {
+	graph [bb="0,0,453.97,328",
+		rankdir=TB
+	];
+	node [fontname=Arial,
+		fontsize=10,
+		label="\N",
+		penwidth=0.7,
+		shape=Mrecord
+	];
+	edge [dir=forward,
+		fontname=Arial,
+		fontsize=9,
+		penwidth=0.7
+	];
+	writing_submission	 [height=0.54167,
+		label="{Writing submission|}",
+		pos="169.97,252",
+		width=1.3889];
+	reviewing	 [height=0.54167,
+		label="{Reviewing|entry / notify_submitted();}",
+		pos="119.97,166",
+		width=1.7778];
+	writing_submission -> reviewing	 [label=" submit  ",
+		lp="129.97,209",
+		pos="e,111.55,185.33 129.56,232.82 122.5,227.77 116.11,221.54 111.97,214 108.84,208.28 108.39,201.64 109.27,195.17"];
+	completed	 [height=0.54167,
+		label="{Completed|}",
+		pos="129.97,80",
+		width=0.86806];
+	writing_submission -> completed	 [label=" deadline_expired / mark_completed();  ",
+		lp="372.47,166",
+		pos="e,161.56,84.441 220.08,242.16 236.76,236.74 253.88,228.02 264.97,214 291.64,180.27 303.41,151.91 276.97,118 264.09,101.47 210.34,\
+91.188 171.56,85.776"];
+	"00bd8bda-a4d6-469d-8681-85b6d895cf5c"	 [color=black,
+		fillcolor=black,
+		fixedsize=true,
+		height=0.25,
+		label="",
+		pos="169.97,319",
+		shape=circle,
+		style=filled,
+		width=0.25];
+	"00bd8bda-a4d6-469d-8681-85b6d895cf5c" -> writing_submission	 [pos="e,169.97,271.24 169.97,309.77 169.97,302.54 169.97,291.6 169.97,281.24"];
+	reviewing -> writing_submission	 [label=" return / notify_returned();  ",
+		lp="207.47,209",
+		pos="e,162.47,232.69 135.01,185.29 139.45,191.09 144.14,197.65 147.97,204 151.66,210.12 155.18,216.95 158.27,223.47"];
+	reviewing -> reviewing	 [label=" submit  ",
+		lp="219.97,166",
+		pos="e,184.26,158.71 184.26,173.29 194.76,172.24 201.97,169.81 201.97,166 201.97,163.56 199.01,161.68 194.12,160.38"];
+	reviewing -> completed	 [label=" accept / on_accepted();  ",
+		lp="56.471,123",
+		pos="e,98.449,80.52 55.895,159.13 20.726,153.21 -12.517,141.42 4.9715,118 24.029,92.484 59.904,83.84 88.35,81.229"];
+	reviewing -> completed	 [label=" deadline_expired / on_accepted();  ",
+		lp="199.47,123",
+		pos="e,127.81,99.191 122.14,146.77 123.44,135.88 125.11,121.79 126.58,109.46"];
+	completed -> completed	 [label=" deadline_expired  ",
+		lp="218.47,80",
+		pos="e,161.55,72.882 161.55,87.118 171.31,86.974 178.97,84.602 178.97,80 178.97,77.196 176.13,75.22 171.69,74.071"];
+	"41d0a329-d3fd-4a0f-8813-98f72a8bd4bc"	 [color=black,
+		fillcolor=black,
+		fixedsize=true,
+		height=0.30556,
+		label="",
+		pos="129.97,11",
+		shape=doublecircle,
+		style=filled,
+		width=0.29167];
+	completed -> "41d0a329-d3fd-4a0f-8813-98f72a8bd4bc"	 [pos="e,129.97,22.176 129.97,60.692 129.97,51.877 129.97,41.283 129.97,32.23"];
 }

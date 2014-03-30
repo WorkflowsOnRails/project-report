@@ -12,12 +12,12 @@ end[label="",
 
 writing_submission[label = "{writing submission|}"]
 reviewing[label = "{reviewing|enter/notify_submitted()}"]
-accepted[label = "{accepted|enter/notify_accepted(),record_submission()}"]
+completed[label = "{completed|enter/notify_accepted(),record_submission()}"]
 
 start->writing_submission
 writing_submission->reviewing [label = " submit   "]
 reviewing->reviewing [label = " submit   "]
 reviewing->writing_submission [label = " return/notify_returned()   "]
-reviewing->accepted [label = " accept   "]
-accepted->end
+reviewing->completed [label = " completed   "]
+completed->end
 }

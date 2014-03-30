@@ -32,7 +32,7 @@ digraph statechart {
 		lp="382.5,209",
 		pos="e,270.71,99.237 324.15,318.85 331.8,306.29 340.96,288.86 345,272 349.14,254.71 347.88,249.54 345,232 338.47,192.2 338.02,179.8 316,\
 146 306.1,130.81 291.85,116.82 278.7,105.74"];
-	"1222499a-ba83-48c5-b10e-a44eb32c168d"	 [color=black,
+	"feb82875-014d-4b6e-8e48-8b6e65143894"	 [color=black,
 		fillcolor=black,
 		fixedsize=true,
 		height=0.25,
@@ -41,7 +41,7 @@ digraph statechart {
 		shape=circle,
 		style=filled,
 		width=0.25];
-	"1222499a-ba83-48c5-b10e-a44eb32c168d" -> writing_submission	 [pos="e,312,357.24 312,395.77 312,388.54 312,377.6 312,367.24"];
+	"feb82875-014d-4b6e-8e48-8b6e65143894" -> writing_submission	 [pos="e,312,357.24 312,395.77 312,388.54 312,377.6 312,367.24"];
 	reviewing -> reviewing	 [label=" submit  ",
 		lp="318,252",
 		pos="e,282.62,245.91 282.62,258.09 293.33,256.78 300,254.75 300,252 300,250.24 297.26,248.77 292.48,247.6"];
@@ -61,7 +61,7 @@ digraph statechart {
 	accepted -> completed	 [label=" deadline_expired  ",
 		lp="191.5,123",
 		pos="e,189.12,99.069 119.46,146.69 128.24,137.16 139.88,125.89 152,118 160.61,112.4 170.2,107.41 179.86,103.05"];
-	"33eefbce-7c56-40dc-9ce4-c7f4d07f7741"	 [color=black,
+	"df3bf4d5-4b2a-4942-80eb-b9c73f6b9ab4"	 [color=black,
 		fillcolor=black,
 		fixedsize=true,
 		height=0.30556,
@@ -70,5 +70,5 @@ digraph statechart {
 		shape=doublecircle,
 		style=filled,
 		width=0.29167];
-	completed -> "33eefbce-7c56-40dc-9ce4-c7f4d07f7741"	 [pos="e,245,22.176 245,60.692 245,51.877 245,41.283 245,32.23"];
+	completed -> "df3bf4d5-4b2a-4942-80eb-b9c73f6b9ab4"	 [pos="e,245,22.176 245,60.692 245,51.877 245,41.283 245,32.23"];
 }
