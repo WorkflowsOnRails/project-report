@@ -1,0 +1,57 @@
+digraph statechart {
+	graph [bb="0,0,241.82,328",
+		rankdir=TB
+	];
+	node [fontname=Arial,
+		fontsize=10,
+		label="\N",
+		penwidth=0.7,
+		shape=Mrecord
+	];
+	edge [dir=forward,
+		fontname=Arial,
+		fontsize=9,
+		penwidth=0.7
+	];
+	unsubmitted	 [height=0.54167,
+		label="{Unsubmitted|}",
+		pos="116.82,252",
+		width=0.97917];
+	submitted	 [height=0.54167,
+		label="{Submitted|exit / cancel_deadline(); close_ticket();}",
+		pos="116.82,166",
+		width=2.5625];
+	unsubmitted -> submitted	 [label=" submit [accepting_claims?] / notify_submitted();  ",
+		lp="106.32,209",
+		pos="e,24.139,180.68 81.186,249.67 55.374,246.62 22.096,237.9 4.8214,214 -4.5518,201.03 1.4711,191.62 14.587,184.8"];
+	"7bf02aa3-dec9-4e6d-96fe-8c96a2ab305f"	 [color=black,
+		fillcolor=black,
+		fixedsize=true,
+		height=0.25,
+		label="",
+		pos="116.82,319",
+		shape=circle,
+		style=filled,
+		width=0.25];
+	"7bf02aa3-dec9-4e6d-96fe-8c96a2ab305f" -> unsubmitted	 [pos="e,116.82,271.24 116.82,309.77 116.82,302.54 116.82,291.6 116.82,281.24"];
+	submitted -> unsubmitted	 [label=" return  ",
+		lp="226.32,209",
+		pos="e,152.72,246.19 195.68,185.11 209.06,192.07 216.26,201.46 207.82,214 197.55,229.26 179.79,238.23 162.67,243.5"];
+	resolved	 [height=0.54167,
+		label="{Resolved|}",
+		pos="116.82,80",
+		width=0.76389];
+	submitted -> resolved	 [label=" accept  ",
+		lp="133.82,123",
+		pos="e,116.82,99.191 116.82,146.77 116.82,135.88 116.82,121.79 116.82,109.46"];
+	"f9c2ddc3-cc54-428a-8c5f-972b720f674e"	 [color=black,
+		fillcolor=black,
+		fixedsize=true,
+		height=0.30556,
+		label="",
+		pos="116.82,11",
+		shape=doublecircle,
+		style=filled,
+		width=0.29167];
+	resolved -> "f9c2ddc3-cc54-428a-8c5f-972b720f674e"	 [pos="e,116.82,22.176 116.82,60.692 116.82,51.877 116.82,41.283 116.82,32.23"];
+}

@@ -1,28 +1,18 @@
-% -*- compile-command: "cd .. && make -k tex/case-study-research-ide.pdf" -*-
+% -*- compile-command: "cd .. && make" -*-
 \documentclass[document.tex]{subfiles}
 \begin{document}
 \chapter{Case~Study: An~IDE~for~Research}
 \label {ch:case-study-2}
 
-While the first case study focused on a system with several complex, deadline-driven workflows, it had only a simple notion of roles. The second case study balances this by focusing on an application that has a simple and well-known workflow, but a more complex notion of user roles.
+Scientific misconduct and reproducibility issues are a growing concern in the scientific community. Researchers need to be careful to follow a rigorous research process research, and must document their experiments and analyses carefully. Though deliberate misconduct and fraud are difficult to prevent using technological means, software tools are well suited to managing data and walking users through the step-by-step application of the scientific method.
 
-\sectionnote {AC}
-\section {Background}
-\label{sec:case-study-research-background}
+In fact, several tools such as Taverna \cite{taverna-website} exist to document and automate scientific experiments, or at least those that can be performed in silico, i.e. using only computers. These tools are known as scientific workflow systems, and allow researchers to describe the series of steps required to carry out an experiment or simulation. This high-level approach allows researchers -- who may not necessarily be programmers -- to easily define complex computational experiments. Additionally, the experiments can be shared with other researchers by providing them with the files defining the scientific workflow.
 
-Workflow-based systems have found a niche in computational science and bioinformatics. Software suites called scientific workflow systems allow researchers to describe their experiments in terms of workflows and manage the results that they produce. These tools improve reproducibility by allowing scientists to share the steps required to reproduce an experiment, and review how the experiment's results were produced.
+These scientific workflow systems do not manage the whole research process, and thus aids reproducibility rather than discouraging misconduct. There is still room for a tool to encourage researchers to carefully follow the scientific method, and thus discourage scientific misconduct. Such a ``research IDE'' is another example of a system that should logically be structured around workflows, which makes it suitable for use as a proof-of-concept application of the platform defined in Chapter \ref{ch:platform}. Additionally, as researchers may be assisted by other researchers, technicians, and graduate students whose roles may vary between research projects, it provides an opportunity to evaluate a system with a more complex notion of roles than the previous prototypes.
 
-Taverna is one such scientific workflow system \cite{taverna-website}. It is an open source tool build to aid in the execution of scientific experiments, with a focus on in silico experiments. In silico experiments are scientific experiments which are done entirely on a computer such as complex models of cells. The main benefit to in silico experiments is the increased precision and the size of the data that can be generated and analyzed. Unfortunately, many researchers are not programmers and are unable to easily create in silico experiments. Taverna allows a researcher to describe an experiment with a workflow so that the steps of an experiment are abstracted from the programming of it. This modular workflow approach allows a researcher to design an experiment without having to worry about the technical details of programming.
-
-Due to the large computational requirement of in silico experiments Taverna allows multiple systems to work on the computations of a single experiment. This allows a researcher to utilize an entire network of computers and benefit from the extra computational power. Because of the nature many scientific experiments many tasks are able to be done in parallel. With parallel activities and enough computational power the speed at which an experiment can be completed drastically increases.
-
-
-\sectionnote {BM}
-\section {Overview}
-\label{sec:case-study-research-overview}
-
-Scientific misconduct and issues with reproducibility are a growing concern.
-While scientific workflow tools similar to Taverna have data management features that help researchers to track data provenance and reproducibility, they do not make any attempt to manage the scientific process itself. Though deliberate misconduct and fraud are difficult to prevent using technological means, it should be possible to encourage best practices by using a software tool to guide inexperienced researchers through the scientific process, which can itself be modeled as a workflow.
+\sectionnote {AC, BM}
+\section {Requirements}
+\label{sec:case-research-requirements}
 
 In general, the process of performing a research project can be described in six steps:
 \begin{compactenum}
@@ -43,15 +33,9 @@ Though the process is often taught as a sequence of steps, some iteration may oc
 
 The research process itself may be carried out by a number of individuals with different responsibilities, depending on the discipline. For example, a technician may be responsible for validating the methodology and carrying out the experiment itself, while a statistician may be consulted for the analysis. It is important that a tool for managing the research process can accommodate any arbitrary assignment of responsibilities to individuals that a project demands.
 
-As a well-defined sequence of steps with restricted iteration, this process seems like an excellent candidate for automation using a workflow framework. Furthermore, as user roles are not predefined, but instead specified on a project-by-project basis, this case study provides an opportunity to investigate best practices and existing libraries for role-based access.
-It also fills a different need that isn't met by existing existing scientific workflow software. \todo{Something about synergy.}
+\todo{Add a transition here}
 
-
-\sectionnote {AC}
-\section {Requirements}
-\label{sec:case-research-requirements}
-
-  Figures \ref{fig:case-research-use-case-project-management} through \ref{fig:case-research-use-case-project-workflow} display the individual use cases for the research IDE application. They have been separated into two diagrams based on project management and the main project workflow. The project management shown in Figure \ref{fig:case-research-use-case-project-management} goes over which actors have permission to view, create and delete research projects. In addition, it also displays modifying the permissions of users for a given project and how the project advances to the next stage of the workflow. The project workflow shown in Figure \ref{fig:case-research-use-case-project-workflow} focuses on the workflow system described in section \ref{sec:case-study-research-overview}.
+  Figures \ref{fig:case-research-use-case-project-management} through \ref{fig:case-research-use-case-project-workflow} display the individual use cases for the research IDE application. They have been separated into two diagrams based on project management and the main project workflow. The project management shown in Figure \ref{fig:case-research-use-case-project-management} goes over which actors have permission to view, create and delete research projects. In addition, it also displays modifying the permissions of users for a given project and how the project advances to the next stage of the workflow. The project workflow shown in Figure \ref{fig:case-research-use-case-project-workflow} focuses on the workflow system described in section \ref{sec:case-research-requirements}.
 
 \begin{figure}[!ht]
 \centering \includegraphics[height=5in]{./img/case-study-research-railgun/project_management_use_case}
@@ -77,7 +61,7 @@ Detailed use case descriptions are provided in Appendix \ref{ch:detailed-use-cas
 \section {Workflow Design}
 \label{sec:case-research-workflow-design}
 
-While the six-step process described in section \ref{sec:case-study-research-overview} maps trivially to a simple workflow, possible iterations described between steps is somewhat more subtle. Though it may appear that the ability to revisit the literature review while performing the analysis implies a transition from the ``Analyzing data'' phase to the ``Performing literature review'' phase, it is important to distinguish the state of the user interface for current user from the state of the project itself. Such a transition would imply that the project must return to ``Performing literature review'', impacting all other participants in the project. Worse, such a transition would require the project to transition back through all of the intermediate states to reach the analysis phase again, possibly altering previously-completed states along the way.
+While the six-step process described in section \ref{sec:case-research-requirements} maps trivially to a simple workflow, possible iterations described between steps is somewhat more subtle. Though it may appear that the ability to revisit the literature review while performing the analysis implies a transition from the ``Analyzing data'' phase to the ``Performing literature review'' phase, it is important to distinguish the state of the user interface for current user from the state of the project itself. Such a transition would imply that the project must return to ``Performing literature review'', impacting all other participants in the project. Worse, such a transition would require the project to transition back through all of the intermediate states to reach the analysis phase again, possibly altering previously-completed states along the way.
 
 Instead, it seems more natural to express this conceptual iteration as a policy, governing which tasks can be edited in which project state. The thus-limited workflow for a research project is expressed in Figure \ref{fig:case-research-design-project-workflow}, while a summary of the policies governing each task are given in Table \ref{tbl:case-research-edit-policies}. It also contains an additional ``completed'' state. Rather than representing a step in the research process, this state represents completion of the process, and is included to accommodate archiving projects for record-keeping purposes.
 
@@ -185,7 +169,7 @@ Though this data model is limited, it is almost sufficient to implement the solu
 \subsection {Permission-based Authorization}
 \label{sec:case-research-permission-based-auth}
 
-Although Pundit provides a way to express authorization rules, it leaves it up to the developer to create the data model to capture which users can perform what actions. While this was an advantage in the first case study as the authorization scheme was simple, the research IDE involves user-configurable fine-grained permissions. The case study also has the following additional requirements, derived from sections \ref{sec:case-study-research-requirements} and \ref{sec:case-research-ui-design}:
+Although Pundit provides a way to express authorization rules, it leaves it up to the developer to create the data model to capture which users can perform what actions. While this was an advantage in the first case study as the authorization scheme was simple, the research IDE involves user-configurable fine-grained permissions. The case study also has the following additional requirements, derived from sections \ref{sec:case-research-requirements} and \ref{sec:case-research-ui-design}:
 \begin{enumerate}
 \item Owners can assign each participant a permission (ex. no access, view, or view and edit) for each task in a single project;
 \item Owners can view and update the set of permissions assigned to a participant through an interface that groups the permissions by participant;

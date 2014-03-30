@@ -1,3 +1,4 @@
+% -*- compile-command: "cd .. && make" -*-
 \documentclass[document.tex]{subfiles}
 \begin{document}
 
@@ -28,13 +29,13 @@ These three actors use the system for tasks that can be split into four main con
 \item \keyword{project execution}, which involves all of the collaboration between Project Group Members and the Project Supervisor(s) for their project.
 \end{itemize}
 
-Individual use cases for these concerns are illustrated in Figures \ref{fig:case-4ys-use-case-account-management} through \ref{fig:case-4ys-use-case-oral-reports}. Note that the project execution concern has been split into its own use case diagram (Figure \ref{fig:case-4ys-use-case-oral-reports}) as its requirements are somewhat more complex than the other phases of the project lifecycle.
+Individual use cases for these concerns are illustrated in Figures \ref{fig:case-4ys-use-case-setup} through \ref{fig:case-4ys-use-case-oral-reports}. Note that the project execution concern has been split into its own use case diagram (Figure \ref{fig:case-4ys-use-case-oral-reports}) as its requirements are somewhat more complex than the other phases of the project lifecycle.
 Detailed use case descriptions are provided in Appendix \ref{ch:detailed-use-cases-1}.
 
 \begin{figure}[!ht]
 \centering \includegraphics[width=3in]{./img/case-study-fourth-year-system/setup}
 \caption{Use case diagram for the setup functionality of the fourth-year project management system.}
-\label{fig:case-4ys-use-case-account-management}
+\label{fig:case-4ys-use-case-setup}
 \end{figure}
 
 \begin{figure}[!ht]
@@ -80,7 +81,7 @@ Each step of the fourth-year project process also has associated deadlines.
 \section{Workflow Design}
 \label{sec:4ys-workflow-design}
 
-The six-step project execution phase described in section \ref{sec:4ys-project-execution} is the core workflow of a project in the fourth-year project management system. As this high-level workflow is completely linear, it can be trivially transformed into the state chart in Figure \ref{fig:state-machine-project-lifecycle}. In this model, the project is a Stonepath work item, while each step is associated with a set of tasks (ex. producing a proposal or submitting a poster fair demo form), which can be extracted from the use case descriptions in section \ref{sec:4ys-project-execution}.
+The six-step project execution phase described in section \ref{sec:4ys-requirements} is the core workflow of a project in the fourth-year project management system. As this high-level workflow is completely linear, it can be trivially transformed into the state chart in Figure \ref{fig:state-machine-project-lifecycle}. In this model, the project is a Stonepath work item, while each step is associated with a set of tasks (ex. producing a proposal or submitting a poster fair demo form), which can be extracted from the use case descriptions in section \ref{sec:4ys-requirements}.
 
 \begin{figure}[!htbp]
 \centering \includegraphics[width=3.8in]{./img/case-study-fourth-year-system/project_lifecycle}
@@ -394,11 +395,61 @@ end
   \label{fig:4ys-pundit-policy}
 \end{figure}
 
+\FloatBarrier
+
+
+\sectionnote{BM}
+\subsection{Handling Deadlines}
+\label {sec:4ys-handling-deadlines}
+
+The use cases in Section \ref{sec:4ys-requirements} and their corresponding
+workflows in Section \ref{sec:4ys-workflow-design} all make heavy use of deadlines. However, Rails by default can only respond to HTTP requests, and cannot support deadlines out of the box as Rails makes no effort to handle scheduled tasks.
+
+Fortunately, there are several Rails libraries that handle executing tasks outside the request-response cycle, including Resque, \verb!Delayed::Job!, and Queue Classic. All three libraries have similar functionality, allowing programmers to schedule method calls to be executed after some specified point in time. The method calls are executed on a pool of worker processes, which allows multiple scheduled operations (or ``tasks'') to run in parallel. Each of the libraries differs from the others only in the technology used to store enqueued tasks: Resque uses a Redis backend, Queue Classic uses PostgreSQL, while \verb!Delayed::Job! uses a Rails model. As such, \verb!Delayed::Job! was selected as it has no additional dependencies, making it much less effort-intensive to install and deploy than the other libraries.
+
+With a library selected to handle executing tasks, the application still needs a way to schedule them. The most basic approach would be to enqueue one task to call a method on each workflow \verb!Task! instance when it will expire. However, this technique comes at the cost of additional complexity: if a deadline changes between the point when the \verb!Task! instance is created and the scheduled task executes, then the programmer must be sure to delete the enqueued task and create a new one for the new deadline.
+
+A more appropriate approach to scheduling is polling. A separate process can query periodically for \verb!Tasks! with expired deadlines, and enqueues calls to their expiration methods. The Clockwork library for Ruby was used to implement this technique. It implements a cron-like DSL that periodically executes configured Ruby method calls. Though we could serially call the expiration methods on each of the expired objects from the polling process itself, there are two reasons to prefer to enqueue the calls:
+\begin{enumerate}
+\item \verb!Task!s may send notification emails or perform other blocking operations, causing other tasks to wait; and
+\item \verb!Task!s of the same type will tend to have their deadlines expire at the same time
+\end{enumerate}
+These two factors make it desirable to use a task queue to execute the tasks in parallel in order to decrease the response time between a deadline being reached, and the associated operations being performed.
+
+Of course, handling deadlines in a workflow is a not a requirement that is unique to the fourth year project system. A reuseable \verb!Expirable! mixin was extracted from the case study to encapsulate the deadline-handling approach described above. Instead of integrating an asynchronous task library and writing their own polling process, clients can include \verb!Expirable! in models that handle deadlines. Each such model must provide a \verb!deadline_expired! instance method that is called when the deadline expires, and a \verb!newly_expired! class method that returns a collection of expired instances that have yet to be processed. Figure \ref{fig:deadline-expiration-example} provides an example model that uses \verb!Expirable! to transition tasks to a \verb!failed! state when their deadline is passed.
+
+\begin{figure}[!ht]
+  \begin{lstlisting}
+class ExampleTask < ActiveRecord::Base
+  include AASM
+  include Expirable
+
+  scope :newly_expired,
+        -> { in_progress.where("deadline < ?", DateTime.now) }
+
+  aasm do
+    # ...
+
+    event :deadline_expired do
+      transitions from: :in_progress, to: :failed
+    end
+
+    # ...
+  end
+end
+  \end{lstlisting}
+  \caption{Code snippet demonstrating the use of the Expirable mixin.}
+  \label{fig:deadline-expiration-example}
+\end{figure}
+
+The use of the \verb!newly_expired! method makes the mixin independent of the implementation of the task models. This allows the clients to make appropriate trade-offs in deadline representation. As an example, each \verb!Task! instance in the case study is related to a \verb!Deadline! corresponding to its task type. This means that only a single \verb!Deadline! instance needs to be changed in order to change the deadlines of all deliverables of a specific type.
 
 \FloatBarrier
 
+
 \sectionnote {BM}
 \subsection {Presenting Available Actions}
+\label {sec:4ys-available-actions}
 
 Using AASM, we can extract information about all of the permitted event transitions from the current state of an object. Additionally, Pundit allows us to query which controller actions may be taken for the current user. As the system follows the convention that every event corresponds to a controller action, this information can be used to automatically present users with the actions they can perform for a task's current state, without resorting to hard-coding \verb!if! statements for role or state checks.
 
