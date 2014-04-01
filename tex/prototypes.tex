@@ -43,6 +43,8 @@ Additionally, the model also includes actions to create and destroy tasks when a
 
 The state machine was translated to a Ruby on Rails application, which is available at \url{https://github.com/WorkflowsOnRails/stonepath-timeboxed-example}. The application was implemented from the bottom up. First a workitem was implemented for issues, as demonstrated in the code snippet in Figure \ref{fig:stonepath-prototype-workitem}. Next, workbenches were created to for roles and users. Finally, a generic task type was defined to associate workitems and workbenches. After the model was completed, Devise was integrated to handle authentication, and the model was wrapped with appropriate views and controllers to drive the application.
 
+\todo {Mention Devise and Cancan only in passing, making forward references to the case study for more information.}
+
 \begin{figure}[!ht]
   \begin{lstlisting}
 class Issue < ActiveRecord::Base
