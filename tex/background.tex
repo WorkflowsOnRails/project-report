@@ -10,18 +10,19 @@
 \section {Workflow Framework Types and Notation}
 \label {sec:overview-of-workflows}
 
-\todo {Expand this section with more information on how the notations and styles differ, ex. state machine can't express responsibility and work assignment, and must compose parallel activities with communicating state machines and guards. An example of each notation would also be good to have.}
+A workflow framework is an implementation of a workflow notation into software which can be used by a developer to create and manage a workflow for their system. The framework will keep track of the state of the workflow and all of the guard conditions on the transitions. This lowers the complexity of the system as the workflow can be abstracted from the implementation of the rest of the system. This abstraction allows transitions and new activities to be added easily without modifying the rest of the system.
 
-Workflows are implemented as state machines (state based) or flow charts (process based).
+There are two common notations used to describe workflows: state based and Business Process Model Notation (BPMN) \cite{bpmn}. State based workflows are implemented in software using the idea of a state machine where each state is a step in the workflow. BPMN based workflows are implemented in software using the idea of a flowchart where each process is a step in the workflow. Each notation has its own strengths and weaknesses and both can be implemented in software to handle all types of workflows.
 
-Workflow frameworks normally maintain the current step of the program and how the program will transition between steps. This allows what each step implements to be abstracted from how the program transitions between the many steps lowering the overall complexity of the system. This allows transitions to be modified and edited with little impact to the implementation of each individual step.
+State based workflows are very good at non-linear looping workflows. The state based model assumes that a workflow is only ever in a single state which makes workflows designed using this notation robust. However, due to the single state limitation the state based model is a poor choice for modeling workflows with parallel activities. In order to model parallel activities a state must be composed of multiple individual state machines. Each of these state machines must implement guard conditions and communicate with each other in order to stay synchronized.
 
-The state based model implements the workflow as a state machine. Each step is represented as a state and the following steps are represented by the state transitions. The state model acts like a state machine and is only ever in one state at any time. The state model is good at modeling workflows with well defined single states but falls apart when parallel states are required.
+\todo example of state machine, show loops and branches and guard conditions
 
-The process based model implements the workflow as a flow chart. This model differs from the state model in that it can easily model parallel processes. Where a state machine typically is only ever in a single state the process model can branch its flow of control to work in parallel. This is done by allowing all the transitions out of a node to be taken as long as the correct conditions are met. The process model also allows control flow to merge from two branches of control back into a single process.
+Unlike the state based model, BPMN is well suited to non-looping parallel workflows. BPMN allows multiple processes to be executed concurrently by branching  control flow and merging it back together at some later time. The major downside to this branching method is that looping can become very complicated and unstable when multiple control flows exist.
 
-BPMN \cite{bpmn} is graphical way of modeling a business process and is very similar to UML. BPMN is structured as a set of activities linked together by messages and events. Activities are the processes and can be considered the actions that need to be done. Events are actions that happen in response to something else, such as delays, and connections which describe the control flow.
+\todo example of BPMN, show parallel branches, roles, and guard conditions
 
+Another feature of BPMN that cannot be modeled using state based modeling is the ability to express responsibility and assignment of work for individual processes. This concept of a 'role' is used by any workflow involving more than one group that perform different actions during each process. For example, a software project with the roles of developer, manager, and tester each have different tasks during each step of a project. While this can be implemented in software to work with a state based model state based diagrams cannot express the idea of a role.
 
 \sectionnote {BM}
 \section {Ruby on Rails}
@@ -111,16 +112,14 @@ Stonepath itself is only a thin layer on top of Rails. While it provides methods
 \sectionnote {AC}
 \subsection {Ruote}
 
-In contrast to Stonepath, Ruote is a process-based workflow framework that can be integrated with any Ruby application \cite{ruote}. Though it is not specific to Ruby on Rails, it can interoperate with Rails using the Ruote-Kit library \cite{ruote-kit} integrated with Ruby on Rails. It models a workflow as a combination of processes and participants. A process represents an activity or stage of a workflow and a participant represents the agent working on that specific step of the process. Each participant can be used in multiple processes, however they are not reusable as each participant has a single \verb!on_workitem! method that is called when a process passes work to a participant. Thus participants don't model users and groups, but associations of users and groups to specific steps in a process.
+In contrast to Stonepath, Ruote is a process-based workflow framework that can be integrated with any Ruby application \cite{ruote}. Ruote models a workflow as a combination of process definitions, work items and participants. A process definition defines the flow of control between participants and holds the work items used during it. The work items are the objects that are passed between processes and have work done to them. And finally the participants are the actors who do work on work items during each process. 
 
-\todo {We need an example here, because this is a bit hard to follow}
+Each participant has a single \verb!on_workitem! method that is called when a process begins that the participant is assigned to. Because of this the \verb!on_workitem! method must decide what action(s) to do based off the current process. This can be very messy and hard to maintain if the same participant is to be used for many different actions. Because of this participants don't model users and groups, but associations of users and groups to specific steps in a process.
 
-Each process is defined by a process definition. Process definitions describe the flow of work between the registered participants. Once the end of the process definition is reached, the process terminates and it moves on to the next process.
+Consider the expense-claim-system used as an example for Stonepath. Tasks such as reviewing and writing the expense claim would be processes. The acts done by managers and employees would be the participants. When the expense claim enters the reviewing stage all of the groups that need to do work are notified. For example, there may be two participants: a manager who oversees a group of employees, and a group of employees which review the expense claim.
 
-A work item can be seen as a collection of data passed between each process that the participants work on and modify. Ruote has complete control over the work item and can reset it and modify it at any point during the workflow.
+Ruote was created to work with Ruby projects and is not specific to the Rails framework. In order to interface with the Rails framework you must use the Ruote-Kit library \cite{ruote-kit}. The Ruote-Kit library runs on a separate thread from your Rails application. This allows it to handle parallel activities and time limited activities without interupting your rails application. This separation also abstracts the implementation of your application from the workflow completely which allows it to be added to existing rails projects easily.
 
 Similar to Stonepath, Ruote does not provide any tools for authorization, authentication, or generating user interfaces automatically from processes. However, it does have support for time-limited and parallel activities out of the box. A process definition can specify how long an activity should take before it times out and invokes a \verb!on_timeout! method on the associated participants. A process definition can also specify a set of activities (or groups of activities) that run concurrently. Ruote can also synchronize separate workflows using mutexes provided by the ruote-synchronize add-on \cite{ruote-synchronize}.
-
-
 
 \end{document}
