@@ -21,7 +21,7 @@
     Project Coordinator
     %
     \ucpart{Preconditions}
-    The current year has no deadlines that have not been met (The current year is finished)
+    Setting up the first year OR previous year is finished (all deadlines are in the past)
     %
     \ucpart{Flow}
     \ucnormal
@@ -67,17 +67,18 @@
     \ucpart{Flow}
     \ucnormal
     \begin{ucenum}
+      \item A Coordinator selects to schedule deadlines and is presented with a list of all possible deadlines and their dates
       \item A Coordinator selects a deadline to reschedule and is presented with a way to input a new date
-      \item The Coordinator selects a new date and agrees to the deadline scheduling
-      \item The deadline has been scheduled and all users are notified of the modification
+      \item The Coordinator selects a new date and agrees to the scheduling of the deadline via a confirmation box
+      \item The deadline has been scheduled
     \end{ucenum}
     %
     \ucpart{Exceptions}
-    \ucexception{Date selected has passed}
-    You cannot assign a deadline before the current time, the coordinator is sent back to step 2 and shown the error
+    \ucexception{Date selected is in the past}
+    You cannot assign a deadline in the past, the coordinator is sent back to step 3
     %
     \ucpart{Postconditions}
-    The deadline is rescheduled and all supervisors and group members are notified
+    The deadline is scheduled
   \end{usecase}
 \end{table}
 
@@ -90,41 +91,7 @@
 \section{Account Management}
 \label{sec:account-management}
 
-The account management use cases shown in Figure \ref{fig:case-4ys-use-case-account-management} are described in the following tables \ref{tbl:use-case-create-account} through \ref{tbl:use-case-authenticate}. These descriptions cover the creation, modification, and deletion of the different accounts in the system.
-
-
-\begin{table}[!htbp]
-  \centering
-  \caption{Use case description for the ``Create Account'' use case of the fourth-year project management system.}
-  \label{tbl:use-case-create-account}
-
-  \begin{usecase}[Create User Account]
-    \ucpart{Description}
-    Creates a User Account and assign permissions for the newly created User Account
-    %
-    \ucpart{Actors}
-    Project Group Member, Project Coordinator
-    %
-    \ucpart{Flow}
-    \ucnormal
-    \begin{ucenum}
-      \item The user provides an email address, password, confirmation password, full name, student number, and programme
-      \item The system validates and saves the account
-    \end{ucenum}
-    %
-    \ucpart{Exceptions}
-    \ucexception{Email not unique}
-    An account with that email address already exists and the user is redirected to step 1 and notified of the error
-    \ucexception{Password and confirmation password do not match}
-    User is redirected to step 1 and notified of the error
-    \ucexception{Email address, password, confirmation password, or full name  is not provided}
-    User is redirected to step 1 and notified of the error
-    %
-    \ucpart{Postconditions}
-    The User Account is created and saved by the system
-  \end{usecase}
-\end{table}
-
+The account management use cases shown in Figure \ref{fig:case-4ys-use-case-account-management} are described in the following tables \ref{tbl:use-case-register-member-account} through \ref{tbl:use-case-authenticate}. These descriptions cover the creation, modification, and deletion of the different accounts in the system.
 
 \begin{table}[!htbp]
   \centering
@@ -133,7 +100,7 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
 
   \begin{usecase}[Register Group Member Account]
     \ucpart{Description}
-    A student is able to register their own account and their Student Number must be provided and be unique
+    A student is able to register their own account
     %
     \ucpart{Actors}
     Project Group Member
@@ -141,15 +108,20 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
     \ucpart{Description}
     \ucnormal
     \begin{ucenum}
+      \item The user selects to register a new account
       \item The user provides an email address, password, confirmation password, full name, student number, and programme
-      \item The system validates and saves the account, include (Create User Account)
+      \item The system validates and saves the account
     \end{ucenum}
     %
     \ucpart{Exceptions}
+    \ucexception{Email not unique}
+    An account with that email address already exists and the user is redirected to step 2 and notified of the error
+    \ucexception{Password and confirmation password do not match}
+    User is redirected to step 2 and notified of the error
+    \ucexception{Name, email, student number, programme, password or confirmation password is not provided}
+    User is redirected to step 2 and notified of the error
     \ucexception{Student number not unique}
-    An account with that student number already exists and the user is redirected to step 1 and notified of the error
-    \ucexception{Student number or programme is not provided}
-    User is redirected to step 1 and notified of the error
+    An account with that student number already exists and the user is redirected to step 2 and notified of the error
     %
     \ucpart{Postconditions}
     If the Group Member Account was created successfully they will be logged in. If the Group Member Account was not created successfully they will be prompted to attempt to create their account again.
@@ -172,7 +144,7 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
     \ucpart{Flow}
     \ucnormal
     \begin{ucenum}
-      \item A Coordinator clicks on the Create Supervisors tab
+      \item A Coordinator selects to create a new Supervisor Account
       \item The Coordinator provides a name, email, and password
       \item The system validates and saves the supervisor account
     \end{ucenum}
@@ -295,7 +267,7 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
     The user is not authenticated and is redirected to step 1 and notified of the error
     %
     \ucpart{Postconditions}
-    The User Account was authenticated and is allowed to do any operations that it is allowed.
+    The User Account was authenticated and is allowed into the system.
   \end{usecase}
 \end{table}
 
@@ -336,9 +308,9 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
     %
     \ucpart{Exceptions}
     \ucexception{Name not unique}
-    A Project with that name already exists and the user is redirected to step 1 and notified of the errors
+    A Project with that name already exists and the user is redirected to step 2 and notified of the errors
     \ucexception{Name, desciription, programmes, or supervisor is not provided}
-    The user is redirected to step 1 and notified of the errors
+    The user is redirected to step 2 and notified of the errors
     %
     \ucpart{Postconditions}
     The Project is created and saved by the system
@@ -469,14 +441,14 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
     \ucnormal
     \begin{ucenum}
       \item A Project Supervisor selects a Project Group Member to be removed from the group
-      \item A confirmation message is displayed notifying the user of what this operation means
+      \item A confirmation message is displayed notifying the user that they are removing the selected user
       \item The Project Supervisor agrees and the selected user is removed from the group
     \end{ucenum}
     %
     \ucpart{Variations}
     \ucbranch{A}
     \begin{ucenum*}
-      \item [A.1] A Project Supervisor selects to leave the group themselves
+      \item [A.1] A Project Supervisor selects to leave the group themselves, continue from step 2
     \end{ucenum*}
     \ucbranch{B}
     \begin{ucenum}
