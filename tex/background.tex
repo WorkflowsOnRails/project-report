@@ -14,13 +14,25 @@ A workflow framework is an implementation of a workflow notation into software w
 
 There are two common notations used to describe workflows: state based and Business Process Model Notation (BPMN) \cite{bpmn}. State based workflows are implemented in software using the idea of a state machine where each state is a step in the workflow. BPMN based workflows are implemented in software using the idea of a flowchart where each process is a step in the workflow. Each notation has its own strengths and weaknesses and both can be implemented in software to handle all types of workflows.
 
-State based workflows are very good at non-linear looping workflows. The state based model assumes that a workflow is only ever in a single state which makes workflows designed using this notation robust. However, due to the single state limitation the state based model is a poor choice for modeling workflows with parallel activities. In order to model parallel activities a state must be composed of multiple individual state machines. Each of these state machines must implement guard conditions and communicate with each other in order to stay synchronized.
+State based workflows are very good at non-linear looping workflows. The state based model assumes that a workflow is only ever in a single state which makes workflows designed using this notation robust. However, due to the single state limitation the state based model is a poor choice for modeling workflows with parallel activities. In order to model parallel activities a state must be composed of multiple individual state machines. Each of these state machines must implement guard conditions and communicate with each other in order to stay synchronized. Figure \ref{fig:state-machine-example-diagram} provides an example of a state machine. The details of the state machine are covered in section \ref{sec:stonepath-prototyping-results}.
 
-\todo example of state machine, show loops and branches and guard conditions
+\begin{figure}[!ht]
+\centering \includegraphics[height=5in]{./img/prototypes/stonepath-state-machine}
+\caption{State machine example of a simple issue tracking system}
+\label{fig:state-machine-example-diagram}
+\end{figure}
 
-Unlike the state based model, BPMN is well suited to non-looping parallel workflows. BPMN allows multiple processes to be executed concurrently by branching  control flow and merging it back together at some later time. The major downside to this branching method is that looping can become very complicated and unstable when multiple control flows exist.
+\FloatBarrier
 
-\todo example of BPMN, show parallel branches, roles, and guard conditions
+Unlike the state based model, BPMN is well suited to non-looping parallel workflows. BPMN allows multiple processes to be executed concurrently by branching  control flow and merging it back together at some later time. The major downside to this branching method is that looping can become very complicated and unstable when multiple control flows exist. Figure \ref{fig:bpmn-example-diagram} displays the BMPN diagram of a simple issue tracking system which is covered in detail in section \ref{sec:ruote-prototyping-results}.
+
+\begin{figure}[!ht]
+\centering \includegraphics[height=5in]{./img/prototypes/ruote-bpmn-diagram}
+\caption{BPMN example of a simple issue tracking system.}
+\label{fig:bpmn-example-diagram}
+\end{figure}
+
+\FloatBarrier
 
 Another feature of BPMN that cannot be modeled using state based modeling is the ability to express responsibility and assignment of work for individual processes. This concept of a 'role' is used by any workflow involving more than one group that perform different actions during each process. For example, a software project with the roles of developer, manager, and tester each have different tasks during each step of a project. While this can be implemented in software to work with a state based model state based diagrams cannot express the idea of a role.
 
