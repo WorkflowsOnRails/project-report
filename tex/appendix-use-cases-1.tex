@@ -29,7 +29,7 @@
       \item The Coordinator selects to start a new year and a confirmation message is displayed (It must mention that all projects and group member accounts will be deleted)
       \item The Coordinator agrees and all projects and group member accounts are deleted
       \item The Coordinator is presented with a list of all current supervisor accounts and is able to add and delete them before moving onto the next step
-      \item The Coordinator choses to move to the next step and is presented with a list of all deadlines and must schedule them all before moving on to the next step
+      \item The Coordinator chooses to move to the next step and is presented with a list of all deadlines and must schedule them all before moving on to the next step
       \item The Coordinator schedules all the deadlines and the New Year has started
     \end{ucenum}
     %
@@ -190,9 +190,9 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
     \end{ucenum*}
     %
     \ucpart{Exceptions}
-    \ucexception{Supversior doesn't exist}
+    \ucexception{Supervisor does not exist}
     The Supervisor that is attempting to be deleted does not exist, The coordinator is sent back to the list of Supervisors
-    \ucexception{Supversior is last supervisor of a project}
+    \ucexception{Supervisor is last supervisor of a project}
     The Supervisor cannot be deleted if they are the last supervisor in a project
     %
     \ucpart{Postconditions}
@@ -309,7 +309,7 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
     \ucpart{Exceptions}
     \ucexception{Name not unique}
     A Project with that name already exists and the user is redirected to step 2 and notified of the errors
-    \ucexception{Name, desciription, programmes, or supervisor is not provided}
+    \ucexception{Name, description, programmes, or supervisor is not provided}
     The user is redirected to step 2 and notified of the errors
     %
     \ucpart{Postconditions}
@@ -594,7 +594,7 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
     \end{ucenum}
     %
     \ucpart{Postconditions}
-    The last approved version of the scheduling form is recorded as the scheduling form submitted by the group. If no scheduling form was approved, then a form is submitted with all timeslots marked as available.
+    The last approved version of the scheduling form is recorded as the scheduling form submitted by the group. If no scheduling form was approved, then a form is submitted with all time slots marked as available.
   \end{usecase}
 \end{table}
 
