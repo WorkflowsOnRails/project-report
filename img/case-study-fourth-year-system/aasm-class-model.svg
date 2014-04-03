@@ -28,10 +28,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.979899"
-     inkscape:cx="162.08512"
-     inkscape:cy="150.19697"
+     inkscape:cx="206.18227"
+     inkscape:cy="144.00879"
      inkscape:document-units="px"
-     inkscape:current-layer="g3798"
+     inkscape:current-layer="layer1"
      showgrid="false"
      showguides="false"
      inkscape:snap-global="false"
@@ -63,7 +63,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -416,20 +416,20 @@
        style="fill:none;stroke:#000000;stroke-width:0.99999994;stroke-linecap:square;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:2"
        id="rect2985-4-7"
        width="127.27126"
-       height="33.981884"
+       height="32.466656"
        x="199.8076"
-       y="72.616638" />
+       y="74.131866" />
     <text
        xml:space="preserve"
        style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
        x="239.84511"
-       y="97.22892"
+       y="95.22892"
        id="text3755-5-9"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan3757-6-0"
          x="239.84511"
-         y="97.22892">Project</tspan></text>
+         y="95.22892">Project</tspan></text>
     <g
        id="g5443">
       <path
@@ -450,47 +450,31 @@
        inkscape:connector-curvature="0" />
     <text
        sodipodi:linespacing="125%"
-       id="text5098-46"
-       y="117.82138"
-       x="270.57617"
-       style="font-size:10px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
-       xml:space="preserve"><tspan
-         y="117.82138"
-         x="270.57617"
-         id="tspan5100-6"
-         sodipodi:role="line">1</tspan></text>
-    <text
-       sodipodi:linespacing="125%"
        id="text5098-7-1"
-       y="141.04773"
+       y="139.04773"
        x="270.77997"
        style="font-size:10px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
        xml:space="preserve"><tspan
-         y="141.04773"
+         y="139.04773"
          x="270.77997"
          id="tspan5100-93-9"
          sodipodi:role="line">1</tspan></text>
     <text
        sodipodi:linespacing="125%"
        id="text5159-2"
-       y="140.92081"
+       y="138.92081"
        x="229.82397"
        style="font-size:10px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
        xml:space="preserve"><tspan
-         y="140.92081"
+         y="138.92081"
          x="229.82397"
          id="tspan5161-1"
          sodipodi:role="line">aasm</tspan></text>
-    <text
-       sodipodi:linespacing="125%"
-       id="text5159-2-4"
-       y="82.383522"
-       x="233.98158"
-       style="font-size:10px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
-       xml:space="preserve"><tspan
-         y="82.383522"
-         x="233.98158"
-         id="tspan5161-1-6"
-         sodipodi:role="line">«metaclass»</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.69999999999999996;stroke-linecap:square;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 40.279832,77.516472 22.728433,0"
+       id="path3069"
+       inkscape:connector-curvature="0"
+       transform="translate(190.3076,63.116638)" />
   </g>
 </svg>

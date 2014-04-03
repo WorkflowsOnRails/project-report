@@ -1,0 +1,83 @@
+% -*- compile-command: "cd .. && make" -*-
+\documentclass[document.tex]{subfiles}
+\begin{document}
+
+\chapter{Platform Test Cases}
+\label {ch:platform-test-cases}
+
+\sectionnote {BM}
+\section {expirable}
+
+
+\sectionnote {BM}
+\section {aasm\_statecharts}
+\label {sec:platform-test-cases-aasm_statecharts}
+
+The only parameters are the model class, the filename to save the diagram to, and the format of the diagram.
+
+The characteristics for each parameter are outlined briefly in Tables \ref{tbl:platform-test-cases-aasm_statecharts-aasm-xtics}, \ref{aaa}, and \ref{aaa}. Note that many of the characteristics in Table \ref{tbl:platform-test-cases-aasm_statecharts-aasm-xtics} apply to individual transitions and states, rather than the whole state machine. These characteristics are marked as overlapping as there may be several such characteristics represented in a model. For example, a model may contain both states that include no entry actions, and states that include 2+ entry actions. This extension to standard black-box testing methodology allows us to reduce the number of tests significantly, and test much more reasonable state machines.
+
+\begin{table}[!htbp]
+  \centering
+  \caption{Characteristics of the model class. Characteristics marked overlapping may have multiple blocks apply to a single test case.}
+  \label{tbl:platform-test-cases-aasm_statecharts-aasm-xtics}
+
+  \vspace{3mm}
+  \begin{tabular}{l *{3}{c} c}
+    \hline
+    Characteristic & \multicolumn{3}{c}{Blocks} & Overlapping? \\
+    \hline
+    AASM included? & No & Yes & & \\
+    Number of states & 0 & 1 & 2+ & \\
+    Number of transitions & 0 & 1 & 2+ & Yes \\
+    Number of transition actions & 0 & 1 & 2+ & Yes \\
+    Number of entry actions & 0 & 1 & 2+ & Yes \\
+    Number of exit actions & 0 & 1 & 2+ & Yes \\
+    Guards used? & No & Yes & & Yes \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+  \centering
+  \caption{Characteristics of the filename.}
+  \label{tbl:platform-test-cases-aasm_statecharts-filename-xtics}
+
+  \vspace{3mm}
+  \begin{tabular}{l *{3}{c} c}
+    \hline
+    Characteristic & \multicolumn{2}{c}{Blocks} \\
+    \hline
+    Target file present? & No & Yes \\
+    Target directory present? & No & Yes \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+  \centering
+  \caption{Characteristics of the file format.}
+  \label{tbl:platform-test-cases-aasm_statecharts-format-xtics}
+
+  \vspace{3mm}
+  \begin{tabular}{l *{3}{c} c}
+    \hline
+    Characteristic & \multicolumn{2}{c}{Blocks} \\
+    \hline
+    File format supported? & No & Yes \\
+    \hline
+  \end{tabular}
+\end{table}
+
+As the underlying library is quite simple, unit tests were selected using the ``all blocks'' criterion. \todo {LIST TESTS, EXPLAIN THAT 100\% COVERAGE WAS ACHIEVED.}
+
+\FloatBarrier
+
+\sectionnote {BM}
+\section {aasm\_progressable}
+
+\sectionnote {BM}
+\section {aasm\_actionable}
+
+
+\end {document}

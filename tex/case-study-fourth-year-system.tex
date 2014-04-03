@@ -278,7 +278,7 @@ The data model in Figure \ref{fig:custom-task-simplicity} was realized as the ER
 
 \begin{figure}[!htbp]
 \centering \includegraphics{./img/case-study-fourth-year-system/task-through-project-er-model}
-\caption{ER diagram depicting how the logical class model in Figure \ref{fig:custom-task-simplicity} translates to a relational model for the Rails Object Relational Mapper (ORM).}
+\caption{ER diagram depicting how the logical class model in Figure \ref{fig:custom-task-simplicity} translates to a relational model for the Rails ORM.}
 \label{fig:custom-task-er-model}
 \end{figure}
 
@@ -421,7 +421,7 @@ A more appropriate approach to scheduling is polling. A separate process can que
 \end{enumerate}
 These two factors make it desirable to use a task queue to execute the tasks in parallel in order to decrease the response time between a deadline being reached, and the associated operations being performed.
 
-Of course, handling deadlines in a workflow is a not a requirement that is unique to the fourth year project system. A reuseable \verb!Expirable! mixin was extracted from the case study to encapsulate the deadline-handling approach described above. Instead of integrating an asynchronous task library and writing their own polling process, clients can include \verb!Expirable! in models that handle deadlines. Each such model must provide a \verb!deadline_expired! instance method that is called when the deadline expires, and a \verb!newly_expired! class method that returns a collection of expired instances that have yet to be processed. Figure \ref{fig:deadline-expiration-example} provides an example model that uses \verb!Expirable! to transition tasks to a \verb!failed! state when their deadline is passed.
+As multiple state machines in the fourth year system need to handle deadlines, the deadline-handling solution needed to be reusable. A mixin named \verb!Expirable! was extracted from the case study to encapsulate the deadline-handling approach described above. Models that handle deadlines must include \verb!Expirable!. Each such model must provide a \verb!deadline_expired! instance method that is called when the deadline expires, and a \verb!newly_expired! class method that returns a collection of expired instances that have yet to be processed. Figure \ref{fig:deadline-expiration-example} provides an example model that uses \verb!Expirable! to transition tasks to a \verb!failed! state when their deadline is passed.
 
 \begin{figure}[!ht]
   \begin{lstlisting}
@@ -447,7 +447,7 @@ end
   \label{fig:deadline-expiration-example}
 \end{figure}
 
-The use of the \verb!newly_expired! method makes the mixin independent of the implementation of the task models. This allows the clients to make appropriate trade-offs in deadline representation. As an example, each \verb!Task! instance in the case study is related to a \verb!Deadline! corresponding to its task type. This means that only a single \verb!Deadline! instance needs to be changed in order to change the deadlines of all deliverables of a specific type.
+The use of the \verb!newly_expired! method makes the mixin independent of the implementation of the task models. This allows the implementation to make appropriate trade-offs in deadline representation. As an example, each \verb!Task! instance in the case study is related to a \verb!Deadline! corresponding to its task type. This means that only a single \verb!Deadline! instance needs to be changed in order to change the deadlines of all deliverables of a specific type.
 
 \FloatBarrier
 

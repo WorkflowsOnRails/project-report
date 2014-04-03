@@ -8,6 +8,7 @@
 
 \sectionnote {BM}
 \section{Expirable}
+\label {sec:expirable-manual}
 
 Expirable is a simple Rails mixin to handle deadlines in workflows.
 It builds on \href{https://github.com/collectiveidea/delayed\_job}{Delayed::Job}
@@ -257,6 +258,7 @@ Models that use {\tt aasm\_progressable} should have a strictly linear workflow,
 
 \sectionnote {BM}
 \section{aasm\_actionable}
+\label {sec:aasm-actionable-manual}
 
 aasm\_actionable is a Rails extension that helps factor out boilerplate state and authorization conditionals from view code. Using \href{https://github.com/elabs/pundit}{pundit} for authorization, it allows developers to write partials for user actions that are automatically displayed to the user if the model is in an appropriate state, and the user has sufficient permissions.
 
