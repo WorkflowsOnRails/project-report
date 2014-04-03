@@ -507,7 +507,7 @@ Though this functionality is useful for structuring actions, it comes with an as
 
 The 'Start New Year' functionality is a very simple implementation of the wizard UI pattern. A coordinator is presented with a series of pages to guide them through the set up of a new year. The coordinator navigates through these pages with forward and backward buttons. The steps involved in creating a new year are described in table \ref{tbl:use-case-start-new-year}. 
 
-The wizard pattern is used to give the user an easy way to go through a sequence of steps to achieve a goal. This is typlically done with forward and backward buttons which are located on every page. In order to reuse previous functionality of Supervisor Management and Deadline Scheduling those features were moved into rails partials. This allows the previous implementation to be used in multiple pages allowing the addition of the forward and back buttons to only the wizard pages.
+The wizard pattern is used to give the user an easy way to go through a sequence of steps to achieve a goal. This is typically done with forward and backward buttons which are located on every page. In order to reuse previous functionality of Supervisor Management and Deadline Scheduling those features were moved into rails partials. This allows the previous implementation to be used in multiple pages allowing the addition of the forward and back buttons to only the wizard pages.
 
 During this refactoring of the Supervisor management and Deadline Scheduling we discovered an issue with how the partial would redirect the user after modifications. Previously the user would be redirected to the default Supervisor Management page or the default Deadline Scheduling page. With this new change the page the user would be directed to would be dependant on if the user was accessing that page through the wizard or by itself. To solve this we simply send a reference to which page the partial is being viewed from to the partial so it knows how to redirect itself.
 
@@ -516,7 +516,7 @@ During this refactoring of the Supervisor management and Deadline Scheduling we 
 \section {Testing}
 
 Although the case studies are not intended to be deployed and used, there is still value in producing a test suite for the fourth year project system.
-As the project plan involves extracting reuseable components from the two case studies, it is important to ensure that the case studies continue to function as they are refactored as decomposed.
+As the project plan involves extracting reusable components from the two case studies, it is important to ensure that the case studies continue to function as they are refactored as decomposed.
 
 
 \sectionnote {BM}
@@ -527,7 +527,7 @@ it is important to maximize test coverage per hour of test development. Furtherm
 
 In order to minimize time spent developing tests for the case study, it was decided that tests would only be designed to achieve complete coverage of the use cases detailed in section \ref{sec:4ys-requirements}. Full black-box coverage should be sufficient to find regressions caused by refactoring the system, as the implementation of the business logic itself will not evolve. If regressions do occur while extracting components to external libraries, it is expected that they will be detectable without full white-box coverage.
 
-\todo {Explain why we're using the all-transitions criterion to select test paths for functionality modeled as state machines.}
+\todo {Explain why we're using the all-transitions criterion to select test paths for functionality modelled as state machines.}
 
 
 \sectionnote {BM}

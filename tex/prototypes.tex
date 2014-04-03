@@ -154,7 +154,7 @@ end
   \label{fig:ruote-prototype-participant-register}
 \end{figure}
 
-\paragraph{Process:} A process is created along side every new Report and the workitem is set to the newly created report. Figure \ref{fig:ruote-prototype-process-definition} displays the process definition and the participants used to model the BPMN diagram in Figure \ref{fig:ruote-bpmn-diagram}.
+\paragraph{Process:} A process is created along side every new Report and the work item is set to the newly created report. Figure \ref{fig:ruote-prototype-process-definition} displays the process definition and the participants used to model the BPMN diagram in Figure \ref{fig:ruote-bpmn-diagram}.
 
 \begin{figure}[!ht]
   \begin{lstlisting}
@@ -177,7 +177,7 @@ RuoteKit.engine.launch(pdef, REPORT_OBJECT) #launches the process
   \label{fig:ruote-prototype-process-definition}
 \end{figure}
 
-This process definition first calls the \verb!on_workitem! method in the \verb!unclaimed_pool! participant and waits for a reply call to notify that the \verb!on_workitem! method has finished executing. Once it has finished execution \verb!claim_issue! and \verb!sign_issue! both begin execution concurrently. Only once both \verb!claim_issue! and \verb!sign_issue! are finished is \verb!close_issue! executed. Once \verb!close_issue! is finished the process ends. The \verb!report_object! that is passed as a parameter to \verb!launch()! is passed between the participants as a hashmap of the models data. Because of this the value passed to be the workitem must be hashable.
+This process definition first calls the \verb!on_workitem! method in the \verb!unclaimed_pool! participant and waits for a reply call to notify that the \verb!on_workitem! method has finished executing. Once it has finished execution \verb!claim_issue! and \verb!sign_issue! both begin execution concurrently. Only once both \verb!claim_issue! and \verb!sign_issue! are finished is \verb!close_issue! executed. Once \verb!close_issue! is finished the process ends. The \verb!report_object! that is passed as a parameter to \verb!launch()! is passed between the participants as a hash map of the models data. Because of this the value passed to be the work item must be hashable.
 
 \section {Conclusions}
 \todo {Discuss applicability of the different workflow frameworks, and which one we decided to use in our case studies.}

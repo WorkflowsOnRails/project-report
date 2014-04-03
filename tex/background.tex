@@ -34,7 +34,7 @@ Unlike the state based model, BPMN is well suited to non-looping parallel workfl
 
 \FloatBarrier
 
-Another feature of BPMN that cannot be modeled using state based modeling is the ability to express responsibility and assignment of work for individual processes. This concept of a 'role' is used by any workflow involving more than one group that perform different actions during each process. For example, a software project with the roles of developer, manager, and tester each have different tasks during each step of a project. While this can be implemented in software to work with a state based model state based diagrams cannot express the idea of a role.
+Another feature of BPMN that cannot be modelled using state based modelling is the ability to express responsibility and assignment of work for individual processes. This concept of a 'role' is used by any workflow involving more than one group that perform different actions during each process. For example, a software project with the roles of developer, manager, and tester each have different tasks during each step of a project. While this can be implemented in software to work with a state based model state based diagrams cannot express the idea of a role.
 
 \sectionnote {BM}
 \section {Ruby on Rails}
@@ -130,7 +130,7 @@ Each participant has a single \verb!on_workitem! method that is called when a pr
 
 Consider the expense-claim-system used as an example for Stonepath. Tasks such as reviewing and writing the expense claim would be processes. The acts done by managers and employees would be the participants. When the expense claim enters the reviewing stage all of the groups that need to do work are notified. For example, there may be two participants: a manager who oversees a group of employees, and a group of employees which review the expense claim.
 
-Ruote was created to work with Ruby projects and is not specific to the Rails framework. In order to interface with the Rails framework you must use the Ruote-Kit library \cite{ruote-kit}. The Ruote-Kit library runs on a separate thread from your Rails application. This allows it to handle parallel activities and time limited activities without interupting your rails application. This separation also abstracts the implementation of your application from the workflow completely which allows it to be added to existing rails projects easily.
+Ruote was created to work with Ruby projects and is not specific to the Rails framework. In order to interface with the Rails framework you must use the Ruote-Kit library \cite{ruote-kit}. The Ruote-Kit library runs on a separate thread from your Rails application. This allows it to handle parallel activities and time limited activities without interrupting your rails application. This separation also abstracts the implementation of your application from the workflow completely which allows it to be added to existing rails projects easily.
 
 Similar to Stonepath, Ruote does not provide any tools for authorization, authentication, or generating user interfaces automatically from processes. However, it does have support for time-limited and parallel activities out of the box. A process definition can specify how long an activity should take before it times out and invokes a \verb!on_timeout! method on the associated participants. A process definition can also specify a set of activities (or groups of activities) that run concurrently. Ruote can also synchronize separate workflows using mutexes provided by the ruote-synchronize add-on \cite{ruote-synchronize}.
 
