@@ -198,6 +198,80 @@ After the core data model and workflows for the application were designed, imple
 
 \todo {Re-organize this section to present authentication, then authorization, then assignment, workflow generalization, and then presenting available actions. There seems to be too little discussion to bother keeping the start new year section.}
 
+
+\sectionnote{BM}
+\subsection{User Profiles and Authentication}
+
+As well, the subsystem for authentication and user profiles described in section \ref{sec:4ys-design} was implemented. Devise was used to implement authentication for a \verb!User! model, with the attributes detailed in Table \ref{tbl:user-profile-attributes}. The validations prescribed in Tables \ref{tbl:use-case-register-member-account} through \ref{tbl:use-case-authenticate} were implemented, along with additional validations to ensure that the attributes which apply only to Project Group Members could not be accidentally added to users in other roles. These in-application validations provide the equivalent data integrity guarantees as splitting the User model into distinct models by role type. A code snippet with an example of these validations appears in Figure \ref{fig:4ys-user-validations}. Note the use of the \verb!is_group_member?! predicate: as alluded to in section \ref{sec:4ys-design}, the implementation of the User model provides appropriate predicates (named \verb!is_group_member?!, \verb!is_supervisor?!, and \verb!is_coodinator?!) to describe which effective roles are indicated by the value of a \verb!User!’s role attribute.
+
+\begin{figure}[!ht]
+  \begin{lstlisting}
+class User < ActiveRecord::Base
+  # ...
+  with_options unless: :is_group_member? do |m|
+    m.validates :programme, absence: true
+    m.validates :student_number, absence: true
+    m.validates :project_id, absence: true
+  end
+  # ...
+end
+  \end{lstlisting}
+  \caption{Code snippet illustrating the use of the conditional validations to ensure that extra attributes are only set for users with the Project Group Member role.}
+  \label{fig:4ys-user-validations}
+\end{figure}
+
+
+\FloatBarrier
+
+\sectionnote{BM}
+\subsection{Authorization}
+
+With authentication and user profiles in place, authorization was the next requirement. Many actions, such as creating projects, can only be performed by users in specific roles. While access checks could be implemented manually using if-else statements and query filters in the controllers and views, this would lead to code duplication: permission checks could end up duplicated in multiple controllers, and the views linking to those controllers would also have to include the checks to prevent inaccessible links from being displayed. Fortunately, Rails has several authorization libraries available which provide conventions to centralize, enforce, and query permission checks. We considered Stonewall, Cancan, Authority, and Pundit for the access control system. These libraries are described briefly below.
+
+\paragraph{Stonewall.} The developers of Stonepath also produced Stonewall, which is intended to be an access-control library that integrates well with Stonepath \cite{stonewall}. Stonewall defines permissions at the model level using a complex DSL, and applies them to methods on the models themselves. It captures the current user when a controller begins executing, and implicitly checks every method call to a protected method on a model. If a method is executed that the user does not have permission to call, than an exception will be thrown. Unfortunately, Stonewall is largely undocumented, and is totally untested and unmaintained.
+
+\paragraph{Cancan.} Cancan allows developers to define rule-based permissions for CRUD operations in a single central Ability class \cite{cancan}. Cancan includes an declarative Ruby DSL to define permissions: rules can range from statements that grant a user permission to perform all actions on all models, to declaring that the current user can only view a specific model that they are associated with through a deeply-nested relationship. Cancan defines a \verb!can?! predicate that tests whether the current user can perform an action on a specified target, and an \verb|authorize!| method that raises an exception if an action can’t be performed on a specified target.
+
+In addition to basic permission-checking methods, Cancan includes tools to remove boilerplate permission checks, and to protect against holes due to forgotten permission checks. Any controller class may be configured to automatically load, create, or list objects before passing control to the standard RESTful actions. Controllers may also be flagged with \verb!check_authorization! to raise an exception if no permission check is performed while handling a controller action. Unfortunately, resource autoloading and auto-authorization conflicts with the new protections against mass assignment attacks introduced in Rails 4. The latest Rails version that is compatible with Cancan is version 3.2.15.
+
+\paragraph{Authority.} Authority \cite{authority} is an authorization library for Rails 4 that takes a somewhat different approach than Cancan. Developers define one class, called an authorizer, for each model to authorize. Each authorizer consists of a series of methods, such as \verb!creatable_by?!, which return a boolean indicating whether the current user can perform the action corresponding to the method. Like Cancan, Authority provides a method to enforce permissions and raise an exception if they are not fulfilled, another to query if a user is permitted to perform an action, and a way to ensure that authorization is performed in each action of a controller. Authority requires more setup and wiring than Cancan; for example, to define an authorizer method for a custom action, one must first add the action to a configuration file so that Authority knows which authorizer method to call to check permissions on the action. Additionally, Authority lacks Cancan’s ability to automatically load and authorize models.
+
+\paragraph{Pundit.} Like Authority, Pundit is an authorization library for Rails 4 that represents access rules with one authorization class per model \cite{pundit}. Each corresponding class (called a policy) has one boolean method for each action that may be taken on the model. Similarly to Cancan and Authority, Pundit defines one controller method to enforce permissions, another to query permissions on objects, and a third to ensure that authorization is performed in each action. As is the case with Authority, Pundit can’t automatically load and authorize models. However, unlike Authority, Pundit eschews configuration files for method naming conventions, and requires no setup beyond installing the gem.
+
+\par \noindent \\ After reviewing the documentation and open issues for each library, Pundit was selected as the authorization system for the case study. Stonewall was eliminated for being too unwieldy, as per-method and per-attribute access control are much more granular than necessary, and much harder to validate than per-action access control. Cancan was eliminated due to its incompatibility with Rails 4, and because it doesn’t appear to be actively maintained. Pundit was chosen over Authority as it provides the same feature set as Authority with less configuration and boilerplate. Pundit is actively maintained, and is seeing an increase in use as developers migrate away from Cancan. Though Pundit lacks support for automatically loading and authorizing objects, we can achieve the same thing ourselves by using a library like \verb!inherited_resources! and overloading the relevant controller methods perform do authorization automatically.
+
+An example pundit policy is given in Figure \ref{fig:4ys-pundit-policy}. This policy allows all users to view projects, but only allows coordinators and the supervisors assigned to a project to update or delete them. This policy is automatically associated with \verb!Project! models, so we only need to call
+\verb!authority @project! in each action in the the \verb!ProjectsController! to check it. Additionally, we can check permissions to conditionally show links and sections in the view by getting an instance of the policy and calling appropriate methods on it, such as \verb!policy(@project).destroy?!.
+
+\begin{figure}[!ht]
+  \begin{lstlisting}
+class ProjectPolicy < ApplicationPolicy
+  def show?
+    true
+  end
+
+  def create?
+    @user.is_supervisor?
+  end
+
+  def update?
+    @user.is_coordinator? || user_supervises_project?
+  end
+
+  alias_method :destroy?, :update?
+
+  def user_supervises_project?
+    @user.is_supervisor? && @record.supervisors.include?(@user)
+  end
+end
+  \end{lstlisting}
+  \cprotect \caption{An example Pundit policy governing actions on \verb!Project!s.}
+  \label{fig:4ys-pundit-policy}
+\end{figure}
+
+\FloatBarrier
+
+
 \sectionnote{BM}
 \subsection{Task Assignment}
 The data model in Figure \ref{fig:custom-task-simplicity} was realized as the ER model represented in Figure \ref{fig:custom-task-er-model} using multiple-table inheritance (MTI.) Though there are Rails libraries available that implement MTI, such as acts\_as\_relation and heritage (\todo{cite}), neither are documented to work with Rails 4 and both mask the fact that MTI subclasses are not substitutable. Instead of using a library, MTI was implemented manually using Rails’ polymorphic associations. The base Task table contains all of the data required to present it in a task list (such as a summary of the task and when it is due), as well as the attributes for a polymorphic ActiveRecord association with the various task types. This permits a single query over the task table to select the summaries of all tasks assigned to a user, while each task page (such as the proposal task page in Figure \ref{fig:wireframe-group-member-proposal-view}) can retrieve the specialized task instance it requires and display it.
@@ -254,6 +328,7 @@ end
 
 \sectionnote{BM}
 \subsection{Workflow Generalization}
+\label {sec:4ys-workflow-generalization}
 
 The task completion workflows presented in \ref{sec:4ys-workflow-design} can be thought of as specializations of a basic submission workflow; if the core process of submitting a document changes, it is likely to impact all tasks. It would be nice to reuse the definition of the core submission workflow among all of the tasks that extend it. This way, changes to the core submission process only need to be made in one place, and it is clear how two tasks that specialize the core workflow differ.
 
@@ -325,76 +400,6 @@ end
 \end{figure}
 
 
-\sectionnote{BM}
-\subsection{User Profiles and Authentication}
-
-As well, the subsystem for authentication and user profiles described in section \ref{sec:4ys-design} was implemented. Devise was used to implement authentication for a \verb!User! model, with the attributes detailed in Table \ref{tbl:user-profile-attributes}. The validations prescribed in Tables \ref{tbl:use-case-create-account} through \ref{tbl:use-case-authenticate} were implemented, along with additional validations to ensure that the attributes which apply only to Project Group Members could not be accidentally added to users in other roles. These in-application validations provide the equivalent data integrity guarantees as splitting the User model into distinct models by role type. A code snippet with an example of these validations appears in Figure \ref{fig:4ys-user-validations}. Note the use of the \verb!is_group_member?! predicate: as alluded to in section \ref{sec:4ys-design}, the implementation of the User model provides appropriate predicates (named \verb!is_group_member?!, \verb!is_supervisor?!, and \verb!is_coodinator?!) to describe which effective roles are indicated by the value of a \verb!User!’s role attribute.
-
-\begin{figure}[!ht]
-  \begin{lstlisting}
-class User < ActiveRecord::Base
-  # ...
-  with_options unless: :is_group_member? do |m|
-    m.validates :programme, absence: true
-    m.validates :student_number, absence: true
-    m.validates :project_id, absence: true
-  end
-  # ...
-end
-  \end{lstlisting}
-  \caption{Code snippet illustrating the use of the conditional validations to ensure that extra attributes are only set for users with the Project Group Member role.}
-  \label{fig:4ys-user-validations}
-\end{figure}
-
-
-\FloatBarrier
-
-\sectionnote{BM}
-\subsection{Authorization}
-
-With authentication and user profiles in place, authorization was the next requirement. Many actions, such as creating projects, can only be performed by users in specific roles. While access checks could be implemented manually using if-else statements and query filters in the controllers and views, this would lead to code duplication: permission checks could end up duplicated in multiple controllers, and the views linking to those controllers would also have to include the checks to prevent inaccessible links from being displayed. Fortunately, Rails has several authorization libraries available which provide conventions to centralize, enforce, and query permission checks. We considered Stonewall, Cancan, Authority, and Pundit for the access control system. These libraries are described briefly below.
-
-\paragraph{Stonewall.} The developers of Stonepath also produced Stonewall, which is intended to be an access-control library that integrates well with Stonepath \cite{stonewall}. Stonewall defines permissions at the model level using a complex DSL, and applies them to methods on the models themselves. It captures the current user when a controller begins executing, and implicitly checks every method call to a protected method on a model. If a method is executed that the user does not have permission to call, than an exception will be thrown. Unfortunately, Stonewall is largely undocumented, and is totally untested and unmaintained.
-
-\paragraph{Cancan.} Cancan allows developers to define rule-based permissions for CRUD operations in a single central Ability class \cite{cancan}. Cancan includes an declarative Ruby DSL to define permissions: rules can range from statements that grant a user permission to perform all actions on all models, to declaring that the current user can only view a specific model that they are associated with through a deeply-nested relationship. Cancan defines a \verb!can?! predicate that tests whether the current user can perform an action on a specified target, and an \verb|authorize!| method that raises an exception if an action can’t be performed on a specified target.
-
-In addition to basic permission-checking methods, Cancan includes tools to remove boilerplate permission checks, and to protect against holes due to forgotten permission checks. Any controller class may be configured to automatically load, create, or list objects before passing control to the standard RESTful actions. Controllers may also be flagged with \verb!check_authorization! to raise an exception if no permission check is performed while handling a controller action. Unfortunately, resource autoloading and auto-authorization conflicts with the new protections against mass assignment attacks introduced in Rails 4. The latest Rails version that is compatible with Cancan is version 3.2.15.
-
-\paragraph{Authority.} Authority \cite{authority} is an authorization library for Rails 4 that takes a somewhat different approach than Cancan. Developers define one class, called an authorizer, for each model to authorize. Each authorizer consists of a series of methods, such as \verb!creatable_by?!, which return a boolean indicating whether the current user can perform the action corresponding to the method. Like Cancan, Authority provides a method to enforce permissions and raise an exception if they are not fulfilled, another to query if a user is permitted to perform an action, and a way to ensure that authorization is performed in each action of a controller. Authority requires more setup and wiring than Cancan; for example, to define an authorizer method for a custom action, one must first add the action to a configuration file so that Authority knows which authorizer method to call to check permissions on the action. Additionally, Authority lacks Cancan’s ability to automatically load and authorize models.
-
-\paragraph{Pundit.} Like Authority, Pundit is an authorization library for Rails 4 that represents access rules with one authorization class per model \cite{pundit}. Each corresponding class (called a policy) has one boolean method for each action that may be taken on the model. Similarly to Cancan and Authority, Pundit defines one controller method to enforce permissions, another to query permissions on objects, and a third to ensure that authorization is performed in each action. As is the case with Authority, Pundit can’t automatically load and authorize models. However, unlike Authority, Pundit eschews configuration files for method naming conventions, and requires no setup beyond installing the gem.
-
-\par \noindent \\ After reviewing the documentation and open issues for each library, Pundit was selected as the authorization system for the case study. Stonewall was eliminated for being too unwieldy, as per-method and per-attribute access control are much more granular than necessary, and much harder to validate than per-action access control. Cancan was eliminated due to its incompatibility with Rails 4, and because it doesn’t appear to be actively maintained. Pundit was chosen over Authority as it provides the same feature set as Authority with less configuration and boilerplate. Pundit is actively maintained, and is seeing an increase in use as developers migrate away from Cancan. Though Pundit lacks support for automatically loading and authorizing objects, we can achieve the same thing ourselves by using a library like \verb!inherited_resources! and overloading the relevant controller methods perform do authorization automatically.
-
-An example pundit policy is given in Figure \ref{fig:4ys-pundit-policy}. This policy allows all users to view projects, but only allows coordinators and the supervisors assigned to a project to update or delete them. This policy is automatically associated with \verb!Project! models, so we only need to call
-\verb!authority @project! in each action in the the \verb!ProjectsController! to check it. Additionally, we can check permissions to conditionally show links and sections in the view by getting an instance of the policy and calling appropriate methods on it, such as \verb!policy(@project).destroy?!.
-
-\begin{figure}[!ht]
-  \begin{lstlisting}
-class ProjectPolicy < ApplicationPolicy
-  def show?
-    true
-  end
-
-  def create?
-    @user.is_supervisor?
-  end
-
-  def update?
-    @user.is_coordinator? || user_supervises_project?
-  end
-
-  alias_method :destroy?, :update?
-
-  def user_supervises_project?
-    @user.is_supervisor? && @record.supervisors.include?(@user)
-  end
-end
-  \end{lstlisting}
-  \cprotect \caption{An example Pundit policy governing actions on \verb!Project!s.}
-  \label{fig:4ys-pundit-policy}
-\end{figure}
-
 \FloatBarrier
 
 
@@ -448,10 +453,39 @@ The use of the \verb!newly_expired! method makes the mixin independent of the im
 
 
 \sectionnote {BM}
+\subsection {Visualizing Workflows}
+\label {sec:4ys-visualizing-workflows}
+
+Although AASM provides a domain specific language that is more readable and maintainable than implementing the state machine pattern, its event-oriented approach makes it difficult to determine which events are possible in which state. It is difficult to understand a workflow encoded in AASM without reading the entire specification, even if a developer only wants to get a general sense of the flow of events. Additionally, it also makes it difficult to verify by inspection if a state machine has been implemented correctly or not. Thus, it seems useful to be able to convert back from AASM definitions to diagrams of state machines.
+
+While several tools exist to general state machine diagrams from AASM definitions, these tools fail to capture the full range of concepts expressed by AASM. All of the existing tools, such as RailRoad \cite{railroad}, can generate finite state machine diagrams from AASM descriptions, but the generated diagrams lack guards, actions, and other features of extended state machines that are implemented by AASM. This limits that value of these tools, as it is difficult to understand a diagram that omits a large portion of the model.
+
+While the obvious approach to implementing a diagram generator would be to write a parser for AASM, this would be non-trivial to achieve. AASM state machines are expressed in Ruby itself, so a dedicated parser would need to be able to evaluate arbitrary Ruby expressions. Worse, AASM state machines can be built up through generalization (as demonstrated in section \ref{sec:4ys-workflow-generalization}), so a parser would need to be able to locate and evaluate any Ruby module included in the model using AASM.
+
+Fortunately, there is a simpler approach to extracting state machine information . The class of each model that includes AASM is extended at runtime with an association with an instance of \verb!AASM::Base!, as pictured in Figure \ref{fig:aasm-class-model}. Each \verb!AASM::State! instance associated with the \verb!AASM::Base! contains data about a distinct state in the state machine, such as the state name and options (\verb!options! is an associative array with named entries indicating whether the state is the initial state, what the entry actions are, etc.) Similarly, each \verb!AASM::Transition! instance contains represents a transition in the state machine. Though the data structure is somewhat convoluted to query, it is significantly easier to handle than implementing a custom parser.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics{./img/case-study-fourth-year-system/aasm-class-model}
+  \cprotect
+  \caption{Example UML class diagram depicting the run-time object model associated with a \verb!Project! class that includes \verb!AASM!. Note that the types of the \verb!guard! and \verb!on_transition! attributes have been omitted, as they may be either a string, an anonymous function, or an array made up of a combination thereof.}
+  \label{fig:aasm-class-model}
+\end{figure}
+
+Generating diagrams from the data extracted from the state machine may seem like another potential issue. The diagrams need to be laid out in a readable way, so that events, labels, and states do not overlap. Fortunately, this functionality is already implemented by Graphviz \cite{graphviz}, which generates diagrams of graphs from declarative specifications of nodes and edges.
+In Ruby, these specifications can be produced using Ruby-Graphviz \cite{ruby-graphviz}, a Ruby library that makes it possible to programmatically build Graphviz graphs without manually escaping and concatenating strings. Thus, generating statechart diagrams from AASM using Ruby-Graphviz was as simple as programmatically creating one node for each \verb!AASM::State! instance associated with a model, creating one edge for each \verb!AASM::Transition!, and then styling these nodes and edges appropriately.
+
+The ability to generate statecharts from AASM state machines was used heavily over the course of the case study. The generated diagrams were useful to quickly verify that the state machines implemented in AASM corresponded to the state machines that were designed. Additionally, the generated diagrams were used for documentation: all of the state machine diagrams presented in this chapter were generated automatically.
+
+
+\FloatBarrier
+
+\sectionnote {BM}
 \subsection {Presenting Available Actions}
 \label {sec:4ys-available-actions}
 
-Using AASM, we can extract information about all of the permitted event transitions from the current state of an object. Additionally, Pundit allows us to query which controller actions may be taken for the current user. As the system follows the convention that every event corresponds to a controller action, this information can be used to automatically present users with the actions they can perform for a task's current state, without resorting to hard-coding \verb!if! statements for role or state checks.
+Using the techniques described in section \ref{sec:4ys-visualizing-workflows},
+we can extract information about all of the permitted event transitions from the current state of an model that uses AASM. Additionally, Pundit allows us to query which controller actions may be taken for the current user. As the system follows the convention that every event corresponds to a controller action, this information can be used to automatically present users with the actions they can perform for a task's current state, without resorting to hard-coding \verb!if! statements for role or state checks.
 
 This functionality was implemented as a simple controller concern. In order to use it, controllers may include \verb!StateActionRenderable! and call 
 \verb!render_state_actions! in the associated view, passing it a taskable. When it is called, the helper performs the following steps:
