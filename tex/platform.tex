@@ -34,7 +34,7 @@ Four new utility libraries were developed on top of the selected third-party lib
 \sectionnote {BM}
 \section {aasm\_statecharts}
 
-Although AASM provides a domain specific language that is more readable and maintainable than implementing the state machine pattern, it's event-oriented approach makes it difficult to determine which events are possible in which state. Additionally, it is difficult understand a workflow encoded in AASM without reading the entire specification, even if a developer only wants to get a general sense of the flow of events. Thus, it seems useful to be able to convert back from AASM definitions to diagrams of state machines.
+Although AASM provides a domain specific language that is more readable and maintainable than implementing the state machine pattern, its event-oriented approach makes it difficult to determine which events are possible in which state. Additionally, it is difficult understand a workflow encoded in AASM without reading the entire specification, even if a developer only wants to get a general sense of the flow of events. Thus, it seems useful to be able to convert back from AASM definitions to diagrams of state machines.
 
 While several tools exist to general state machine diagrams from AASM definitions, these tools fail to capture the full range of concepts expressed by AASM. All of the existing tools, such as RailRoad \cite{railroad}, can generate finite state machine diagrams from AASM descriptions, but the generated diagrams lack guards, actions, or other features of extended state machines or statecharts.
 
