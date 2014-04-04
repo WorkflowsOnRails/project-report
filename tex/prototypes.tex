@@ -41,9 +41,7 @@ The state machine model also includes a \verb!timeout! event which is triggered 
 
 Additionally, the model also includes actions to create and destroy tasks when appropriate. Though this appeared to the be correct way to model participation in a workflow when the state machine was designed, it was discarded in the implementation, as described below.
 
-The state machine was translated to a Ruby on Rails application, which is available at \url{https://github.com/WorkflowsOnRails/stonepath-timeboxed-example}. The application was implemented from the bottom up. First a workitem was implemented for issues, as demonstrated in the code snippet in Figure \ref{fig:stonepath-prototype-workitem}. Next, workbenches were created to for roles and users. Finally, a generic task type was defined to associate workitems and workbenches. After the model was completed, Devise was integrated to handle authentication, and the model was wrapped with appropriate views and controllers to drive the application.
-
-\todo {Mention Devise and Cancan only in passing, making forward references to the case study for more information.}
+The state machine was translated to a Ruby on Rails application, which is available at \url{https://github.com/WorkflowsOnRails/stonepath-timeboxed-example}. The application was implemented from the bottom up. First a workitem was implemented for issues, as demonstrated in the code snippet in Figure \ref{fig:stonepath-prototype-workitem}. Next, workbenches were created to for roles and users. Finally, a generic task type was defined to associate workitems and workbenches. After the model was completed, authentication was implemented using Devise (described in more detail in section \ref{sec:4ys-authentication}) , and the model was wrapped with appropriate views and controllers to drive the application.
 
 \begin{figure}[!ht]
   \begin{lstlisting}
@@ -83,11 +81,13 @@ end
   \label{fig:stonepath-prototype-workitem}
 \end{figure}
 
-The prototype identified several possible areas of improvement for both Rails and Stonepath projects, such as:
+The entire prototype was simple to design and implement in Stonepath, requiring only an afternoon to complete. However, the prototype revealed several possible areas of improvement for Stonepath, such as:
 
-\paragraph{Pre-populated roles:} each role in the application was modelled with an instance of the \verb!Role! model. This allowed work items to be assigned to logical groups of users, but required extra work to put roles into the database. A seed migration had to be run whenever a production or test database was set up to create the roles, or else the application could not work. If the case studies use this approach to model roles, we will need a reusable way to specify the roles in the model and have them automatically populated in the database.
+\paragraph{Parallel activities:} Stonepath and AASM do not have the ability to represent sub-states, which makes it difficult to represent parallel activities. This forces developers to employ ad hoc solutions, such as the \verb!completed?! guard used in Figure \ref{fig:stonepath-prototype-workitem}. This guards ensures that the completion of the deployment or development activity does not advance the state of the workflow until the other activity has completed as well. This limitation makes it more difficult to modify workflows, as extending the duration of a parallel activity might require changing guards on activities that it previously ran in parallel with.
 
-\paragraph{Authorization:} though Stonewall is advertised as a flexible authorization layer that integrates well with Stonepath, its permissions are much too finely grained to be useful. Stonewall sets permissions at the method level, while access controls are usually described in terms of actions that users can perform, instead of individual attributes they can access and set. In the end, a custom solution was created, which evolved to check users against an approved list of roles in each controller action in Rails. This technique matched almost one-to-one to the actions described in the requirements. Fortunately, Cancan already implements a similar action-based approach, and is also able to centralize access controls to a single source file instead of hard-coding them in each action.
+\paragraph{Pre-populated roles:} each role in the application was modelled with an instance of the \verb!Role! model. This allowed work items to be assigned to logical groups of users, but required extra work to put roles into the database. A seed migration had to be run whenever a production or test database was set up to create the roles, or else the application could not work. Instead of using this approach, the case study and proof-of-concept should look for a solution than specifies roles and responsibilities in the code itself, instead of the database.
+
+\paragraph{Authorization:} Stonepath does not include an authorization layer, which means that controllers need to be written with explicit permission checks, ex. to determine if a user is a project manager before they set a deployment data. This approach seems difficult to maintain, and hardly self-documenting: the details of permission checks are scattered throughout the application, and may not all be updated at once. A workflow platform should provide a way to centralize access control in a self-documenting and easily-updated format.
 
 \paragraph{Task modelling:} though the task model in Figure 1 was straightforward to design, it was unwieldy in practice. Stonepath represents each task as a Rails model with a polymorphic association to a workbench and a workitem. Unfortunately, polymorphic associations are implemented in Rails, and not at the database level, so it is difficult to request the developer assigned to an issue by querying the tasks. On the other hand, a developer column on an issue is easy to understand and query. Additionally, tasks are heavyweight - each task includes its own state machine, which went totally unused in the prototype application. Tasks seem to be best used to model sub-activities of an activity, while associations that need to be queried should be added to the work item itself.
 
@@ -108,9 +108,9 @@ Reporters are only able to create new reports. Developers are only able to claim
 \label{fig:ruote-bpmn-diagram}
 \end{figure}
 
-\paragraph{Ruote-Kit:} provides an easy way of accessing the Ruote dashboard and handles all of the Ruote rails routes. The dashboard is the core of Ruote providing access to the many processes, participants, and workers. A process can be considered the entire workflow, and the participants can be considered the events within the workflow. Ruote-Kit automatically creates a default dashboard object and populates it with a default worker. Workers in Ruote are threads which are used by the participants to do operations on the workitem. The workitem is passed between participants and in the case of this application is the report.
+\paragraph{Ruote-Kit} provides an easy way of accessing the Ruote dashboard and handles all of the Ruote rails routes. The dashboard is the core of Ruote providing access to the many processes, participants, and workers. A process can be considered the entire workflow, and the participants can be considered the events within the workflow. Ruote-Kit automatically creates a default dashboard object and populates it with a default worker. Workers in Ruote are threads which are used by the participants to do operations on the workitem. The workitem is passed between participants and in the case of this application is the report.
 
-\paragraph{Participants:} Participants contain the logic that is executed whenever a process definition reaches it. Each participant is created using its own class located in app\slash participants. When a participant is called by a process definition it executes its \verb!on_workitem! method. The participant must call 'reply' to notify the process that it has finished working on an item. The basic outline of a participant is shown in Figure \ref{fig:ruote-prototype-participant-code}.
+\paragraph{Participants} contain the logic that is executed whenever a process definition reaches it. Each participant is created using its own class located in app\slash participants. When a participant is called by a process definition it executes its \verb!on_workitem! method. The participant must call 'reply' to notify the process that it has finished working on an item. The basic outline of a participant is shown in Figure \ref{fig:ruote-prototype-participant-code}.
 
 \begin{figure}[!ht]
   \begin{lstlisting}
@@ -179,7 +179,15 @@ RuoteKit.engine.launch(pdef, REPORT_OBJECT) #launches the process
 
 This process definition first calls the \verb!on_workitem! method in the \verb!unclaimed_pool! participant and waits for a reply call to notify that the \verb!on_workitem! method has finished executing. Once it has finished execution \verb!claim_issue! and \verb!sign_issue! both begin execution concurrently. Only once both \verb!claim_issue! and \verb!sign_issue! are finished is \verb!close_issue! executed. Once \verb!close_issue! is finished the process ends. The \verb!report_object! that is passed as a parameter to \verb!launch()! is passed between the participants as a hash map of the models data. Because of this the value passed to be the work item must be hashable.
 
+
+\sectionnote {BM}
 \section {Conclusions}
-\todo {Discuss applicability of the different workflow frameworks, and which one we decided to use in our case studies.}
+
+After completing both prototypes, it was clear that Stonepath more appropriate for use in Rails applications than Ruote. In contrast to the Stonepath prototype (which was implemented in an afternoon), the prototype implementation using Ruote remained incomplete and was canceled after several weeks of effort.
+
+The key problem is that Ruote's model of a workflow does not map naturally to a web application. In contrast to web servers, which operate by responding to HTTP requests with HTTP responses, Ruote models each activity in a workflow as a continuously-executing process. Developers must define the \verb!on_workitem! method of each Participant to create appropriate model instances in the database to represent the activity, carry out the activity as a sequence of request / response cycles in Rails, and then call back to Ruote using the \verb!reply! method when the activity completes. This disjointed approach is significantly more complex than the one employed by Stonepath, which defines persistent state machines on the models themselves, and allows them to respond to events generated by Rails controllers.
+
+In fact, the only advantage offered by Ruote is the ability to define parallel workflows. However, this advantage pales against the difficulty of integrating Ruote with Rails and using it productively. Therefore, Stonepath was selected as the workflow framework to be applied in the following case study.
+
 
 \end{document}
