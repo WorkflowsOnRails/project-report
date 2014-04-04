@@ -4,6 +4,9 @@
 \chapter {Detailed Use Cases for the Fourth~Year~Project~System}
 \label {ch:detailed-use-cases-1}
 
+\todo {Add an overview of this appendix.}
+
+
 \sectionnote{AC}
 \section {Setup}
 \label {sec:detailed-use-cases-1-setup}
@@ -91,7 +94,7 @@
 \section{Account Management}
 \label{sec:account-management}
 
-The account management use cases shown in Figure \ref{fig:case-4ys-use-case-account-management} are described in the following tables \ref{tbl:use-case-register-member-account} through \ref{tbl:use-case-authenticate}. These descriptions cover the creation, modification, and deletion of the different accounts in the system.
+The account management use cases shown in Figure \ref{fig:case-4ys-use-case-account-management} are described in the following tables \ref{tbl:use-case-register-member-account} through \ref{tbl:use-case-manage-account}. These descriptions cover the creation, modification, and deletion of the different accounts in the system.
 
 \begin{table}[!htbp]
   \centering
@@ -239,37 +242,6 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
   \end{usecase}
 \end{table}
 
-
-\begin{table}[!htbp]
-  \centering
-  \caption{Use case description for the ``Authenticate'' use case of the fourth-year project management system.}
-  \label{tbl:use-case-authenticate}
-
-  \begin{usecase}[Authenticate]
-    \ucpart{Description}
-    Authenticate the current User Account
-    %
-    \ucpart{Actors}
-    Project Group Member, Project Supervisor, Project Coordinator
-    %
-    \ucpart{Preconditions}
-    Account being Authenticated exists
-    %
-    \ucpart{Flow}
-    \ucnormal
-    \begin{ucenum}
-      \item User provides an email address and a password
-      \item The system authenticates the user
-    \end{ucenum}
-    %
-    \ucpart{Exceptions}
-    \ucexception{Invalid email or password}
-    The user is not authenticated and is redirected to step 1 and notified of the error
-    %
-    \ucpart{Postconditions}
-    The User Account was authenticated and is allowed into the system.
-  \end{usecase}
-\end{table}
 
 \FloatBarrier
 

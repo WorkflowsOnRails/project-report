@@ -98,9 +98,9 @@ The entire prototype was simple to design and implement in Stonepath, requiring 
 \section {Ruote Prototyping Results}
 \label {sec:ruote-prototyping-results}
 
-The BPMN model shown in Figure \ref{fig:ruote-bpmn-diagram} describes how the issue tracking system works using process based methodologies. The workflow of a report begins when it is created and joins the unclaimed report pool. Developers are then able to claim the report and Managers are able to set the deployment date. Once both actions have been accomplished the developer is able to sign off the report which will then close. If the report has not been signed off after 7 days the report returns to the unclaimed report pool.
+The BPMN model shown in Figure \ref{fig:ruote-bpmn-diagram} describes how the issue tracking system works using process based methodologies. The workflow of a report begins when it is created and joins the unclaimed report pool. Developers are then able to claim the report and Managers are able to set the deployment date. Once both actions have been accomplished the developer is able to sign off the report which will then close. If the report has not been signed off after 7 days the report returns to the unclaimed report pool. Reporters are only able to create new reports. Developers are only able to claim unclaimed reports and sign off on the reports that they have claimed. Managers are only able to assign deployment dates to each claimed report.
 
-Reporters are only able to create new reports. Developers are only able to claim unclaimed reports and sign off on the reports that they have claimed. Managers are only able to assign deployment dates to each report.
+After several weeks of work it became apparent that Ruote was not designed to easily work within a web application and the prototype was abandoned. The rest of the section will cover how the application was built and the features of Ruote.
 
 \begin{figure}[!ht]
 \centering \includegraphics[height=5in]{./img/prototypes/ruote-bpmn-diagram}
@@ -108,9 +108,50 @@ Reporters are only able to create new reports. Developers are only able to claim
 \label{fig:ruote-bpmn-diagram}
 \end{figure}
 
-\paragraph{Ruote-Kit} provides an easy way of accessing the Ruote dashboard and handles all of the Ruote rails routes. The dashboard is the core of Ruote providing access to the many processes, participants, and workers. A process can be considered the entire workflow, and the participants can be considered the events within the workflow. Ruote-Kit automatically creates a default dashboard object and populates it with a default worker. Workers in Ruote are threads which are used by the participants to do operations on the workitem. The workitem is passed between participants and in the case of this application is the report.
+In order to integrate Ruote with rails we decided to use Ruote-Kit. Setting up a Ruote project from scratch or integrating Ruote with an existing project is simple and only involves running a script provided by the developer of Ruote-Kit. It should be noted that removing Ruote-Kit once it has been installed is unadvised due to the amount of code the script modifies.
 
-\paragraph{Participants} contain the logic that is executed whenever a process definition reaches it. Each participant is created using its own class located in app\slash participants. When a participant is called by a process definition it executes its \verb!on_workitem! method. The participant must call 'reply' to notify the process that it has finished working on an item. The basic outline of a participant is shown in Figure \ref{fig:ruote-prototype-participant-code}.
+Since the work item, the issue, was required in every process of the issue tracker only one process definition was needed to model the BPMN processes. Figure \ref{fig:ruote-prototype-process-definition} displays a code snippet that is used to describe the process definition. 
+
+\begin{figure}[!ht]
+  \begin{lstlisting}
+
+#REPORT_OBJECT is created up here and the model is saved
+
+pdef = Ruote.process_definition do
+  unclaimed_pool
+  concurrent do
+    claim_issue
+    sign_issue
+  end
+  close_issue
+end
+
+RuoteKit.engine.launch(pdef, REPORT_OBJECT) #launches the process definition
+
+  \end{lstlisting}
+  \caption{Process Definition of the Ruote prototype bug tracker.}
+  \label{fig:ruote-prototype-process-definition}
+\end{figure}
+
+It is very simple to model the parallel activities \verb!claim_issue! and \verb!sign_issue! by wrapping them inside a \verb!concurrent do! statement. The process definition starts at \verb!unclaimed_pool! by invoking the \verb!on_workitem! method of every participant involved in that process. Once the process definition receives replies from all involved participants it invokes the next two processes at the same time because of the \verb!concurrent do!. Before it can move on it must wait for all the replies from both the \verb!claim_issue! participants and the \verb!sign_issue! participants.
+
+Since Ruote is based off BPMN it easily allows the concept of roles to be implemented by creating participants for each role. The code snippet shown in Figure \ref{fig:ruote-prototype-participant-register} shows how the participants can be attached to each process. For example, the \verb!UnclaimedPoolParticipant! participant is a participant of the \verb!unclaimed_pool! process.
+
+\begin{figure}[!ht]
+  \begin{lstlisting}
+#Register each participant for use in a process definition
+RuoteKit.engine.register do
+  participant 'unclaimed_pool', UnclaimedPoolParticipant
+  participant 'claim_issue', ClaimIssueParticipant
+  participant 'sign_issue', SignIssueParticipant
+  participant 'close_issue', CloseIssueParticipant
+end
+  \end{lstlisting}
+  \caption{Registering the participants with the Dashboard.}
+  \label{fig:ruote-prototype-participant-register}
+\end{figure}
+
+An example participant code snippet is shown in Figure \ref{fig:ruote-prototype-participant-code}. It should be noted that there is only a single \verb!on_workitem! method which seems to indicate that a participant should only be used for a single process. It is possible to use if statements to have a participant work for more than one process but is complex and hard to maintain. The \verb!reply! call is required in order to progress the process. If the reply call is not executed the process will wait forever or until some other condition is met.
 
 \begin{figure}[!ht]
   \begin{lstlisting}
@@ -138,50 +179,17 @@ end
   \label{fig:ruote-prototype-participant-code}
 \end{figure}
 
-In order to use a participant in a process definition Ruote must be able to find your participant class. This is done in an initializer file so that the participants are registered and ready for use when the server is started. The method of registering participants with Ruote is shown below in Figure \ref{fig:ruote-prototype-participant-register}.
+The main problem encountered with Ruote was being unable to store data within the work item object required to pass data between processes. The process of storing information was complicated due to the fact the information comes into rails as a standard web request. The information is then sent to the Ruote process and stored in a work item as a hash map. This worked really well for integers but did not work for anything more complex such as strings. In addition, there were also issues retrieving data from outside the process definition making it difficult to display what had been done to the work item.
 
-\begin{figure}[!ht]
-  \begin{lstlisting}
-#Register each participant for use in a process definition
-RuoteKit.engine.register do
-  participant 'unclaimed_pool', UnclaimedPoolParticipant
-  participant 'claim_issue', ClaimIssueParticipant
-  participant 'sign_issue', SignIssueParticipant
-  participant 'close_issue', CloseIssueParticipant
-end
-  \end{lstlisting}
-  \caption{Registering the participants with the Dashboard.}
-  \label{fig:ruote-prototype-participant-register}
-\end{figure}
+The abstraction of the workflow provided by Ruote is a good idea on paper, but did not seem to work in practice. The rails application ended up being completely integrated with Ruote to the extent that any modification to the Ruote processes would impact the rails application significantly. For this reason Ruote is not recommended for use with web applications.
 
-\paragraph{Process:} A process is created along side every new Report and the work item is set to the newly created report. Figure \ref{fig:ruote-prototype-process-definition} displays the process definition and the participants used to model the BPMN diagram in Figure \ref{fig:ruote-bpmn-diagram}.
 
-\begin{figure}[!ht]
-  \begin{lstlisting}
-
--- REPORT_OBJECT is created up here and the model is saved
-
-pdef = Ruote.process_definition do
-  unclaimed_pool
-  concurrent do
-    claim_issue
-    sign_issue
-  end
-  close_issue
-end
-
-RuoteKit.engine.launch(pdef, REPORT_OBJECT) #launches the process
-
-  \end{lstlisting}
-  \caption{Process Definition of the Ruote prototype bug tracker.}
-  \label{fig:ruote-prototype-process-definition}
-\end{figure}
-
-This process definition first calls the \verb!on_workitem! method in the \verb!unclaimed_pool! participant and waits for a reply call to notify that the \verb!on_workitem! method has finished executing. Once it has finished execution \verb!claim_issue! and \verb!sign_issue! both begin execution concurrently. Only once both \verb!claim_issue! and \verb!sign_issue! are finished is \verb!close_issue! executed. Once \verb!close_issue! is finished the process ends. The \verb!report_object! that is passed as a parameter to \verb!launch()! is passed between the participants as a hash map of the models data. Because of this the value passed to be the work item must be hashable.
-
+\FloatBarrier
 
 \sectionnote {BM}
-\section {Conclusions}
+\section {Results and Discussion}
+
+\todo {Harmonize this section with Alex's new Ruote discussion above}
 
 After completing both prototypes, it was clear that Stonepath more appropriate for use in Rails applications than Ruote. In contrast to the Stonepath prototype (which was implemented in an afternoon), the prototype implementation using Ruote remained incomplete and was canceled after several weeks of effort.
 

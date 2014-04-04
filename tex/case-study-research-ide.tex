@@ -304,7 +304,9 @@ Our use case testing suite is much more in depth and focuses on the project use 
 \begin{itemize}
 \item Though not mentioned explicitly, many parts of the platform were used to construct the proof of concept.
 \item Used AASM, Devise and Pundit were applied as in the previous case study. Aside from the Pundit policy used for tasks, the implementation details were unremarkable and were thus omitted.
-\item Many of the new third-party libraries were applied as well. aasm\_statecharts was applied to generate state machine diagrams from the implementation. These diagrams were used to validate that the implementation matched the design. aasm\_progressable was also used 
+\item Many of the new third-party libraries were applied as well. aasm\_statecharts was applied to generate state machine diagrams from the implementation. These diagrams were used to validate that the implementation matched the design. Highlight extensibility of aasm\_progressable.
+\item expirable was not used as the application does not involve deadlines, and actionable was not used as it makes little sense to use a tabbed widget to edit the body of a task or upload a file.
+\item Need more flexible libraries for managing roles and permissions.
 \end{itemize}
 
 \end{document}
