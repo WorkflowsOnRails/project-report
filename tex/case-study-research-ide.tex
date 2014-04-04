@@ -1,7 +1,7 @@
 % -*- compile-command: "cd .. && make" -*-
 \documentclass[document.tex]{subfiles}
 \begin{document}
-\chapter{Case~Study: An~IDE~for~Research}
+\chapter{Proof~of~Concept: An~IDE~for~Research}
 \label {ch:case-study-2}
 
 Scientific misconduct and reproducibility issues are a growing concern in the scientific community. Researchers need to be careful to follow a rigorous research process research, and must document their experiments and analyses carefully. Though deliberate misconduct and fraud are difficult to prevent using technological means, software tools are well suited to managing data and walking users through the step-by-step application of the scientific method.
@@ -157,7 +157,7 @@ Though this data model is limited, it is almost sufficient to implement the solu
 
 \begin{figure}[!ht]
 \centering \includegraphics[width=5.0in]{./img/case-study-research-railgun/data-model}
-\caption{Partial data model depicting the relationship between the application-specific models involved in the research IDE case study. The logical file attribute of the Attachment model is provided by the Paperclip attachment library, which was also used in the first case study.}
+\caption{Partial data model depicting the relationship between the application-specific models involved in the research IDE. The logical file attribute of the Attachment model is provided by the Paperclip attachment library, which was also used in the preceding case study.}
 \label{fig:case-research-data-model}
 \end{figure}
 
@@ -168,7 +168,7 @@ Though this data model is limited, it is almost sufficient to implement the solu
 \subsection {Permission-based Authorization}
 \label{sec:case-research-permission-based-auth}
 
-Although Pundit provides a way to express authorization rules, it leaves it up to the developer to create the data model to capture which users can perform what actions. While this was an advantage in the first case study as the authorization scheme was simple, the research IDE involves user-configurable fine-grained permissions. The case study also has the following additional requirements, derived from sections \ref{sec:case-research-requirements} and \ref{sec:case-research-ui-design}:
+Although Pundit provides a way to express authorization rules, it leaves it up to the developer to create the data model to capture which users can perform what actions. While this was an advantage in the preceding case study as the authorization scheme was simple, the research IDE involves user-configurable fine-grained permissions. The research IDE also has the following additional requirements, derived from sections \ref{sec:case-research-requirements} and \ref{sec:case-research-ui-design}:
 \begin{enumerate}
 \item Owners can assign each participant a permission (ex. no access, view, or view and edit) for each task in a single project;
 \item Owners can view and update the set of permissions assigned to a participant through an interface that groups the permissions by participant;
@@ -196,10 +196,10 @@ Even bypassing the API and manipulating the database directly is insufficient to
 The permission libraries all store permissions in a form that makes it impossible to change the permission level of an existing user / resource association with a single update; for example, the Rolify data model (presented in Figure \ref{fig:case-research-rolify-data-model}) separates the permission level from the many-to-many association connecting users to permissions.
 This clever data model would require more programmer effort to update than most Rails forms, which simply transform the submitted data into a set of model instances and save them to the database without creating intermediate objects.
 
-A richer permission model is therefore necessary to meet the requirements of the second case study.
+A richer permission model was therefore necessary to meet the requirements of the research IDE.
 Figure \ref{fig:case-research-sane-permission-data-model} depicts the data model of the new system.
 The database enforces a unique constraint on user / role name / resource combinations, so that a named set of mutually exclusive permissions can be guaranteed to have only a single value per user / resource pair.
-For the second case study, the users are associated with projects through a permission named for the task type they are associated with.
+For the research IDE, the users are associated with projects through a permission named for the task type they are associated with.
 This not only ensures that only a single value is set, but also permits permissions to be set for tasks before the associated task model has been created.
 As well, the use of a single join table for the permissions makes it trivial to perform an insert or update simply by creating and saving a model instance, as no associated model instances need to be created.
 It is equally trivial to query the database to determine if a user has a specified permission for a task: as demonstrated by Figure \ref{fig:case-research-permission-code-example}, it can be implemented with a single existence query on the Role model.
@@ -295,10 +295,17 @@ end
 \sectionnote {AC}
 \section {Testing}
 
-As in our previous case study, we focused mainly on use case testing since the case study is not intended to be deployed. We focused on testing the features of the second case study that were not present in the first case study, such as role permissions.We assumed we might be able to extract a role permission feature and decided to build a test suite focusing that functionality.
+As in our previous case study, we focused mainly on use case testing since the research IDE is not intended to be deployed. We focused on testing the features of the application that were not present in the first case study, such as role permissions. We assumed we might be able to extract a role permission feature and decided to build a test suite focusing that functionality.
 
-Even though we were focused on testing role permissions we still found it valuable to test the state machines. By testing the state machines we could be certain that our permission tests which rely heavily on the state of a project would work correctly. All-transitions criteria was used to test the state machines and was not very expensive due to the simplicity of the state machine. The state machine of the second case study is completely linear with each state only having a single transition to the following state. Because of this it was enough to use a single test path through the system to cover all-transitions.
+Even though we were focused on testing role permissions we still found it valuable to test the state machines. By testing the state machines we could be certain that our permission tests which rely heavily on the state of a project would work correctly. All-transitions criteria was used to test the state machines and was not very expensive due to the simplicity of the state machine. The state machine of the research IDE is completely linear with each state only having a single transition to the following state. Because of this it was enough to use a single test path through the system to cover all-transitions.
 
-Our use case testing suite is much more in depth and focuses on the project use cases. At each state a member of a project gains access to the actions that the state provides. In addition, some actions belonging to a previous state may remain open to modification, or may be closed and unable to be modified. Because of this each possible action had to be tested in every state. This was done using Capybara, advancing to the correct state and going back through all previous possible actions and asserting their availability according to our use cases
+Our use case testing suite is much more in depth and focuses on the project use cases. At each state a member of a project gains access to the actions that the state provides. In addition, some actions belonging to a previous state may remain open to modification, or may be closed and unable to be modified. Because of this each possible action had to be tested in every state. This was done using Capybara, advancing to the correct state and going back through all previous possible actions and asserting their availability according to our use cases.
+
+
+\sectionnote {BM}
+\section {Conclusions}
+
+\todo {Write this section}
+
 
 \end{document}
