@@ -500,18 +500,6 @@ Of course, it may be the case that multiple controllers should share the same vi
 Though this functionality is useful for structuring actions, it comes with an associated cost in user interface flexibility. As the partials for each action are separate, there is no way to have them share user interface elements, which leads to some redundancy. It is possible to alter the state machine so that elements which are rendered together use the same event, and check a guard to determine which transition to take; however, it is undesirable to compromise the model in order to improve the user interface. \todo {Create an illustration to support this assertion, and demonstrate the difference between the original mockups and the user interfaces produced with this technique.}
 
 
-\FloatBarrier
-
-\sectionnote {AC}
-\subsection {Start New Year Case Implementation}
-
-The 'Start New Year' functionality is a very simple implementation of the wizard UI pattern. A coordinator is presented with a series of pages to guide them through the set up of a new year. The coordinator navigates through these pages with forward and backward buttons. The steps involved in creating a new year are described in table \ref{tbl:use-case-start-new-year}. 
-
-The wizard pattern is used to give the user an easy way to go through a sequence of steps to achieve a goal. This is typically done with forward and backward buttons which are located on every page. In order to reuse previous functionality of Supervisor Management and Deadline Scheduling those features were moved into rails partials. This allows the previous implementation to be used in multiple pages allowing the addition of the forward and back buttons to only the wizard pages.
-
-During this refactoring of the Supervisor management and Deadline Scheduling we discovered an issue with how the partial would redirect the user after modifications. Previously the user would be redirected to the default Supervisor Management page or the default Deadline Scheduling page. With this new change the page the user would be directed to would be dependant on if the user was accessing that page through the wizard or by itself. To solve this we simply send a reference to which page the partial is being viewed from to the partial so it knows how to redirect itself.
-
-
 \sectionnote {BM}
 \section {Testing}
 
