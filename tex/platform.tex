@@ -5,13 +5,13 @@
 \chapter{Platform}
 \label {ch:platform}
 
-\todo {Define a ``gem''}
-
 The results of the first case study were used to define a new platform for workflow-based web development on Rails. The intention is to provide programmers with a set of reusable components that allow them to perform common tasks required by workflow-based applications, without sacrificing usability.
 
-The platform consists of both third-party packages and new utility packages that leverage them. A package diagram illustrating the relationships between the packages that make up the platform is given in Figure \ref{fig:platform-package-diagram}. Note that Stonepath itself is omitted from the platform; in the prototype and case study, it was determined that aside from AASM, its features did not improve developer productivity. \todo {Add a conclusion section to the case study to support this.}
+AASM, Devise, and Pundit form the core of the new platform. These third-party libraries (or ``gems'' in Ruby parlance) cover the two key requirements of all workflow platforms: as workflows are sequences of steps carried out by one or more users in specific roles, then it is necessary for workflow-based applications to encode both the sequence of steps and the ability to recognize users and roles. AASM provides support for encoding sequences of steps using a domain-specific language for state machines, while Devise and Pundit provide the authorization and authorization required to identify users and slot them into specific roles. Note that Stonepath itself is omitted from the platform; in the prototype and case study, it was determined that aside from AASM, its features did not improve developer productivity. \todo {Add a conclusion section to the case study to support this.}
 
-Each new package is described in more detail in the following sections. The section for each package summarizes the motivation for including the package in the platform, presents a brief description of the package, and discusses how the package is tested. The section concludes with a description of \todo {Application platform} and how integration testing is performed on newly-released versions of upstream packages.
+Several new libraries were also created to provide common workflow-related features as part of the platform. As illustrated by the package diagram in Figure \ref{fig:platform-package-diagram}, these new libraries build on the core third-party libraries in the platform.
+
+Each new package is described in more detail in the following sections. The section for each package summarizes the motivation for including the package in the platform, presents a brief description of the package, and discusses how the package is tested.
 
 \begin{figure}[!ht]
 \centering \includegraphics[width=4.5in]{./img/platform/platform-package-diagram}
@@ -20,6 +20,11 @@ Each new package is described in more detail in the following sections. The sect
 \end{figure}
 
 \FloatBarrier
+
+
+\sectionnote {BM}
+\section {AASM, Devise, and Pundit}
+
 
 
 \sectionnote {BM}

@@ -37,7 +37,7 @@ The requirements for the issue tracking system were translated into the state ma
 \label{fig:stonepath-prototype-state-machine}
 \end{figure}
 
-The state machine model also includes a \verb!timeout! event which is triggered seven days after the in progress state is entered. The timeout was omitted from the prototype to save time, as it was not considered a risk - a scheduled task can easily be added using the delayed\_job (\todo{citation}) gem.
+The state machine model also includes a \verb!timeout! event which is triggered seven days after the in progress state is entered. The timeout was omitted from the prototype to save time, as it was not considered a risk -- several libraries already exist for Rails that provide delayed execution of method calls, as is discussed further in section \ref{sec:4ys-handling-deadlines}.
 
 Additionally, the model also includes actions to create and destroy tasks when appropriate. Though this appeared to the be correct way to model participation in a workflow when the state machine was designed, it was discarded in the implementation, as described below.
 
