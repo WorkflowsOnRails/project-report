@@ -274,7 +274,7 @@ end
 
 \sectionnote{BM}
 \subsection{Task Assignment}
-The data model in Figure \ref{fig:custom-task-simplicity} was realized as the ER model represented in Figure \ref{fig:custom-task-er-model} using multiple-table inheritance (MTI.) Though there are Rails libraries available that implement MTI, such as acts\_as\_relation and heritage (\todo{cite}), neither are documented to work with Rails 4 and both mask the fact that MTI subclasses are not substitutable. Instead of using a library, MTI was implemented manually using Rails’ polymorphic associations. The base Task table contains all of the data required to present it in a task list (such as a summary of the task and when it is due), as well as the attributes for a polymorphic ActiveRecord association with the various task types. This permits a single query over the task table to select the summaries of all tasks assigned to a user, while each task page (such as the proposal task page in Figure \ref{fig:wireframe-group-member-proposal-view}) can retrieve the specialized task instance it requires and display it.
+The data model in Figure \ref{fig:custom-task-simplicity} was realized as the ER model represented in Figure \ref{fig:custom-task-er-model} using multiple-table inheritance (MTI.) Though there are Rails libraries available that implement MTI, such as acts\_as\_relation \cite{acts_as_relation} and heritage \cite{heritage}, neither are documented to work with Rails 4 and both mask the fact that MTI subclasses are not substitutable. Instead of using a library, MTI was implemented manually using Rails’ polymorphic associations. The base Task table contains all of the data required to present it in a task list (such as a summary of the task and when it is due), as well as the attributes for a polymorphic ActiveRecord association with the various task types. This permits a single query over the task table to select the summaries of all tasks assigned to a user, while each task page (such as the proposal task page in Figure \ref{fig:wireframe-group-member-proposal-view}) can retrieve the specialized task instance it requires and display it.
 
 \begin{figure}[!htbp]
 \centering \includegraphics{./img/case-study-fourth-year-system/task-through-project-er-model}
@@ -495,9 +495,7 @@ This functionality was implemented as a simple controller concern. In order to u
 \item Finally, it renders the partial view with the same name as each permitted event.
 \end{enumerate}
 
-Of course, it may be the case that multiple controllers should share the same views. Controllers may override the method \verb!action_view_prefix!, which takes the event name as an argument and returns the view directory to look in to find the event partial. This is convenient, as it allows view delegation to be performed without having to create one partial per controller for each event, which would in turn only render another partial.
-
-Though this functionality is useful for structuring actions, it comes with an associated cost in user interface flexibility. As the partials for each action are separate, there is no way to have them share user interface elements, which leads to some redundancy. It is possible to alter the state machine so that elements which are rendered together use the same event, and check a guard to determine which transition to take; however, it is undesirable to compromise the model in order to improve the user interface. \todo {Create an illustration to support this assertion, and demonstrate the difference between the original mockups and the user interfaces produced with this technique.}
+Of course, it may be the case that multiple controllers should share the same views. Controllers may override the method \verb!action_view_prefix!, which takes the event name as an argument and returns the view directory to look in to find the event partial. This is convenient for developers, as it allows view delegation to be performed without having to create one partial per controller for each event, which would in turn only render another partial.
 
 
 \sectionnote {BM}
@@ -515,15 +513,13 @@ it is important to maximize test coverage per hour of test development. Furtherm
 
 In order to minimize time spent developing tests for the case study, it was decided that tests would only be designed to achieve complete coverage of the use cases detailed in section \ref{sec:4ys-requirements}. Full black-box coverage should be sufficient to find regressions caused by refactoring the system, as the implementation of the business logic itself will not evolve. If regressions do occur while extracting components to external libraries, it is expected that they will be detectable without full white-box coverage.
 
-\todo {Explain why we're using the all-transitions criterion to select test paths for functionality modelled as state machines.}
+Additionally, the individual state machines making up the workflow were tested using integration tests selected with the all-transitions criterion. Again, as the case study application will not be deployed in production, correctness was less important than the ability to detect regressions caused by refactoring. Compared to other state machine testing techniques, the all-transitions criterion minimizes the number of tests required, while still providing decent defect-detection ability for the amount of time invested.
 
 
 \sectionnote {BM}
-\subsection {Technology}
+\subsection {End-to-End Testing Technology}
 
-\todo{Break this into two sections -- end-to-end testing and time-based   testing. Add citations for projects.}
-
-The Ruby community has coalesced around two popular tools for web application integration testing: Capybara and Watir. While Watir provides a framework-agnostic Ruby API to launch and control web browsers, Capybara provides a domain-specific language to test Rails applications. Capybara was selected as the case study's integration testing framework due to its ease of use with Rails. While Watir requires users to write their own code to handle running a web server outside of their Watir tests, Capybara uses the Rack::Test library to send requests and receive responses from a Rails application without requiring the user to launch and shut down a separate server process.
+The Ruby community has coalesced around two popular tools for web application integration testing: Capybara \cite{capybara} and Watir \cite{watir}. While Watir provides a framework-agnostic Ruby API to launch and control web browsers, Capybara provides a domain-specific language to test Rails applications. Capybara was selected as the case study's integration testing framework due to its ease of use with Rails. While Watir requires users to write their own code to handle running a web server outside of their Watir tests, Capybara uses the Rack::Test library to send requests and receive responses from a Rails application without requiring the user to launch and shut down a separate server process.
 
 Additionally, Capybara's DSL makes it trivial to control with the system under test, as each logical action taken by a user (for example, ``click on a button'' or ``fill in an input box'') requires a single Capybara statement. Figure \ref{fig:4ys-test-signup} provides an example of a simple Capybara test, which drives the system through the process of a Project Group Member creating an account.
 
@@ -561,9 +557,12 @@ end
 \end{figure}
 
 
-Many of the use cases in the system also involve time-based actions, such as deadlines expiring. While it would be possible to directly manipulate the test database to insert timestamps occurring at some point in the past, this would require bypassing ActiveRecord entirely to avoid the system's custom validation rule that prevents deadlines from being set for past dates. It also produces test cases that are difficult to follow: instead of modeling deadlines expiring due to the passage of time, the test cases would instead written to modify the deadlines.
+\sectionnote {BM}
+\subsection {Testing Time-Sensitive Functionality}
 
-The timecop library provides a simpler approach to testing time-sensitive behavior. It replaces the Ruby Time class with a mock object that returns the desired time, allowing tests to simulate the passage of time. Figure \ref{fig:4ys-test-timecop} contains an example that uses timecop and Capybara to test deadlines for oral presentation forms, corresponding to the behavior modeled in Figure \ref{fig:state-machine-oral-presentation-scheduling}. Note the call to \verb!Expirable.send_expired_events!: as timecop can only modify the current time in the running process, the test must invoke methods that would normally be run periodically by an external process.
+Many of the use cases in the system involve time-based actions, such as deadlines expiring. While it would be possible to directly manipulate the test database to insert timestamps occurring at some point in the past, this would require bypassing ActiveRecord entirely to avoid the system's custom validation rule that prevents deadlines from being set for past dates. It also produces test cases that are difficult to follow: instead of modeling deadlines expiring due to the passage of time, the test cases would instead written to modify the deadlines.
+
+The timecop \cite{timecop} library provides a simpler approach to testing time-sensitive behavior. It replaces the Ruby Time class with a mock object that returns the desired time, allowing tests to simulate the passage of time. Figure \ref{fig:4ys-test-timecop} contains an example that uses timecop and Capybara to test deadlines for oral presentation forms, corresponding to the behavior modeled in Figure \ref{fig:state-machine-oral-presentation-scheduling}. Note the call to \verb!Expirable.send_expired_events!: as timecop can only modify the current time in the running process, the test must invoke methods that would normally be run periodically by an external process.
 
 \begin{figure}[!ht]
   \begin{lstlisting}

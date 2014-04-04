@@ -98,7 +98,7 @@ Each state of the workflow has an entry action that is responsible for creating 
 \section {User Interface Design}
 \label {sec:case-research-ui-design}
 
-\todo {Add an appropriate introduction to this section here}
+After the workflow design of the system was completed, the workflow design and requirements were combined to produce a preliminary design for the user interface. The rest of this section presents a short discussion of this design, as well as mockups illustrating key concepts of the interface.
 
 As the research IDE allows a user to be a member of several projects at the same time, the user needs some way of navigating available projects and quickly distinguishing projects of interest from historical or inactive projects. The home page of the application, presented in Figure \ref{fig:case-research-design-home-page} presents a user's projects grouped into two categories. The ``active'' category contains projects that are in states that grant the user edit permission; for example, if a project is in the ``collecting data'' state, and a technician assigned to the project has permission to edit the results task, then it will appear in the active category. Otherwise, projects will be listed under the ``dormant'' category in case they contain data that a user wishes to access.
 
@@ -143,7 +143,7 @@ This functionality is illustrated in the wireframe in Figure \ref{fig:case-resea
 
 \section {Implementation}
 
-\todo {Add an introduction and overview of this section here}
+After the design of the workflow and user interface of the proof-of-concept research IDE was completed, the application was implemented iteratively, starting by setting up the platform libraries, creating the core data model and user interface for individual steps in the workflow, and then implementing the other functionality such as permission management. This section describes the implementation of a few of the key workflow-related concerns for the proof-of-concept, concluding with a discussion of the application of the platform to this specific application.
 
 
 \sectionnote {BM}
@@ -250,12 +250,10 @@ end
 
 While the permission model in section \ref{sec:case-research-permission-based-auth} captures which users have permission to perform specific actions, the ability to edit a task also depends on the state its associated project is in, as specified in Table \ref{tbl:case-research-edit-policies}.
 
-Although the simplest way to implement this policy would be to hard-code a list of all states that each task type is editable in, the \verb!Project! model already specifies the order of states, in order to render the navigation bar.
+Although the simplest way to implement this policy would be to hard-code a list of all states that each task type is editable in, the \verb!Project! model already specifies the order of states used to render the navigation bar.
 A \verb!have_not_started?! method was added to query whether a specific state (or a successor thereof) had already been entered.
 With this method, it was possible to perform a row-by-row translation of Table \ref{tbl:case-research-edit-policies} to the partial Pundit policy given in Figure \ref{fig:case-research-state-based-policy}.
 Re-using the existing metadata significantly improves the maintainability of the policy -- if a state is added or removed, the policy only needs to be modified if that specific state determines when a task is editable.
-
-\todo{Can we conclude anything general here? Is this a pattern worth capturing in our methodology when we write it?}
 
 \begin{figure}[!ht]
   \begin{lstlisting}
@@ -286,6 +284,13 @@ end
 \end{figure}
 
 \FloatBarrier
+
+
+\sectionnote {BM}
+\subsection {Platform Application}
+
+\todo {Write this section}
+
 
 \sectionnote {AC}
 \section {Testing}
