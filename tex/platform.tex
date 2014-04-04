@@ -23,19 +23,6 @@ Each new package is described in more detail in the following sections. The sect
 
 
 \sectionnote {BM}
-\section {expirable}
-
-Business processes often involve deadlines, such as ensuring that tax forms are prepared before the filing deadline, or support requests are answered within contractually-imposed time limits. Workflow frameworks must therefore support them as well -- however, AASM and Rails do not have such support out-of-the box, nor are there any third-party libraries that make it easy to implement deadlines for AASM.
-
-\verb!expirable! \cite{expirable} is a Rails library that fills that gap. It uses the techniques described in section \ref{sec:4ys-handling-deadlines} to generate time-based events with Clockwork and then asynchronously run associated actions with \verb!Delayed::Job!. As the deadline-handling functionality was designed to be used by several models in the fourth year system, it was trivial to extract the reusable parts to a separate library without performing any refactoring.
-
-Testing of the new gem was somewhat more complicated. Though the library's unit test suite achieved 100\% statement coverage of the code in the expirable library itself, the task of integration testing the library was complicated by the fact that \verb!Delayed::Job! runs in its own thread. This makes it difficult to detect when a deadline event has run from within the test runner without constructing an inter-process communication mechanism or polling the database. In the end the integration tests were omitted; based on the simplicity of the integration (which only involves invoking a ``delay'' method from \verb!Delayed::Job!) and the widespread use and excellent upstream test coverage, further test would add little value relative to the effort involved.
-
-The completed library is available online at \url{https://github.com/WorkflowsOnRails/aasm_statecharts}, or it may be installed from the \verb!aasm_statecharts! gem.
-A short manual is available on the project's GitHub page, and is also attached to this report in section \ref{sec:expirable-manual}.
-
-
-\sectionnote {BM}
 \section {aasm\_statecharts}
 
 The AASM domain specific language provides a readable and writable way to define state machines in Ruby. Unfortunately, it is still less readable than graphical techniques such as state charts; developers cannot easily intuit the overall flow of events in a workflow from a textual description, but can if they are provided with a graphical representation.
@@ -46,7 +33,10 @@ While several tools exist to general state machine diagrams from AASM definition
 
 \verb!aasm_statecharts! is based on the diagram generating tool described in section \ref{sec:4ys-visualizing-workflows}, with some modifications to the structure of the code to improve testability. While the original diagram generator was implemented as a single Ruby script, \verb!aasm_statecharts! is split into two parts: a library module (\verb!lib/aasm_statechart.rb!) which implements the logic that maps from AASM to the Ruby-Graphviz object model, and a launcher script (\verb!bin/aasm_startecharts!) that handles parsing command line arguments and invoking the library module appropriately. This improves observability, as the test scripts can access the semantic information in the Ruby-GraphViz object model, instead of just the generated diagram.
 
-Sufficient unit tests have been written to achieve 100\% coverage of the library module. The unit tests were written following a black-box methodology, following the testable characteristics of the parameters of the library methods. More detail about the tests can be found in section \ref{sec:platform-test-cases-aasm_statecharts}. Note that the launcher script is still tested manually, as it is trivial to achieve full coverage of the command-line options in a few tests, and because the generated diagrams require human judgment to determine if they are correct.
+Sufficient unit tests have been written to achieve 100\% coverage of the library module. The unit tests were written following a black-box methodology, following the testable characteristics of the parameters of the library methods.
+% More detail about the tests can be found in section
+% \ref{sec:platform-test-cases-aasm_statecharts}.
+Note that the launcher script is still tested manually, as it is trivial to achieve full coverage of the command-line options in a few tests, and because the generated diagrams require human judgment to determine if they are correct.
 
 \verb!aasm_statecharts! is available online at \url{https://github.com/WorkflowsOnRails/aasm_statecharts}, or it may be installed from the \verb!aasm_statecharts! gem.
 A short manual is available on the project's GitHub page, and is also attached to this report in section \ref{sec:aasm-statecharts-manual}.
@@ -55,8 +45,33 @@ A short manual is available on the project's GitHub page, and is also attached t
 \sectionnote {BM}
 \section {aasm\_progressable}
 
+Many workflow-based web applications present some indication of a user's progress through a workflow; for example, consider the registration workflow for GitHub presented in Figure \ref{fig:github-registration}. Such progress indicators are important for designing usable workflow-based user interfaces: they give users a sense of what to expect from future steps, as well as how much of the workflow they have completed.
 
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=6in]{./img/platform/github-registration}
+  \cprotect
+  \caption{Screenshot showing progress indicator used in GitHub's registration workflow. Note that step 1 is highlighted, indicating that it is the current step.}
+  \label{fig:github-registration}
+\end{figure}
 
+Unfortunately, there is no existing off-the-shelf solution for rendering this type of progress indicator for a workflow implemented in AASM. Thus, the \verb!aasm_progressable! \cite{aasm_progressable} library was created to fill this gap. The library renders a progress indicator based on the current state of a model instance, plus an declaration in the model that specifies the order that the states are traversed in the workflow.
+
+Although it might seem like the sequence of states could be inferred automatically, this is not the case; certain state machines have several possible natural orderings. Figure \ref{fig:equivalent-fsms}, presents one such state machine: while subfigure (a) appears to have state B precede state C, rearranging the diagram to yield (b) demonstrates that C could just as easily be inferred to come before B.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=2.3in]{./img/platform/equivalent-fsms}
+  \cprotect
+  \caption{Two representations of the same simplified finite state machine. (The transition labels have been removed for clarity.) The state machine depicted in (b) is equivalent to the one in (a), except nodes B and C have had their positions swapped.}
+  \label{fig:equivalent-fsms}
+\end{figure}
+
+After extracting the library, a series of black-box tests were created in order to achieve more than 90\% statement coverage of the codebase. The exception to the test coverage is the \verb!AasmProgressable::Helper! module, which handles instantiating a few underlying classes, and passing them to a template to be rendered to HTML. The Rails testing libraries lack the ability to check the arguments passed to a call to \verb!render!, and while it would be possible to inject the helper module into a custom object and mock the \verb!render! method, this would be brittle and likely to fail if the code changed. Instead, the four lines in the method were left untested in the gem for now, as the results of rendering a progress indicator widget from the gem are already checked in the integration tests for the first case study.
+
+\verb!aasm_progressable! can be found on GitHub at \url{https://github.com/WorkflowsOnRails/aasm_actionable}, and the stable version is available via the \verb!aasm_progressable! gem. A manual is available on the project's GitHub page, and is also reproduced in section \ref{sec:aasm-progressable-manual} of this report.
+
+\FloatBarrier
 
 \sectionnote {BM}
 \section {aasm\_actionable}
@@ -82,8 +97,16 @@ A short manual is available on the project's GitHub page, and is also attached t
 
 
 \sectionnote {BM}
-\section {Rails Application Template}
+\section {expirable}
 
+Business processes often involve deadlines, such as ensuring that tax forms are prepared before the filing deadline, or support requests are answered within contractually-imposed time limits. Workflow frameworks must therefore support them as well -- however, AASM and Rails do not have such support out-of-the box, nor are there any third-party libraries that make it easy to implement deadlines for AASM.
+
+\verb!expirable! \cite{expirable} is a Rails library that fills that gap. It uses the techniques described in section \ref{sec:4ys-handling-deadlines} to generate time-based events with Clockwork and then asynchronously run associated actions with \verb!Delayed::Job!. As the deadline-handling functionality was designed to be used by several models in the fourth year system, it was trivial to extract the reusable parts to a separate library without performing any refactoring.
+
+Testing of the new gem was somewhat more complicated. Though the library's unit test suite achieved 100\% statement coverage of the code in the expirable library itself, the task of integration testing the library was complicated by the fact that \verb!Delayed::Job! runs in its own thread. This makes it difficult to detect when a deadline event has run from within the test runner without constructing an inter-process communication mechanism or polling the database. In the end the integration tests were omitted; based on the simplicity of the integration (which only involves invoking a ``delay'' method from \verb!Delayed::Job!) and the widespread use and excellent upstream test coverage, further test would add little value relative to the effort involved.
+
+The completed library is available online at \url{https://github.com/WorkflowsOnRails/expirable}, or it may be installed from the \verb!expirable! gem.
+A short manual is available on the project's GitHub page, and is also attached to this report in section \ref{sec:expirable-manual}.
 
 
 \sectionnote {BM}
