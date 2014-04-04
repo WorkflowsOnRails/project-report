@@ -286,12 +286,6 @@ end
 \FloatBarrier
 
 
-\sectionnote {BM}
-\subsection {Platform Application}
-
-\todo {Write this section}
-
-
 \sectionnote {AC}
 \section {Testing}
 
@@ -303,9 +297,14 @@ Our use case testing suite is much more in depth and focuses on the project use 
 
 
 \sectionnote {BM}
-\section {Conclusions}
+\section {Results and Discussion}
 
 \todo {Write this section}
 
+\begin{itemize}
+\item Though not mentioned explicitly, many parts of the platform were used to construct the proof of concept.
+\item Used AASM, Devise and Pundit were applied as in the previous case study. Aside from the Pundit policy used for tasks, the implementation details were unremarkable and were thus omitted.
+\item Many of the new third-party libraries were applied as well. aasm\_statecharts was applied to generate state machine diagrams from the implementation. These diagrams were used to validate that the implementation matched the design. aasm\_progressable was also used 
+\end{itemize}
 
 \end{document}

@@ -9,6 +9,8 @@ The fourth-year project management system is used by the department of Systems a
 
 The system fulfills its functional requirements, but requires significant effort on the part of students to navigate, as all actions, information and deadlines are available at all times. It offers a good example of a system where the user experience could be improved by structuring the system into workflows. Additionally, the system involves deadlines and collaborative activities between multiple actors, which makes it a good test of the capabilities of the Stonepath workflow framework.
 
+This section presents an overview of the requirements and design of the system, following by selected workflow-specific details of the process of implementation and testing. Finally, it concludes with an brief overview and evaluation of the results of the case study.
+
 \sectionnote {BM}
 \section {Requirements}
 \label {sec:4ys-requirements}
@@ -275,6 +277,8 @@ end
 
 \sectionnote{BM}
 \subsection{Task Assignment}
+\label {sec:4ys-task-assignment}
+
 The data model in Figure \ref{fig:custom-task-simplicity} was realized as the ER model represented in Figure \ref{fig:custom-task-er-model} using multiple-table inheritance (MTI.) Though there are Rails libraries available that implement MTI, such as acts\_as\_relation \cite{acts_as_relation} and heritage \cite{heritage}, neither are documented to work with Rails 4 and both mask the fact that MTI subclasses are not substitutable. Instead of using a library, MTI was implemented manually using Rails’ polymorphic associations. The base Task table contains all of the data required to present it in a task list (such as a summary of the task and when it is due), as well as the attributes for a polymorphic ActiveRecord association with the various task types. This permits a single query over the task table to select the summaries of all tasks assigned to a user, while each task page (such as the proposal task page in Figure \ref{fig:wireframe-group-member-proposal-view}) can retrieve the specialized task instance it requires and display it.
 
 \begin{figure}[!htbp]
@@ -594,5 +598,19 @@ end
   \cprotect \caption{An example integration test illustrating the use of timecop to test time-sensitive behavior.}
   \label{fig:4ys-test-timecop}
 \end{figure}
+
+
+\sectionnote {BM}
+\section {Results and Discussion}
+
+The case study was successfully implemented using state-based workflow modeling. The state-based approach mapped naturally to the problem domain, as the case study naturally decomposed into a high-level workflow specifying the order of the project deliverables, and several lower-level per-task workflows.
+Though the inability to naturally declare parallel activities was inconvenient, the effort involved in working around this limitation was not significant, amounting to only a few lines of code in a one or two guards in the entire code base.
+
+The use of AASM, Devise, and Pundit was found to be a great boost to productivity. Out of the box, the three third party libraries provide support for declaring state machines in Ruby, performing authentication, and declaring authorization rules in a central location. Better still, AASM and Pundit expose information that developers can leverage in the rest of the application, instead of having to encode state machine and authorization information in multiple locations in the source code.
+
+In contrast, the task assignment facilities provided by Stonepath were not useful for the case study. As described in section \ref{sec:4ys-task-assignment}, the case study application ended up using an application-specific approach to assignment instead of using the inheritance-based approach implemented in Stonepath. This simplified the implementation by avoiding the unnecessary polymorphic references used by Stonepath, which would have made the data model much more difficult to query.
+
+Finally, the case study identified several opportunities for new libraries.
+As elaborated on in the next chapter, these opportunities relate to common application requirements that are not provided by any current libraries targeting AASM. \todo {Concluding sentence}
 
 \end{document}
