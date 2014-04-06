@@ -4,7 +4,7 @@
 \chapter {Detailed Use Cases for the Fourth~Year~Project~System}
 \label {ch:detailed-use-cases-1}
 
-\todo {Add an overview of this appendix.}
+This appendix contains the detailed use cases for the fourth year project system that was developed as a case study in chapter \ref{ch:case-study-1}. Section \ref{sec:detailed-use-cases-1-setup} contains use cases related to configuring the system for a new year and new slate of students. The use cases in section \ref{sec:account-management} cover details of creating, modifying, and deleting user accounts, while those in section \ref{sec:detailed-use-cases-1-management} describe the activities that culminate in students selecting a project. Finally, section \ref{sec:detailed-use-cases-1-execution} contains descriptions of the use cases involved in carrying out the project, such as submitting proposals and other deliverables.
 
 
 \sectionnote{AC}
@@ -93,8 +93,6 @@
 \sectionnote{AC}
 \section{Account Management}
 \label{sec:account-management}
-
-The account management use cases shown in Figure \ref{fig:case-4ys-use-case-account-management} are described in the following tables \ref{tbl:use-case-register-member-account} through \ref{tbl:use-case-manage-account}. These descriptions cover the creation, modification, and deletion of the different accounts in the system.
 
 \begin{table}[!htbp]
   \centering
@@ -578,7 +576,7 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
 
   \begin{usecase}[Schedule Oral Presentations]
     \ucpart{Description}
-    The Project Coordinator determines when and where each group will have their oral presentation.
+    The Project Coordinator determines when and where each group will have their oral presentation, and informs the groups.
     %
     \ucpart{Actors}
     Project Coordinator
@@ -589,15 +587,17 @@ The account management use cases shown in Figure \ref{fig:case-4ys-use-case-acco
     \ucpart{Flow}
     \ucnormal
     \begin{ucenum}
-      \item The Project Coordinator views each groups scheduling form.
-      \item The Project Coordinator produces a schedule that best meets the constraints of all of the project groups, assigning each group a time and place for their oral presentation.
-      \item The system notifies all Project Group Members and Project Supervisors.
+      \item The Project Coordinator opens the oral presentation scheduling interface.
+      \item The Project Coordinator inputs the week to schedule presentations for, plus the earliest starting time and latest end time that a presentation may have.
+      \item The Project Coordinator submits the scheduling request to the system.
+      \item The system assigns a timeslot to each project group, and informs the Project Coordinator when scheduling has been completed.
+      \item The Project Coordinator notifies the project groups that the presentation schedule has been created.
       \item Project Group Members and Project Supervisors view the times and locations of their assigned oral presentations.
     \end{ucenum}
     %
     \ucpart{Exceptions}
     \ucexception{Rescheduling required}
-    If a Project Group Member or Project Supervisor is no longer available for the timeslot they were assigned, they must contact the Project Coordinator. The Project Coordinator may choose to repeat the process from step 1 with the new scheduling constraints.
+    If a Project Group Member or Project Supervisor is no longer available for the timeslot they were assigned, they must contact the Project Coordinator. The Project Coordinator may update the scheduling forms and repeat the process from step 1 with the new scheduling constraints.
     %
     \ucpart{Postconditions}
     Each group has been assigned an appropriate time and location for their oral presentation.
