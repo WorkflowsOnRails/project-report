@@ -41,7 +41,11 @@ The state machine model also includes a \verb!timeout! event which is triggered 
 
 Additionally, the model also includes actions to create and destroy tasks when appropriate. Though this appeared to the be correct way to model participation in a workflow when the state machine was designed, it was discarded in the implementation, as described below.
 
-The state machine was translated to a Ruby on Rails application, which is available at \url{https://github.com/WorkflowsOnRails/stonepath-timeboxed-example}. The application was implemented from the bottom up. First a workitem was implemented for issues, as demonstrated in the code snippet in Figure \ref{fig:stonepath-prototype-workitem}. Next, workbenches were created for roles and users. Finally, a generic task type was defined to associate workitems and workbenches. After the model was completed, authentication was implemented using Devise (described in more detail in section \ref{sec:4ys-authentication}) , and the model was wrapped with appropriate views and controllers to drive the application.
+The state machine was translated to a Ruby on Rails application, which is available at \url{https://github.com/WorkflowsOnRails/stonepath-timeboxed-example}. The application was implemented from the bottom up. First a workitem was implemented for issues, as demonstrated in the code snippet in Figure \ref{fig:stonepath-prototype-workitem}. Next, workbenches were created for roles and users. Finally, a generic task type was defined to associate workitems and workbenches.
+
+After the model was completed, an authentication system was required to manage user details and implement authorization in the application. Instead of implementing authentication from scratch, two existing authentication solutions for Rails (Devise \cite{devise} and OmniAuth \cite{omniauth}) were considered. Both provide mechanisms to authenticate user credentials using a variety of authentication providers such as OpenID \cite{devise-openid} and LDAP \cite{omniauth-ldap}. Both libraries are widely-deployed and actively developed, but differ in the services they provide. OmniAuth allows existing users to log into the application, but leaves it up to the developer to associate the logged-in user with a user profile model and store this information in the browser session. On the other hand, Devise automatically associates logged in users with their profiles, and exposes the profile model of the logged-in user via a \verb!current_user! variable in all controllers and views. Integrating Devise into an application is as simple as installing the Devise library and running {\tt rails g devise:install}.
+
+Based on its relative ease-of-use and installation, Devise was selected as the authentication backend. It was integrated into the application, and then the model was wrapped with appropriate views and controllers in order to complete the prototype.
 
 \begin{figure}[!ht]
   \begin{lstlisting}
@@ -81,7 +85,7 @@ end
   \label{fig:stonepath-prototype-workitem}
 \end{figure}
 
-The entire prototype was simple to design and implement in Stonepath, requiring only an afternoon to complete. However, the prototype revealed several possible areas of improvement for Stonepath, such as:
+The entire prototype was simple to design and implement using Stonepath and Devise, requiring only an afternoon to complete. However, the prototype revealed several possible areas of improvement for Stonepath, such as:
 
 \paragraph{Parallel activities:} Stonepath and AASM do not have the ability to represent sub-states, which makes it difficult to represent parallel activities. This forces developers to employ ad hoc solutions, such as the \verb!completed?! guard used in Figure \ref{fig:stonepath-prototype-workitem}. This guards ensures that the completion of the deployment or development activity does not advance the state of the workflow until the other activity has completed as well. This limitation makes it more difficult to modify workflows, as extending the duration of a parallel activity might require changing guards on activities that it previously ran in parallel with.
 
@@ -108,7 +112,7 @@ After several weeks of work it became apparent that Ruote was not designed to ea
 \label{fig:ruote-bpmn-diagram}
 \end{figure}
 
-In order to integrate Ruote with rails we decided to use Ruote-Kit. Setting up a Ruote project from scratch or integrating Ruote with an existing project is simple and only involves running a script provided by the developer of Ruote-Kit. It should be noted that removing Ruote-Kit once it has been installed is unadvised due to the amount of code the script modifies.
+In order to integrate Ruote with Rails we decided to use Ruote-Kit. Setting up a Ruote project from scratch or integrating Ruote with an existing project is simple and only involves running a script provided by the developer of Ruote-Kit. It should be noted that removing Ruote-Kit once it has been installed is unadvised due to the amount of code the script modifies.
 
 Since the work item, the issue, was required in every process of the issue tracker only one process definition was needed to model the BPMN processes. Figure \ref{fig:ruote-prototype-process-definition} displays a code snippet that is used to describe the process definition. 
 
@@ -179,9 +183,9 @@ end
   \label{fig:ruote-prototype-participant-code}
 \end{figure}
 
-The main problem encountered with Ruote was being unable to store data within the work item object required to pass data between processes. The process of storing information was complicated due to the fact the information comes into rails as a standard web request. The information is then sent to the Ruote process and stored in a work item as a hash map. This worked really well for integers but did not work for anything more complex such as strings. In addition, there were also issues retrieving data from outside the process definition making it difficult to display what had been done to the work item.
+The main problem encountered with Ruote was being unable to store data within the work item object required to pass data between processes. The process of storing information was complicated due to the fact the information comes into Rails as a standard web request. The information is then sent to the Ruote process and stored in a work item as a hash map. This worked really well for integers but did not work for anything more complex such as strings. In addition, there were also issues retrieving data from outside the process definition making it difficult to display what had been done to the work item.
 
-The abstraction of the workflow provided by Ruote is a good idea on paper, but did not seem to work in practice. The rails application ended up being completely integrated with Ruote to the extent that any modification to the Ruote processes would impact the rails application significantly. For this reason Ruote is not recommended for use with web applications.
+The abstraction of the workflow provided by Ruote is a good idea on paper, but did not seem to work in practice. The Rails application ended up being completely integrated with Ruote to the extent that any modification to the Ruote processes would impact the Rails application significantly. For this reason Ruote is not recommended for use with web applications.
 
 
 \FloatBarrier
