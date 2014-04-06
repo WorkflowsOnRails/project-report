@@ -98,7 +98,7 @@ The entire prototype was simple to design and implement in Stonepath, requiring 
 \section {Ruote Prototyping Results}
 \label {sec:ruote-prototyping-results}
 
-The BPMN model shown in Figure \ref{fig:ruote-bpmn-diagram} describes how the issue tracking system works using process based methodologies. The workflow of a report begins when it is created and joins the unclaimed report pool. Developers are then able to claim the report and Managers are able to set the deployment date. Once both actions have been accomplished the developer is able to sign off the report which will then close. If the report has not been signed off after 7 days the report returns to the unclaimed report pool. Reporters are only able to create new reports. Developers are only able to claim unclaimed reports and sign off on the reports that they have claimed. Managers are only able to assign deployment dates to each claimed report.
+Figure \ref{fig:ruote-bpmn-diagram} is a BPMN representation of the requirements specified in section \ref{sec:overview-of-the-prototype-application}. The workflow of a report begins when it is created and joins the unclaimed report pool. Developers are then able to claim the report and Managers are able to set the deployment date. Once both actions have been accomplished the developer is able to sign off the report which will then close. If the report has not been signed off after 7 days the report returns to the unclaimed report pool. Reporters are only able to create new reports. Developers are only able to claim unclaimed reports and sign off on the reports that they have claimed. Managers are only able to assign deployment dates to each claimed report.
 
 After several weeks of work it became apparent that Ruote was not designed to easily work within a web application and the prototype was abandoned. The rest of the section will cover how the application was built and the features of Ruote.
 
@@ -108,7 +108,7 @@ After several weeks of work it became apparent that Ruote was not designed to ea
 \label{fig:ruote-bpmn-diagram}
 \end{figure}
 
-In order to integrate Ruote with rails we decided to use Ruote-Kit. Setting up a Ruote project from scratch or integrating Ruote with an existing project is simple and only involves running a script provided by the developer of Ruote-Kit. It should be noted that removing Ruote-Kit once it has been installed is unadvised due to the amount of code the script modifies.
+In order to integrate Ruote with Rails we decided to use Ruote-Kit. Setting up a Ruote project from scratch or integrating Ruote with an existing project is simple and only involves running a script provided by the developer of Ruote-Kit. It should be noted that removing Ruote-Kit once it has been installed is unadvised due to the amount of code the script modifies.
 
 Since the work item, the issue, was required in every process of the issue tracker only one process definition was needed to model the BPMN processes. Figure \ref{fig:ruote-prototype-process-definition} displays a code snippet that is used to describe the process definition. 
 
@@ -179,10 +179,9 @@ end
   \label{fig:ruote-prototype-participant-code}
 \end{figure}
 
-The main problem encountered with Ruote was being unable to store data within the work item object required to pass data between processes. The process of storing information was complicated due to the fact the information comes into rails as a standard web request. The information is then sent to the Ruote process and stored in a work item as a hash map. This worked really well for integers but did not work for anything more complex such as strings. In addition, there were also issues retrieving data from outside the process definition making it difficult to display what had been done to the work item.
+The main problem that was encountered with Ruote was that it added complexity and did not make anything easier. All the activities were easily translated from BPMN to code using Ruote but writing what happens during an activity was confusing. Rails works by receiving requests and responding to them. Unlike Rails, each \verb!on_workitem! method is immediately executed upon the start of an activity and continually executes until it is completed. This means \verb!on_workitem! methods are executed before requests are received and require Rails to handle all of the timing requirements. Because of this it was actually easier to just implement everything in Rails itself instead of dealing with Ruote.
 
-The abstraction of the workflow provided by Ruote is a good idea on paper, but did not seem to work in practice. The rails application ended up being completely integrated with Ruote to the extent that any modification to the Ruote processes would impact the rails application significantly. For this reason Ruote is not recommended for use with web applications.
-
+The abstraction of the workflow provided by Ruote is a good idea on paper, but did not seem to work in practice. The Rails application ended up implementing the entire workflow and Ruote provided nothing of value. Some value might be gained from Ruote in projects that are continuously executing instead of a web application. Because of the continually executing nature of Ruote it is not recomended for use with web applications.
 
 \FloatBarrier
 
