@@ -47,11 +47,11 @@ digraph statechart {
 	"f9c2ddc3-cc54-428a-8c5f-972b720f674e"	 [color=black,
 		fillcolor=black,
 		fixedsize=true,
-		height=0.30556,
+		height=0.20,
 		label="",
 		pos="116.82,11",
 		shape=doublecircle,
 		style=filled,
-		width=0.29167];
+		width=0.20];
 	resolved -> "f9c2ddc3-cc54-428a-8c5f-972b720f674e"	 [pos="e,116.82,22.176 116.82,60.692 116.82,51.877 116.82,41.283 116.82,32.23"];
 }

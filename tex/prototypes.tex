@@ -49,9 +49,9 @@ The state machine model also includes a \verb!timeout! event which is triggered 
 
 Additionally, the model also includes actions to create and destroy tasks when appropriate. Though this appeared to the be correct way to model participation in a workflow when the state machine was designed, it was discarded in the implementation, as described below.
 
-The state machine was translated to a Ruby on Rails application, which is available at \url{https://github.com/WorkflowsOnRails/stonepath-timeboxed-example}. The application was implemented from the bottom up. First a workitem was implemented for issues, as demonstrated in the code snippet in Figure \ref{fig:stonepath-prototype-workitem}. Next, workbenches were created for roles and users. Finally, a generic task type was defined to associate workitems and workbenches.
+The state machine was translated to a Ruby on Rails application in a bottom-up fashion. First a workitem was implemented for issues, as demonstrated in the code snippet in Figure \ref{fig:stonepath-prototype-workitem}. Next, workbenches were created for roles and users. Finally, a generic task type was defined to associate workitems and workbenches.
 
-After the model was completed, an authentication system was required to manage user details and implement authorization in the application. Instead of implementing authentication from scratch, two existing authentication solutions for Rails (Devise \cite{devise} and OmniAuth \cite{omniauth}) were considered. Both provide mechanisms to authenticate user credentials using a variety of authentication providers such as OpenID \cite{devise-openid} and LDAP \cite{omniauth-ldap}. Both libraries are widely-deployed and actively developed, but differ in the services they provide. OmniAuth allows existing users to log into the application, but leaves it up to the developer to associate the logged-in user with a user profile model and store this information in the browser session. On the other hand, Devise automatically associates logged in users with their profiles, and exposes the profile model of the logged-in user via a \verb!current_user! variable in all controllers and views. Integrating Devise into an application is as simple as installing the Devise library and running {\tt rails g devise:install}.
+After the model was completed, an authentication system was required to manage user details and implement authorization in the application. Instead of implementing authentication from scratch, two existing authentication solutions for Rails (Devise \cite{devise} and OmniAuth \cite{omniauth}) were considered. Both provide mechanisms to authenticate user credentials using a variety of authentication providers such as OpenID and LDAP \cite{devise-openid} \cite{omniauth-ldap}. Both libraries are widely-deployed and actively developed, but differ in the services they provide. OmniAuth allows existing users to log into the application, but leaves it up to the developer to associate the logged-in user with a user profile model and store this information in the browser session. On the other hand, Devise automatically associates logged in users with their profiles, and exposes the profile model of the logged-in user via a \verb!current_user! variable in all controllers and views. Integrating Devise into an application is as simple as installing the Devise library and running {\tt rails g devise:install}.
 
 Based on its relative ease-of-use and installation, Devise was selected as the authentication backend. It was integrated into the application, and then the model was wrapped with appropriate views and controllers in order to complete the prototype.
 
@@ -124,8 +124,7 @@ Since the work item, the issue, was required in every process of the issue track
 
 \begin{figure}[!ht]
   \begin{lstlisting}
-
-#REPORT_OBJECT is created up here and the model is saved
+# REPORT_OBJECT is created up here and the model is saved
 
 pdef = Ruote.process_definition do
   unclaimed_pool
@@ -136,7 +135,7 @@ pdef = Ruote.process_definition do
   close_issue
 end
 
-RuoteKit.engine.launch(pdef, REPORT_OBJECT) #launches the process definition
+RuoteKit.engine.launch(pdef, REPORT_OBJECT) # launch the definition
 
   \end{lstlisting}
   \caption{Process Definition of the Ruote prototype bug tracker.}
@@ -149,7 +148,7 @@ Since Ruote is based off BPMN it easily allows the concept of roles to be implem
 
 \begin{figure}[!ht]
   \begin{lstlisting}
-#Register each participant for use in a process definition
+# Register each participant for use in a process definition
 RuoteKit.engine.register do
   participant 'unclaimed_pool', UnclaimedPoolParticipant
   participant 'claim_issue', ClaimIssueParticipant

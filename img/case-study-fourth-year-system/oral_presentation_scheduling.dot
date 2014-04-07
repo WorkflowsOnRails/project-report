@@ -64,11 +64,11 @@ digraph statechart {
 	"df3bf4d5-4b2a-4942-80eb-b9c73f6b9ab4"	 [color=black,
 		fillcolor=black,
 		fixedsize=true,
-		height=0.30556,
+		height=0.20,
 		label="",
 		pos="245,11",
 		shape=doublecircle,
 		style=filled,
-		width=0.29167];
+		width=0.20];
 	completed -> "df3bf4d5-4b2a-4942-80eb-b9c73f6b9ab4"	 [pos="e,245,22.176 245,60.692 245,51.877 245,41.283 245,32.23"];
 }
