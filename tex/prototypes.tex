@@ -11,18 +11,26 @@ In order to select a workflow framework for use in the project, a simple prototy
 \section {Overview of the Prototype Application}
 \label {sec:overview-of-the-prototype-application}
 
-\todo {Drop the reference, and specify what criteria we were evaluating in-line}
+The prototype application was designed to focus on three key features of existing workflow frameworks, based on common features found in fully-featured workflow frameworks for other platforms such as Activiti and jBPM \cite{jbpm}. The key features were
 
-The prototype application was designed to encompass as many of the criteria in section \ref{sec:evaluation-questions} as possible in a small demonstration application. A somewhat contrived issue tracking system was designed to match these criteria.
+\begin{itemize}
+\item \textbf{Authentication, authorization and role support}. Workflows often involve users occupying specified roles, so frameworks should support managing users, assigning roles, and ensuring that users can only perform appropriate tasks.
+\item \textbf{Deadlines}. Many activities (such as submitting a grant application) have associated time limits that must be respected.
+\item \textbf{Parallel activities}. Many business processes contain activities that occur in parallel. A useful framework should allow parallel activities to be implemented, even if it does not explicitly support them..
+\end{itemize}
 
-The issue tracking system has three classes of users: reporters, developers, and project managers. Reporters are users who are responsible for reporting bugs, and providing information more information on request. Developers claim bugs from the pool of open issues, implement a fix, and then sign off on the issue. Project managers consult with developers and reporters, and assign a deployment date for the fix. All classes of users can view and comment on bugs, though they are restricted to perform only the following actions:
+A somewhat contrived issue tracking system was designed to match these criteria.
+
+In order to evaluate authentication and role support, the issue tracking system divides users into three possible roles: reporters, developers, and project managers. Reporters are users who are responsible for reporting bugs, and providing information more information on request. Developers claim bugs from the pool of open issues, implement a fix, and then sign off on the issue. Project managers consult with developers and reporters, and assign a deployment date for the fix.
+
+All classes of users can view and comment on bugs, though in order to evaluate authorization support they are restricted to perform only the following actions in:
 \begin{itemize}
 \item reporters may only create issues;
 \item developers may only claim issues that have not yet been claimed, and can only sign off on issues that they have claimed; and
 \item project managers may only set the deployment date on issues.
 \end{itemize}
 
-Once a developer has signed off on an issue, and a project manager has set a deployment date, the issue is closed. Developers and project managers may sign off and set deployment dates in any order - though this is a somewhat unrealistic requirement, it is a good example of a pair of parallel activities. Finally, if a developer holds an issue for a week with, then the issue reverts to an unclaimed state.
+Once a developer has signed off on an issue, and a project manager has set a deployment date, the issue is closed. Developers and project managers may sign off and set deployment dates in any order - though this is a somewhat unrealistic requirement, it is a good example of a pair of parallel activities. Finally, in order to test deadline support, issues claimed by a developer for a week without resolution will revert to an unclaimed state.
 
 
 \sectionnote {BM}
