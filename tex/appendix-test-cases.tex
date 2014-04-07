@@ -34,13 +34,13 @@ After the characteristics and blocks were defined, test cases were generated acc
     \hline
     Parameter & Characteristic & \multicolumn{2}{c |}{Block} \\
     \hline
-    Model class & AASM included? & B1 & No$^\textrm{ [error]}$ \\
+    Model class & AASM included? & B1 & No\textit{ [error]} \\
     & & B2 & Yes \\
-    & Number of states & B3 & 0$^\textrm{ [ error]}$ \\
-    & & B4 & 1$^\textrm{ [single]}$ \\
+    & Number of states & B3 & 0\textit{ [error]} \\
+    & & B4 & 1\textit{ [single]} \\
     & & B5 & 2+ \\
     \hline
-    Each state & Number of transitions out & B6 & 0$^\textrm{ [notrans]}$\\
+    Each state & Number of transitions out & B6 & 0\textit{ [notrans]}\\
     & & B7 & 1 \\
     & & B8 & 2+ \\
     & Number of entry actions & B9 & 0 \\
@@ -50,18 +50,18 @@ After the characteristics and blocks were defined, test cases were generated acc
     & & B13 & 1 \\
     & & B14 & 2+ \\
     \hline
-    Each transition & Number of actions & B15 & 0$^\textrm{ [if !notrans]}$ \\
-    & & B16 & 1$^\textrm{ [if !notrans]}$ \\
-    & & B17 & 2+$^\textrm{ [if !notrans]}$ \\
-    & Guards used? & B18 & No$^\textrm{ [if !notrans]}$ \\
-    & & B19 & Yes$^\textrm{ [if !notrans]}$ \\
+    Each transition & Number of actions & B15 & 0\textit{ [if !notrans]} \\
+    & & B16 & 1\textit{ [if !notrans]} \\
+    & & B17 & 2+\textit{ [if !notrans]} \\
+    & Guards used? & B18 & No\textit{ [if !notrans]} \\
+    & & B19 & Yes\textit{ [if !notrans]} \\
     \hline
-    File name & Target directory present? & B22 & No$^\textrm{ [single]}$ \\
-    & & B23 & Yes$^\textrm{ [hasdir]}$ \\
+    File name & Target directory present? & B22 & No\textit{ [single]} \\
+    & & B23 & Yes\textit{ [hasdir]} \\
     & Target file present? & B20 & No \\
-    & & B21 & Yes$^\textrm{ [single] [if hasdir]}$ \\
+    & & B21 & Yes\textit{ [single] [if hasdir]} \\
     \hline
-    File format & File format supported? & B24 & No$^\textrm{ [error]}$ \\
+    File format & File format supported? & B24 & No\textit{ [error]} \\
     & & B25 & Yes \\
     \hline
   \end{tabular}
