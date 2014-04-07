@@ -1,15 +1,15 @@
 \documentclass[document.tex]{subfiles}
 \begin{document}
 
-\chapter{Conclusion and Future Work}
+\chapter{Conclusions and Future Work}
 \label {ch:conclusion}
 
-\todo {Write this section}
+Workflow frameworks reduce implementation effort and maintenance of applications implementing business processes. However, complete workflow frameworks are not available for lightweight web application frameworks such as Ruby on Rails. Many applications implementing workflows in Rails are therefore implemented in an ad hoc manner, which makes them more difficult to design, implement, and maintain.
 
-\begin{itemize}
-\item Summarize problem
-\item Summarize solution and accomplishments, highlight that Stonepath and Ruote has been discontinued.
-\item Future work: role support, use of some BPMN-like DSL to specify workflows instead of splitting roles and state machines.
-\end{itemize}
+To remedy this, a fleshed out workflow platform is needed for Rails. In order to create one, a pair of application prototypes were developed to evaluate Stonepath and Ruote, two existing frameworks for Rails. As Stonepath was identified as the more appropriate framework for construction workflow-based web application, it was used to implement a case study application. Though Stonepath was determined to be a poor choice for developing workflow-based applications, several components of the case study were determined to be reusable in other systems. A new platform for workflow-based web development was thus developed from existing third-party libraries and components extracted from the case study. Finally, a proof-of-concept application was implemented using the platform.
+
+The proof-of-concept demonstrated the usefulness of the new platform for constructing workflow-based web applications. The platform increases developer productivity by providing workflow-related functionality that was previously absent from the Rails ecosystem, such as the ability to generate full statechart diagrams for the workflows driving an implemented application. 
+
+However, the platform still has rough edges and opportunities for improvement. The use of AASM to implement state machines forces developers to use guard conditions as ad hoc synchronization points between parallel workflow activities. Though this limitation is not severe -- AASM was still useful enough to be selected over Ruote, which does support parallel activities -- it still bears investigating. An AASM-like DSL that offers the full expressiveness of BPMN and a more web-friendly programmer model than Ruote would be a welcome addition to the Rails ecosystem. Additionally, the weaknesses in existing permission-management libraries that were highlighted by the proof-of-concept application indicate that there is room for an improved permission-management library as well, perhaps following the model discussed in section \ref{sec:case-research-permission-based-auth}.
 
 \end{document}
