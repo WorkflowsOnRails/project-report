@@ -104,10 +104,6 @@ The entire prototype was simple to design and implement using Stonepath and Devi
 
 Figure \ref{fig:ruote-bpmn-diagram} is a BPMN representation of the requirements specified in section \ref{sec:overview-of-the-prototype-application}. The workflow of a report begins when it is created and joins the unclaimed report pool. Developers are then able to claim the report and Managers are able to set the deployment date. Once both actions have been accomplished the developer is able to sign off the report which will then close. If the report has not been signed off after 7 days the report returns to the unclaimed report pool. Reporters are only able to create new reports. Developers are only able to claim unclaimed reports and sign off on the reports that they have claimed. Managers are only able to assign deployment dates to each claimed report.
 
-\todo {Move this later on in the section}
-
-After several weeks of work it became apparent that Ruote was not designed to easily work within a web application and the prototype was abandoned. The rest of the section will cover how the application was built and the features of Ruote.
-
 \begin{figure}[!ht]
 \centering \includegraphics[height=5in]{./img/prototypes/ruote-bpmn-diagram}
 \caption{BPMN for the Ruote prototype issue tracking system.}
@@ -185,7 +181,7 @@ end
   \label{fig:ruote-prototype-participant-code}
 \end{figure}
 
-The main problem that was encountered with Ruote was that it added complexity and did not make anything easier. All the activities were easily translated from BPMN to code using Ruote but writing what happens during an activity was confusing. Rails works by receiving requests and responding to them. Unlike Rails, each \verb!on_workitem! method is immediately executed upon the start of an activity and continually executes until it is completed. This means \verb!on_workitem! methods are executed before requests are received and require Rails to handle all of the timing requirements. Because of this it was actually easier to just implement everything in Rails itself instead of dealing with Ruote.
+After several weeks of work it became apparent that Ruote was not designed to easily work within a web application and the prototype was abandoned. The main problem that was encountered with Ruote was that it added complexity and did not make anything easier. All the activities were easily translated from BPMN to code using Ruote but writing what happens during an activity was confusing. Rails works by receiving requests and responding to them. Unlike Rails, each \verb!on_workitem! method is immediately executed upon the start of an activity and continually executes until it is completed. This means \verb!on_workitem! methods are executed before requests are received and require Rails to handle all of the timing requirements. Because of this it was actually easier to just implement everything in Rails itself instead of dealing with Ruote.
 
 The abstraction of the workflow provided by Ruote is a good idea on paper, but did not seem to work in practice. The Rails application ended up implementing the entire workflow and Ruote provided nothing of value. Some value might be gained from Ruote in projects that are continuously executing instead of a web application. Because of the continually executing nature of Ruote it is not recomended for use with web applications.
 
@@ -194,13 +190,9 @@ The abstraction of the workflow provided by Ruote is a good idea on paper, but d
 \sectionnote {BM}
 \section {Results and Discussion}
 
-\todo {Harmonize this section with Alex's new Ruote discussion above}
+After completing both prototypes, it was clear that Stonepath is more appropriate for use in Rails applications than Ruote. In contrast to the Stonepath prototype (which was implemented in an afternoon), the Ruote prototype remained incomplete and was canceled after several weeks of effort.
 
-After completing both prototypes, it was clear that Stonepath more appropriate for use in Rails applications than Ruote. In contrast to the Stonepath prototype (which was implemented in an afternoon), the prototype implementation using Ruote remained incomplete and was canceled after several weeks of effort.
-
-The key problem is that Ruote's model of a workflow does not map naturally to a web application. In contrast to web servers, which operate by responding to HTTP requests with HTTP responses, Ruote models each activity in a workflow as a continuously-executing process. Developers must define the \verb!on_workitem! method of each Participant to create appropriate model instances in the database to represent the activity, carry out the activity as a sequence of request / response cycles in Rails, and then call back to Ruote using the \verb!reply! method when the activity completes. This disjointed approach is significantly more complex than the one employed by Stonepath, which defines persistent state machines on the models themselves, and allows them to respond to events generated by Rails controllers.
-
-In fact, the only advantage offered by Ruote is the ability to define parallel workflows. However, this advantage pales against the difficulty of integrating Ruote with Rails and using it productively. Therefore, Stonepath was selected as the workflow framework to be applied in the following case study.
+The key problem is that Ruote's model of a workflow does not map naturally to a web application. In contrast to web servers, which operate by responding to HTTP requests with HTTP responses, Ruote models each activity in a workflow as a continuously-executing process. Developers must implement the activity as a sequence of request / response cycles in Rails, and then call back to Ruote when the activity completes. This disjointed approach is significantly more complex than the one employed by Stonepath, which defines persistent state machines on the models themselves. This allows them to respond to events generated by Rails controllers without coordinating with a separate process.
 
 
 \end{document}
