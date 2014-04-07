@@ -331,80 +331,6 @@ end
 \end{figure}
 
 
-\sectionnote{BM}
-\subsection{Workflow Generalization}
-\label {sec:4ys-workflow-generalization}
-
-The task completion workflows presented in \ref{sec:4ys-workflow-design} can be thought of as specializations of a basic submission workflow; if the core process of submitting a document changes, it is likely to impact all tasks. It would be nice to reuse the definition of the core submission workflow among all of the tasks that extend it. This way, changes to the core submission process only need to be made in one place, and it is clear how two tasks that specialize the core workflow differ.
-
-While this is somewhat awkward to express in class-based state machines, it is easy to implement in Rails with AASM. AASM permits multiple \verb!aasm do ... end!
-blocks in the body of a model definition. Each block can add new states or events, or refine behaviours associated with previously-defined states and events. Thus, the common states and transitions shared by all tasks implementing extensions of a common workflow may be captured in one such
-\verb!aasm! block, while extensions are implemented in successive blocks.
-
-Using this feature, the most general submission workflow was implemented as the \verb!DocumentSubmissionWorkflow! concern given in Figure
-\ref{fig:document-submission-concern}. Task implementations that do not require any modification of the base workflow (such as proposal submission) can simply \verb!include DocumentSubmissionWorkflow!. Other tasks requiring a refined submission workflow may include the concern, and follow it with additional \verb!aasm! blocks. The implementation of the \verb!FinalReport! task given in Figure \ref{fig:final-report-workflow-specialization} exemplifies this approach.
-
-\begin{figure}[!ht]
-  \begin{lstlisting}
-module DocumentSubmissionWorkflow
-  extend ActiveSupport::Concern
-
-  included do
-    include AASM
-
-    aasm do
-      state :writing_submission, initial: true
-      state :reviewing, enter: :notify_submitted
-      state :accepted,
-            after_enter: [:notify_accepted, :record_submission]
-
-      event :submit do
-        transitions from: [:writing_submission, :reviewing],
-                    to: :reviewing
-      end
-
-      event :return do
-        transitions from: :reviewing, to: :writing_submission,
-                    on_transition: :notify_returned
-      end
-
-      event :accept do
-        transitions from: :reviewing, to: :accepted
-      end
-    end
-  end
-end
-  \end{lstlisting}
-  \caption{Code snippet illustrating the most general submission workflow captured by the DocumentSubmissionWorkflow concern.}
-  \label{fig:document-submission-concern}
-\end{figure}
-
-\begin{figure}[!ht]
-  \begin{lstlisting}
-class FinalReport < ActiveRecord::Base
-  # ...
-
-  include DocumentSubmissionWorkflow
-
-  aasm do
-    state :failed
-
-    event :deadline_expired do
-      after { notify_expired }
-
-      transitions from: :writing_submission, to: :failed
-      transitions from: :reviewing, to: :accepted
-    end
-  end
-
-  # ...
-end
-  \end{lstlisting}
-  \cprotect\caption{Code snippet demonstrating refinement of the document submission workflow for the \verb!FinalReport! model.}
-  \label{fig:final-report-workflow-specialization}
-\end{figure}
-
-
 \FloatBarrier
 
 
@@ -465,7 +391,7 @@ Although AASM provides a domain specific language that is more readable and main
 
 While several tools exist to general state machine diagrams from AASM definitions, these tools fail to capture the full range of concepts expressed by AASM. All of the existing tools, such as RailRoad \cite{railroad}, can generate finite state machine diagrams from AASM descriptions, but the generated diagrams lack guards, actions, and other features of extended state machines that are implemented by AASM. This limits that value of these tools, as it is difficult to understand a diagram that omits a large portion of the model.
 
-While the obvious approach to implementing a diagram generator would be to write a parser for AASM, this would be non-trivial to achieve. AASM state machines are expressed in Ruby itself, so a dedicated parser would need to be able to evaluate arbitrary Ruby expressions. Worse, AASM state machines can be built up through generalization (as demonstrated in section \ref{sec:4ys-workflow-generalization}), so a parser would need to be able to locate and evaluate any Ruby module included in the model using AASM.
+While the obvious approach to implementing a diagram generator would be to write a parser for AASM, this would be non-trivial to achieve. AASM state machines are expressed in Ruby itself, so a dedicated parser would need to be able to evaluate arbitrary Ruby expressions. Worse, AASM state machines can extend state machine definitions inherited from parent classes, so a parser would need to be able to locate and evaluate other Ruby source files as well.
 
 Fortunately, there is a simpler approach to extracting state machine information . The class of each model that includes AASM is extended at runtime with an association with an instance of \verb!AASM::Base!, as pictured in Figure \ref{fig:aasm-class-model}. Each \verb!AASM::State! instance associated with the \verb!AASM::Base! contains data about a distinct state in the state machine, such as the state name and options (\verb!options! is an associative array with named entries indicating whether the state is the initial state, what the entry actions are, etc.) Similarly, each \verb!AASM::Transition! instance contains represents a transition in the state machine. Though the data structure is somewhat convoluted to query, it is significantly easier to handle than implementing a custom parser.
 
