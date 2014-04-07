@@ -56,7 +56,7 @@ Many workflow-based web applications present some indication of a user's progres
   \label{fig:github-registration}
 \end{figure}
 
-Unfortunately, there is no existing off-the-shelf solution for rendering this type of progress indicator for a workflow implemented in AASM. Thus, the \verb!aasm_progressable! \cite{aasm_progressable} library was created to fill this gap. The library renders a progress indicator based on the current state of a model instance, plus an declaration in the model that specifies the order that the states are traversed in the workflow.
+Unfortunately, there is no existing off-the-shelf solution for rendering this type of progress indicator for a workflow implemented in AASM. Thus, the \verb!aasm_progressable! \cite{aasm_progressable} library was created to fill this gap. The library renders a progress indicator based on the current state of a model instance, plus an declaration in the model that specifies the order that the states are traversed in the workflow. The library follows Rails' conventions by separating the logic for computing completed states from the view that renders the progress bar, so that developers can customize the bar's appearance.
 
 Although it might seem like the sequence of states could be inferred automatically, this is not the case; certain state machines have several possible natural orderings. Figure \ref{fig:equivalent-fsms}, presents one such state machine: while subfigure (a) appears to have state B precede state C, rearranging the diagram to yield (b) demonstrates that C could just as easily be inferred to come before B.
 
