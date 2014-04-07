@@ -26,7 +26,7 @@ After the characteristics and blocks were defined, test cases were generated acc
 
 \begin{table}[!htbp]
   \centering
-  \caption{Characteristics of the model class. Characteristics marked overlapping may have multiple blocks apply to a single test case.}
+  \caption{Parameters, characteristics and blocks for aasm\_statecharts utility.}
   \label{tbl:aasm-statecharts-characteristics}
 
   \vspace{3mm}
@@ -69,7 +69,7 @@ After the characteristics and blocks were defined, test cases were generated acc
 
 \begin{table}[!htbp]
   \centering
-  \caption{Characteristics of the model class. Characteristics marked overlapping may have multiple blocks apply to a single test case.}
+  \caption{Test cases generated from the blocks in Table \ref{tbl:aasm-statecharts-characteristics} using the all-blocks criterion.}
   \label{tbl:aasm-statecharts-cases}
 
   \renewcommand{\arraystretch}{1.2}
@@ -81,8 +81,8 @@ After the characteristics and blocks were defined, test cases were generated acc
     TC1 & B1 & A model class is passed with no AASM definition \\
     TC2 & B2, B3 & A model class is passed that contains an empty AASM definition. \\
     TC3 & B2, B4, B6, B11, B14, B21, B23, B25 & A model class is passed that contains a single state, with multiple entry and exit actions. The target file name is not present, though the directory is. The file format is supported. \\
-    TC4 & B2, B4, B6, B11, B14, B20, B23, B24 & The same model class as passed as in TC3, but the file format it is saved to it not supported. \\
-    TC5 & B2, B5, B7, B8, B9, B10, B12, B13, B15, B16, B17, B18, B19, B20, B22, B25 & A model class is passed the contains multiple states, some of which have multiple outgoing transitions. Some of the states contain an entry action or an exit action, and some of the transitions have zero, one, or two actions. Some transitions also have guards. The target directory is not present, but the file format is supported.
+    TC4 & B2, B4, B6, B11, B14, B20, B23, B24 & The same model class as passed as in TC3, but the file format it is saved to is not supported. \\
+    TC5 & B2, B5, B7, B8, B9, B10, B12, B13, B15, B16, B17, B18, B19, B20, B22, B25 & A model class is passed that contains multiple states, some of which have multiple outgoing transitions. Some of the states contain an entry action or an exit action, and some of the transitions have zero, one, or two actions. Some transitions also have guards. The target directory is not present, but the file format is supported.
 \\
     \bottomrule
   \end{tabular}
