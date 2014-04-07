@@ -421,6 +421,8 @@ The ability to generate statecharts from AASM state machines was used heavily ov
 \subsection {Presenting Available Actions}
 \label {sec:4ys-available-actions}
 
+Almost every task in the fourth year project system needs to present users with a set of actions that they can perform based on their role and the current state of the task. For instance, a project proposal in the ``reviewing'' state should display a ``submit'' form to Project Group Members, while the same proposal would display ``accept'' and ``return'' actions to a Project Supervisor. Though it would be possible to implement the views for each task as a series of conditionals based on the current user and task state, it is possible to instead determine which actions to display based on authorization rules and state machine definitions that are already part of the system.
+
 Using the techniques described in section \ref{sec:4ys-visualizing-workflows},
 we can extract information about all of the permitted event transitions from the current state of an model that uses AASM. Additionally, Pundit allows us to query which controller actions may be taken for the current user. As the system follows the convention that every event corresponds to a controller action, this information can be used to automatically present users with the actions they can perform for a task's current state, without resorting to hard-coding \verb!if! statements for role or state checks.
 
@@ -433,6 +435,8 @@ This functionality was implemented as a simple controller concern. In order to u
 \end{enumerate}
 
 Of course, it may be the case that multiple controllers should share the same views. Controllers may override the method \verb!action_view_prefix!, which takes the event name as an argument and returns the view directory to look in to find the event partial. This is convenient for developers, as it allows view delegation to be performed without having to create one partial per controller for each event, which would in turn only render another partial.
+
+Thus, the use of AASM and Pundit allowed actions to be presented automatically to users based on their role and the current state of a task. This improved maintainability by removing the requirement that rules for displaying actions be duplicated in views, eliminating the risk of divergence from the canonical rules expressed in the authorization policies and state machine definitions.
 
 
 \sectionnote {BM}

@@ -18,6 +18,6 @@ start->writing_submission
 writing_submission->reviewing [label = " submit   "]
 reviewing->reviewing [label = " submit   "]
 reviewing->writing_submission [label = " return/notify_returned()   "]
-reviewing->completed [label = " completed   "]
+reviewing->completed [label = " accept   "]
 completed->end
 }
