@@ -9,7 +9,7 @@
 \vspace{-\baselineskip}
 
 This appendix provides an example of the process of deriving a test suite for \verb!aasm_statecharts!, one of the new components in the platform.
-To create the test suite, tests were generated using the input space partitioning black box testing methodology. Five key factors were identified that influence the behavior of the library:
+To create the test suite, tests were generated using the input space partitioning black box testing methodology \cite{offut}. Five key factors were identified that influence the behavior of the utility:
 
 \begin{itemize}
 \item attributes of the model class provided, such as whether it includes AASM and how many states the AASM definition contains;
@@ -21,7 +21,7 @@ To create the test suite, tests were generated using the input space partitionin
 
 These factors were used as parameters for the input space partitioning methodology, and were elaborated to produce the input characteristics and blocks that are found in Table \ref{tbl:aasm-statecharts-characteristics}. Note that attributes of the states and transitions are not technically characteristics as they are not disjoint (a test can have a state with no entry actions and another state with an entry action at the same time). Normally, these would have to be represented as separate boolean characteristics (ex. has a state with zero entry actions, has a state with one entry action); however, they were condensed into overlapping blocks in order to fit the table on a single page. This change does undermine the effectiveness of the methodology.
 
-After the characteristics and blocks were defined, test cases were generated according to the ``all blocks'' criterion. These test cases are presented in Table \ref{tbl:aasm-statecharts-cases}. These tests were then translated into unit tests using the RSpec testing library, and statement coverage reports were generated. Although the all-blocks criterion generally does not produce test suites with high levels of coverage, the implementation of aasm\_statecharts handles the parameters independently. This meant that 100\% test coverage was achievable without considering combinations of blocks.
+After the characteristics and blocks were defined, test cases were generated according to the ``all blocks'' criterion. These test cases are presented in Table \ref{tbl:aasm-statecharts-cases}. These tests were then translated into unit tests using the RSpec \cite{rspec} testing library, and statement coverage reports were generated. Although the all-blocks criterion generally does not produce test suites with high levels of coverage, the implementation of aasm\_statecharts handles the parameters independently. This meant that 100\% statement coverage was achieved without considering combinations of blocks.
 
 
 \begin{table}[!htbp]
