@@ -23,7 +23,7 @@ A somewhat contrived issue tracking system was designed to match these criteria.
 
 In order to evaluate authentication and role support, the issue tracking system divides users into three possible roles: reporters, developers, and project managers. Reporters are users who are responsible for reporting bugs, and providing information more information on request. Developers claim bugs from the pool of open issues, implement a fix, and then sign off on the issue. Project managers consult with developers and reporters, and assign a deployment date for the fix.
 
-All classes of users can view and comment on bugs, though in order to evaluate authorization support they are restricted to perform only the following actions in:
+All classes of users can view and comment on bugs, though in order to evaluate authorization support they are restricted to perform only the following actions:
 \begin{itemize}
 \item reporters may only create issues;
 \item developers may only claim issues that have not yet been claimed, and can only sign off on issues that they have claimed; and
