@@ -34,8 +34,7 @@ While several tools exist to general state machine diagrams from AASM definition
 \verb!aasm_statecharts! is based on the diagram generating tool described in section \ref{sec:4ys-visualizing-workflows}, with some modifications to the structure of the code to improve testability. While the original diagram generator was implemented as a single Ruby script, \verb!aasm_statecharts! is split into two parts: a library module (\verb!lib/aasm_statechart.rb!) which implements the logic that maps from AASM to the Ruby-Graphviz object model, and a launcher script (\verb!bin/aasm_startecharts!) that handles parsing command line arguments and invoking the library module appropriately. This improves observability, as the test scripts can access the semantic information in the Ruby-GraphViz object model, instead of just the generated diagram.
 
 Sufficient unit tests have been written to achieve 100\% coverage of the library module. The unit tests were written following a black-box methodology, following the testable characteristics of the parameters of the library methods.
-% More detail about the tests can be found in section
-% \ref{sec:platform-test-cases-aasm_statecharts}.
+More detail about the method used to select test cases for the test suite can be found in Appendix \ref{ch:aasm-statecharts-test-cases}.
 Note that the launcher script is still tested manually, as it is trivial to achieve full coverage of the command-line options in a few tests, and because the generated diagrams require human judgment to determine if they are correct.
 
 \verb!aasm_statecharts! is available online at \url{https://github.com/WorkflowsOnRails/aasm_statecharts}, or it may be installed from the \verb!aasm_statecharts! gem.

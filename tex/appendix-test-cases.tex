@@ -1,85 +1,94 @@
-% -*- compile-command: "cd .. && make" -*-
+% -*- compile-command & "cd .. && make" -*-
 \documentclass[document.tex]{subfiles}
 \begin{document}
 
-\chapter{Platform Test Cases}
-\label {ch:platform-test-cases}
+\chapter{Test Suite for aasm\_statecharts}
+\label {ch:aasm-statecharts-test-cases}
 
-\todo {Add an overview of this appendix.}
+\llap{\normalfont\small BM \hspace*{\marginparsep}}
+\vspace{-\baselineskip}
 
-\sectionnote {BM}
-\section {expirable}
+This appendix provides an example of the process of deriving a test suite for \verb!aasm_statecharts!, one of the new components in the platform.
+To create the test suite, tests were generated using the input space partitioning black box testing methodology. Five key factors were identified that influence the behavior of the library:
 
+\begin{itemize}
+\item attributes of the model class provided, such as whether it includes AASM and how many states the AASM definition contains;
+\item attributes of the states defined in the model class;
+\item attributes of the transitions defined in the mode class;
+\item the file name to save the diagram to;
+\item the file format to export the diagram in;
+\end{itemize}
 
-\sectionnote {BM}
-\section {aasm\_statecharts}
-\label {sec:platform-test-cases-aasm_statecharts}
+These factors were used as parameters for the input space partitioning methodology, and were elaborated to produce the input characteristics and blocks that are found in Table \ref{tbl:aasm-statecharts-characteristics}. Note that attributes of the states and transitions are not technically characteristics as they are not disjoint (a test can have a state with no entry actions and another state with an entry action at the same time). Normally, these would have to be represented as separate boolean characteristics (ex. has a state with zero entry actions, has a state with one entry action); however, they were condensed into overlapping blocks in order to fit the table on a single page. This change does undermine the effectiveness of the methodology.
 
-The only parameters are the model class, the filename to save the diagram to, and the format of the diagram.
+After the characteristics and blocks were defined, test cases were generated according to the ``all blocks'' criterion. These test cases are presented in Table \ref{tbl:aasm-statecharts-cases}. These tests were then translated into unit tests using the RSpec testing library, and statement coverage reports were generated. Although the all-blocks criterion generally does not produce test suites with high levels of coverage, the implementation of aasm\_statecharts handles the parameters independently. This meant that 100\% test coverage was achievable without considering combinations of blocks.
 
-The characteristics for each parameter are outlined briefly in Tables \ref{tbl:platform-test-cases-aasm_statecharts-aasm-xtics}, \ref{aaa}, and \ref{aaa}. Note that many of the characteristics in Table \ref{tbl:platform-test-cases-aasm_statecharts-aasm-xtics} apply to individual transitions and states, rather than the whole state machine. These characteristics are marked as overlapping as there may be several such characteristics represented in a model. For example, a model may contain both states that include no entry actions, and states that include 2+ entry actions. This extension to standard black-box testing methodology allows us to reduce the number of tests significantly, and test much more reasonable state machines.
 
 \begin{table}[!htbp]
   \centering
   \caption{Characteristics of the model class. Characteristics marked overlapping may have multiple blocks apply to a single test case.}
-  \label{tbl:platform-test-cases-aasm_statecharts-aasm-xtics}
+  \label{tbl:aasm-statecharts-characteristics}
 
   \vspace{3mm}
-  \begin{tabular}{l *{3}{c} c}
+  \begin{tabular}{| l l r l |}
     \hline
-    Characteristic & \multicolumn{3}{c}{Blocks} & Overlapping? \\
+    Parameter & Characteristic & \multicolumn{2}{c |}{Block} \\
     \hline
-    AASM included? & No & Yes & & \\
-    Number of states & 0 & 1 & 2+ & \\
-    Number of transitions & 0 & 1 & 2+ & Yes \\
-    Number of transition actions & 0 & 1 & 2+ & Yes \\
-    Number of entry actions & 0 & 1 & 2+ & Yes \\
-    Number of exit actions & 0 & 1 & 2+ & Yes \\
-    Guards used? & No & Yes & & Yes \\
+    Model class & AASM included? & B1 & No$^\textrm{ [error]}$ \\
+    & & B2 & Yes \\
+    & Number of states & B3 & 0$^\textrm{ [ error]}$ \\
+    & & B4 & 1$^\textrm{ [single]}$ \\
+    & & B5 & 2+ \\
+    \hline
+    Each state & Number of transitions out & B6 & 0$^\textrm{ [notrans]}$\\
+    & & B7 & 1 \\
+    & & B8 & 2+ \\
+    & Number of entry actions & B9 & 0 \\
+    & & B10 & 1 \\
+    & & B11 & 2+ \\
+    & Number of exit actions & B12 & 0 \\
+    & & B13 & 1 \\
+    & & B14 & 2+ \\
+    \hline
+    Each transition & Number of actions & B15 & 0$^\textrm{ [if !notrans]}$ \\
+    & & B16 & 1$^\textrm{ [if !notrans]}$ \\
+    & & B17 & 2+$^\textrm{ [if !notrans]}$ \\
+    & Guards used? & B18 & No$^\textrm{ [if !notrans]}$ \\
+    & & B19 & Yes$^\textrm{ [if !notrans]}$ \\
+    \hline
+    File name & Target directory present? & B22 & No$^\textrm{ [single]}$ \\
+    & & B23 & Yes$^\textrm{ [hasdir]}$ \\
+    & Target file present? & B20 & No \\
+    & & B21 & Yes$^\textrm{ [single] [if hasdir]}$ \\
+    \hline
+    File format & File format supported? & B24 & No$^\textrm{ [error]}$ \\
+    & & B25 & Yes \\
     \hline
   \end{tabular}
 \end{table}
 
 \begin{table}[!htbp]
   \centering
-  \caption{Characteristics of the filename.}
-  \label{tbl:platform-test-cases-aasm_statecharts-filename-xtics}
+  \caption{Characteristics of the model class. Characteristics marked overlapping may have multiple blocks apply to a single test case.}
+  \label{tbl:aasm-statecharts-cases}
 
+  \renewcommand{\arraystretch}{1.2}
   \vspace{3mm}
-  \begin{tabular}{l *{3}{c} c}
-    \hline
-    Characteristic & \multicolumn{2}{c}{Blocks} \\
-    \hline
-    Target file present? & No & Yes \\
-    Target directory present? & No & Yes \\
-    \hline
+  \begin{tabular}{l p{4cm} p{8cm}}
+    \toprule
+    Test Case & Blocks & Realization \\
+    \midrule
+    TC1 & B1 & A model class is passed with no AASM definition \\
+    TC2 & B2, B3 & A model class is passed that contains an empty AASM definition. \\
+    TC3 & B2, B4, B6, B11, B14, B21, B23, B25 & A model class is passed that contains a single state, with multiple entry and exit actions. The target file name is not present, though the directory is. The file format is supported. \\
+    TC4 & B2, B4, B6, B11, B14, B20, B23, B24 & The same model class as passed as in TC3, but the file format it is saved to it not supported. \\
+    TC5 & B2, B5, B7, B8, B9, B10, B12, B13, B15, B16, B17, B18, B19, B20, B22, B25 & A model class is passed the contains multiple states, some of which have multiple outgoing transitions. Some of the states contain an entry action or an exit action, and some of the transitions have zero, one, or two actions. Some transitions also have guards. The target directory is not present, but the file format is supported.
+\\
+    \bottomrule
   \end{tabular}
 \end{table}
 
-\begin{table}[!htbp]
-  \centering
-  \caption{Characteristics of the file format.}
-  \label{tbl:platform-test-cases-aasm_statecharts-format-xtics}
-
-  \vspace{3mm}
-  \begin{tabular}{l *{3}{c} c}
-    \hline
-    Characteristic & \multicolumn{2}{c}{Blocks} \\
-    \hline
-    File format supported? & No & Yes \\
-    \hline
-  \end{tabular}
-\end{table}
-
-As the underlying library is quite simple, unit tests were selected using the ``all blocks'' criterion. \todo {LIST TESTS, EXPLAIN THAT 100\% COVERAGE WAS ACHIEVED.}
 
 \FloatBarrier
-
-\sectionnote {BM}
-\section {aasm\_progressable}
-
-\sectionnote {BM}
-\section {aasm\_actionable}
-
 
 \end {document}
