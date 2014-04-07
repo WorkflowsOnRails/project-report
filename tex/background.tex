@@ -92,34 +92,47 @@ Stonepath is a state-based workflow library for Ruby on Rails. Stonepath defines
 
 As an example, consider an expense-claim system. The work item that is the focus of the business process is an individual expense claim, while both the employee that submitted the claim and their manager would be workbenches. A task to review the claim would like the manager to the expense claim. In this case, only the expense claim would have an associated workflow, as the task of reviewing the claim is unlikely to be so complicated that it needs its own state machine.
 
-The state machine functionality in Stonepath is implemented by a third-party library called AASM. It provides a rich domain-specific language to specify persistent state machines, along with transition guards, entry conditions. In addition, AASM can express constraints that must only apply to the object in specific states, which is useful to ensure that data consistency. For example, if we had a project management system that tracks features, we might need to provide acceptance criteria and time estimates for a feature before it can be assigned to a developer. We could encode this in a model using AASM as in Figure
-\ref{fig:stonepath-aasm}.
-
-\todo {Provide an AASM syntax example here, not just a validation example}
+The state machine functionality in Stonepath is implemented by a third-party library called AASM. It provides a rich domain-specific language to specify persistent state machines, along with transition guards and actions.
+AASM makes it easy to translate state machines to Ruby; for example, the state machine depicted in Figure \ref{fig:background-aasm-statemachine} can be encoded in AASM as in Figure \ref{fig:background-aasm-code}. In addition, AASM can express data integrity constraints that only apply to the object when it is in specific states, which is useful to ensure data consistency.
 
 \begin{figure}[!ht]
-  \caption{Example of an activity precondition encoded with Stonepath}
-  \label{fig:stonepath-aasm}
+  \centering
+  \includegraphics[width=3.0in]{./img/manual/aasm-statecharts-claim}
+  \caption{Example state machine for Stonepath as a UML statechart.}
+  \label{fig:background-aasm-statemachine}
+\end{figure}
+
+\begin{figure}[!ht]
   \begin{lstlisting}
-class Feature < ActiveRecord::Base
-  # ... state definitions omitted...
-  # States: new, todo, in_progress, in_testing, done, accepted, rejected
-  # Acceptance criteria and hour estimated are required for features
-  # that are in development, or have been developed already.
+class ExampleWorkItem < ActiveRecord::Base
+  include AASM
+  aasm do
+    state :unsubmitted, initial: true
+    state :submitted, exit: [:cancel_deadline, :close_ticket]
+    state :resolved, final: true
 
-  with_options if: :in_development? do |m|
-    m.validates :acceptance_criteria, presence: true
-    m.validates :estimated_hours, numericality: true
-  end
-
-  def in_development?
-    todo? or in_progress? or in_testing? or done? or accepted?
+    event :submit do
+      transitions from: :unsubmitted, to: :submitted,
+                  guard: :accepting_claims?,
+                  on_transition: :notify_submitted
+    end
+    event :return do
+      transitions from: :submitted, to: :unsubmitted
+    end
+    event :accept do
+      transitions from: :submitted, to: :resolved
+    end
   end
 end
   \end{lstlisting}
+  \caption{Example of a state machine encoded with AASM.}
+  \label{fig:background-aasm-code}
 \end{figure}
 
 Stonepath itself is only a thin layer on top of Rails. While it provides methods to relate workbenches to work items and tasks and automatically generate database schemas that reflect these relationships, it is lacking in many other respects. Stonepath does not provide any authentication or authorization features, relying on the developer to select appropriate libraries or implement authorization themselves. It also does not provide any tools to automatically generate user interfaces from workflows: developers need to implement appropriate views and controllers for work items and tasks by themselves. Furthermore, it lacks the ability to trigger transitions after a specified timeout. Stonepath focuses on providing a well-documented set of best practices for implementing business processes, instead of a collection of time-saving utilities.
+
+
+\FloatBarrier
 
 \sectionnote {AC}
 \subsection {Ruote}
