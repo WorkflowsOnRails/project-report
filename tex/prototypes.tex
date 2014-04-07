@@ -104,6 +104,8 @@ The entire prototype was simple to design and implement using Stonepath and Devi
 
 Figure \ref{fig:ruote-bpmn-diagram} is a BPMN representation of the requirements specified in section \ref{sec:overview-of-the-prototype-application}. The workflow of a report begins when it is created and joins the unclaimed report pool. Developers are then able to claim the report and Managers are able to set the deployment date. Once both actions have been accomplished the developer is able to sign off the report which will then close. If the report has not been signed off after 7 days the report returns to the unclaimed report pool. Reporters are only able to create new reports. Developers are only able to claim unclaimed reports and sign off on the reports that they have claimed. Managers are only able to assign deployment dates to each claimed report.
 
+\todo {Move this later on in the section}
+
 After several weeks of work it became apparent that Ruote was not designed to easily work within a web application and the prototype was abandoned. The rest of the section will cover how the application was built and the features of Ruote.
 
 \begin{figure}[!ht]
